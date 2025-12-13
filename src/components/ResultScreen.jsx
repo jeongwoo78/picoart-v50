@@ -52,9 +52,17 @@ const ResultScreen = ({
   
   // 현재 보여줄 결과
   const currentResult = isFullTransform ? results[currentIndex] : null;
-  const displayImage = isFullTransform ? currentResult?.resultUrl : resultImage;
-  const displayArtist = isFullTransform ? currentResult?.aiSelectedArtist : aiSelectedArtist;
-  const displayWork = isFullTransform ? currentResult?.selected_work : aiSelectedWork;
+  // 단독변환: 재시도 성공 시 singleRetryResult 사용
+  const [singleRetryResultState, setSingleRetryResultState] = useState(null);
+  const displayImage = isFullTransform 
+    ? currentResult?.resultUrl 
+    : (singleRetryResultState?.resultUrl || resultImage);
+  const displayArtist = isFullTransform 
+    ? currentResult?.aiSelectedArtist 
+    : (singleRetryResultState?.aiSelectedArtist || aiSelectedArtist);
+  const displayWork = isFullTransform 
+    ? currentResult?.selected_work 
+    : (singleRetryResultState?.selected_work || aiSelectedWork);
   const displayCategory = isFullTransform ? currentResult?.style?.category : selectedStyle?.category;
   
   // ========== State ==========
@@ -257,6 +265,48 @@ const ResultScreen = ({
       }
     } catch (error) {
       console.error(`❌ 재시도 에러: ${failed.style?.name}`, error);
+      alert('재시도 중 오류가 발생했습니다.');
+    }
+    
+    setIsRetrying(false);
+    setRetryProgress('');
+  };
+
+  // ========== 단독변환 재시도 함수 ==========
+  const handleSingleModeRetry = async () => {
+    if (!originalPhoto || !selectedStyle || isRetrying) return;
+    
+    setIsRetrying(true);
+    setRetryProgress(`${selectedStyle.name} 재시도 중...`);
+    console.log(`🔄 단독변환 재시도: ${selectedStyle.name}`);
+    
+    try {
+      const result = await processStyleTransfer(
+        originalPhoto,
+        selectedStyle,
+        null,
+        (progress) => setRetryProgress(`${selectedStyle.name}: ${progress}`)
+      );
+      
+      if (result.success) {
+        console.log(`✅ 단독변환 재시도 성공: ${selectedStyle.name}`);
+        setSingleRetryResultState(result);
+        
+        // 갤러리에 저장
+        const styleName = result.aiSelectedArtist || selectedStyle.name || '변환 이미지';
+        const categoryName = selectedStyle.category === 'movements' ? '미술사조' 
+          : selectedStyle.category === 'masters' ? '거장' 
+          : selectedStyle.category === 'oriental' ? '동양화' 
+          : '';
+        await saveToGallery(result.resultUrl, styleName, categoryName);
+        
+        alert('재시도 성공!');
+      } else {
+        console.log(`❌ 단독변환 재시도 실패: ${selectedStyle.name} - ${result.error}`);
+        alert('재시도 실패. 나중에 다시 시도해주세요.');
+      }
+    } catch (error) {
+      console.error(`❌ 단독변환 재시도 에러:`, error);
       alert('재시도 중 오류가 발생했습니다.');
     }
     
@@ -1608,12 +1658,40 @@ const ResultScreen = ({
         )}
 
         {/* 단일 변환: Before/After Slider */}
-        {!isFullTransform && (
+        {!isFullTransform && displayImage && (
           <div className="comparison-wrapper">
             <BeforeAfter 
               beforeImage={URL.createObjectURL(originalPhoto)}
               afterImage={displayImage}
             />
+          </div>
+        )}
+
+        {/* 단독변환 실패 시 재시도 버튼 */}
+        {!isFullTransform && !displayImage && (
+          <div className="retry-section">
+            {isRetrying ? (
+              <div className="retry-in-progress">
+                <div className="retry-status">
+                  <div className="spinner-medium"></div>
+                  <p className="retry-text">{retryProgress}</p>
+                </div>
+                <div className="retry-education">
+                  <p>🎨 잠시만 기다려주세요. AI가 다시 변환 중입니다...</p>
+                </div>
+              </div>
+            ) : (
+              <div className="retry-prompt">
+                <p className="fail-message">변환에 실패하였습니다. 재시도 하세요.</p>
+                <button 
+                  className="btn btn-retry"
+                  onClick={handleSingleModeRetry}
+                >
+                  <span className="btn-icon">🔄</span>
+                  재시도
+                </button>
+              </div>
+            )}
           </div>
         )}
 

@@ -702,12 +702,19 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
         {/* ===== 원클릭 모드 ===== */}
         {isFullTransform && (
           <>
-            {/* 1차 교육 */}
+            {/* 1차 교육 + 원본 사진 */}
             {viewIndex === -1 && showEducation && getPrimaryEducation() && (
-              <div className="edu-card primary">
-                <h3>{getPrimaryEducation().title}</h3>
-                <p>{getPrimaryEducation().content}</p>
-                {completedCount > 0 && <p className="hint">👆 완료된 결과를 확인하세요</p>}
+              <div className="preview">
+                <img src={URL.createObjectURL(photo)} alt="원본 사진" />
+                <div className="preview-info">
+                  <div className="preview-style">{selectedStyle?.name || '전체 변환'}</div>
+                  <div className="preview-subtitle">원본 사진</div>
+                </div>
+                <div className="edu-card primary">
+                  <h3>{getPrimaryEducation().title}</h3>
+                  <p>{getPrimaryEducation().content}</p>
+                  {completedCount > 0 && <p className="hint">👆 완료된 결과를 확인하세요</p>}
+                </div>
               </div>
             )}
 
@@ -755,7 +762,7 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
                     disabled={idx >= completedCount}
                   />
                 ))}
-                <span className="count">{viewIndex === -1 ? `📚` : `${viewIndex + 1}/${totalCount}`}</span>
+                <span className="count">[{viewIndex === -1 ? 0 : viewIndex + 1}/{totalCount}]</span>
               </div>
               
               <button 
