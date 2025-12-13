@@ -1025,6 +1025,66 @@ const ResultScreen = ({
   };
 
 
+  // ========== 거장 화가명 풀네임 + 화파 매핑 ==========
+  const getMasterInfo = (artistName) => {
+    const masterMap = {
+      // 반 고흐
+      '반 고흐': { fullName: '빈센트 반 고흐(Vincent van Gogh)', movement: '후기인상주의' },
+      'vangogh': { fullName: '빈센트 반 고흐(Vincent van Gogh)', movement: '후기인상주의' },
+      'van gogh': { fullName: '빈센트 반 고흐(Vincent van Gogh)', movement: '후기인상주의' },
+      'vincent van gogh': { fullName: '빈센트 반 고흐(Vincent van Gogh)', movement: '후기인상주의' },
+      
+      // 클림트
+      '클림트': { fullName: '구스타프 클림트(Gustav Klimt)', movement: '아르누보' },
+      'klimt': { fullName: '구스타프 클림트(Gustav Klimt)', movement: '아르누보' },
+      'gustav klimt': { fullName: '구스타프 클림트(Gustav Klimt)', movement: '아르누보' },
+      
+      // 뭉크
+      '뭉크': { fullName: '에드바르 뭉크(Edvard Munch)', movement: '표현주의' },
+      'munch': { fullName: '에드바르 뭉크(Edvard Munch)', movement: '표현주의' },
+      'edvard munch': { fullName: '에드바르 뭉크(Edvard Munch)', movement: '표현주의' },
+      
+      // 마티스
+      '마티스': { fullName: '앙리 마티스(Henri Matisse)', movement: '야수파' },
+      'matisse': { fullName: '앙리 마티스(Henri Matisse)', movement: '야수파' },
+      'henri matisse': { fullName: '앙리 마티스(Henri Matisse)', movement: '야수파' },
+      
+      // 피카소
+      '피카소': { fullName: '파블로 피카소(Pablo Picasso)', movement: '입체주의' },
+      'picasso': { fullName: '파블로 피카소(Pablo Picasso)', movement: '입체주의' },
+      'pablo picasso': { fullName: '파블로 피카소(Pablo Picasso)', movement: '입체주의' },
+      
+      // 프리다 칼로
+      '프리다': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
+      '프리다 칼로': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
+      'frida': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
+      'frida kahlo': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
+      
+      // 워홀
+      '워홀': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' },
+      'warhol': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' },
+      'andy warhol': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' }
+    };
+    
+    if (!artistName) return { fullName: '거장', movement: '' };
+    
+    const normalized = artistName.toLowerCase().trim();
+    
+    // 직접 매핑 확인
+    if (masterMap[artistName]) return masterMap[artistName];
+    if (masterMap[normalized]) return masterMap[normalized];
+    
+    // 부분 매칭
+    for (const [key, value] of Object.entries(masterMap)) {
+      if (normalized.includes(key.toLowerCase()) || key.toLowerCase().includes(normalized)) {
+        return value;
+      }
+    }
+    
+    return { fullName: artistName, movement: '' };
+  };
+
+
   // ========== 거장 작품명 포맷 ==========
   const formatWorkName = (workName) => {
     if (!workName) return '대표작';
@@ -1145,7 +1205,7 @@ const ResultScreen = ({
     console.log('🎨 formatArtistName input:', artistName);
     console.log('🎨 formatArtistName normalized:', normalized);
     
-    // 영문 이름 → 한글(Full Name) 매핑
+    // 영문 이름 → 한글 풀네임(Full Name) 매핑
     const nameMap = {
       // 고대 미술
       'ancient-greek-sculpture': '고대 조각(Ancient Sculpture)',
@@ -1169,121 +1229,120 @@ const ResultScreen = ({
       // 르네상스
       'leonardo': '레오나르도 다 빈치(Leonardo da Vinci)',
       'leonardo da vinci': '레오나르도 다 빈치(Leonardo da Vinci)',
-      'michelangelo': '미켈란젤로(Michelangelo Buonarroti)',
-      'raphael': '라파엘로(Raffaello Sanzio)',
-      'botticelli': '보티첼리(Sandro Botticelli)',
-      'titian': '티치아노(Tiziano Vecellio)',
+      'michelangelo': '미켈란젤로 부오나로티(Michelangelo Buonarroti)',
+      'raphael': '라파엘로 산치오(Raffaello Sanzio)',
+      'botticelli': '산드로 보티첼리(Sandro Botticelli)',
+      'titian': '티치아노 베첼리오(Tiziano Vecellio)',
       
       // 바로크
       'caravaggio': '카라바조(Caravaggio)',
-      'rembrandt': '렘브란트(Rembrandt van Rijn)',
-      'vermeer': '베르메르(Johannes Vermeer)',
-      'velazquez': '벨라스케스(Diego Velázquez)',
-      'rubens': '루벤스(Peter Paul Rubens)',
-      'peter paul rubens': '루벤스(Peter Paul Rubens)',
+      'rembrandt': '렘브란트 판 레인(Rembrandt van Rijn)',
+      'vermeer': '요하네스 베르메르(Johannes Vermeer)',
+      'velazquez': '디에고 벨라스케스(Diego Velázquez)',
+      'rubens': '피터 파울 루벤스(Peter Paul Rubens)',
+      'peter paul rubens': '피터 파울 루벤스(Peter Paul Rubens)',
       
       // 로코코
-      'watteau': '와토(Jean-Antoine Watteau)',
-      'jean-antoine watteau': '와토(Jean-Antoine Watteau)',
-      'boucher': '부셰(François Boucher)',
-      'françois boucher': '부셰(François Boucher)',
-      'francois boucher': '부셰(François Boucher)',
-      'jean-honoré fragonard': '프라고나르(Jean-Honoré Fragonard)',
-      'jean-honore fragonard': '프라고나르(Jean-Honoré Fragonard)',
-      'fragonard': '프라고나르(Jean-Honoré Fragonard)',
+      'watteau': '장 앙투안 와토(Jean-Antoine Watteau)',
+      'jean-antoine watteau': '장 앙투안 와토(Jean-Antoine Watteau)',
+      'boucher': '프랑수아 부셰(François Boucher)',
+      'françois boucher': '프랑수아 부셰(François Boucher)',
+      'francois boucher': '프랑수아 부셰(François Boucher)',
+      'jean-honoré fragonard': '장 오노레 프라고나르(Jean-Honoré Fragonard)',
+      'jean-honore fragonard': '장 오노레 프라고나르(Jean-Honoré Fragonard)',
+      'fragonard': '장 오노레 프라고나르(Jean-Honoré Fragonard)',
       
       // 신고전주의
-      'jacques-louis-david': '다비드(Jacques-Louis David)',
-      'david': '다비드(Jacques-Louis David)',
-      'ingres': '앵그르(Jean-Auguste-Dominique Ingres)',
-      'jean-auguste-dominique ingres': '앵그르(Jean-Auguste-Dominique Ingres)',
+      'jacques-louis-david': '자크 루이 다비드(Jacques-Louis David)',
+      'david': '자크 루이 다비드(Jacques-Louis David)',
+      'ingres': '장 오귀스트 도미니크 앵그르(Jean-Auguste-Dominique Ingres)',
+      'jean-auguste-dominique ingres': '장 오귀스트 도미니크 앵그르(Jean-Auguste-Dominique Ingres)',
       
       // 낭만주의
-      'turner': '터너(J.M.W. Turner)',
-      'j.m.w. turner': '터너(J.M.W. Turner)',
-      'william turner': '터너(J.M.W. Turner)',
-      'friedrich': '프리드리히(Caspar David Friedrich)',
-      'caspar david friedrich': '프리드리히(Caspar David Friedrich)',
-      'delacroix': '들라크루아(Eugène Delacroix)',
-      'eugène delacroix': '들라크루아(Eugène Delacroix)',
-      'eugene delacroix': '들라크루아(Eugène Delacroix)',
-      'goya': '고야(Francisco Goya)',
-      'francisco goya': '고야(Francisco Goya)',
+      'turner': '윌리엄 터너(J.M.W. Turner)',
+      'j.m.w. turner': '윌리엄 터너(J.M.W. Turner)',
+      'william turner': '윌리엄 터너(J.M.W. Turner)',
+      'friedrich': '카스파르 다비드 프리드리히(Caspar David Friedrich)',
+      'caspar david friedrich': '카스파르 다비드 프리드리히(Caspar David Friedrich)',
+      'delacroix': '외젠 들라크루아(Eugène Delacroix)',
+      'eugène delacroix': '외젠 들라크루아(Eugène Delacroix)',
+      'eugene delacroix': '외젠 들라크루아(Eugène Delacroix)',
+      'goya': '프란시스코 고야(Francisco Goya)',
+      'francisco goya': '프란시스코 고야(Francisco Goya)',
       
       // 사실주의
-      'millet': '밀레(Jean-François Millet)',
-      'jean-françois millet': '밀레(Jean-François Millet)',
-      'jean-francois millet': '밀레(Jean-François Millet)',
-      'manet': '마네(Édouard Manet)',
-      'édouard manet': '마네(Édouard Manet)',
-      'edouard manet': '마네(Édouard Manet)',
+      'millet': '장 프랑수아 밀레(Jean-François Millet)',
+      'jean-françois millet': '장 프랑수아 밀레(Jean-François Millet)',
+      'jean-francois millet': '장 프랑수아 밀레(Jean-François Millet)',
+      'manet': '에두아르 마네(Édouard Manet)',
+      'édouard manet': '에두아르 마네(Édouard Manet)',
+      'edouard manet': '에두아르 마네(Édouard Manet)',
       
       // 인상주의
-      'monet': '모네(Claude Monet)',
-      'claude monet': '모네(Claude Monet)',
-      'renoir': '르누아르(Pierre-Auguste Renoir)',
-      'pierre-auguste renoir': '르누아르(Pierre-Auguste Renoir)',
-      'degas': '드가(Edgar Degas)',
-      'edgar degas': '드가(Edgar Degas)',
-      'caillebotte': '칼리보트(Gustave Caillebotte)',
-      'gustave caillebotte': '칼리보트(Gustave Caillebotte)',
-      // v60: 피사로/시슬리 삭제 → 칼리보트 추가
+      'monet': '클로드 모네(Claude Monet)',
+      'claude monet': '클로드 모네(Claude Monet)',
+      'renoir': '피에르 오귀스트 르누아르(Pierre-Auguste Renoir)',
+      'pierre-auguste renoir': '피에르 오귀스트 르누아르(Pierre-Auguste Renoir)',
+      'degas': '에드가 드가(Edgar Degas)',
+      'edgar degas': '에드가 드가(Edgar Degas)',
+      'caillebotte': '귀스타브 카유보트(Gustave Caillebotte)',
+      'gustave caillebotte': '귀스타브 카유보트(Gustave Caillebotte)',
       
       // 후기인상주의
-      'van gogh': '반 고흐(Vincent van Gogh)',
-      'vincent van gogh': '반 고흐(Vincent van Gogh)',
-      'cézanne': '세잔(Paul Cézanne)',
-      'cezanne': '세잔(Paul Cézanne)',
-      'paul cézanne': '세잔(Paul Cézanne)',
-      'paul cezanne': '세잔(Paul Cézanne)',
-      'gauguin': '고갱(Paul Gauguin)',
-      'paul gauguin': '고갱(Paul Gauguin)',
-      'seurat': '쇠라(Georges Seurat)',
-      'georges seurat': '쇠라(Georges Seurat)',
-      'signac': '시냐크(Paul Signac)',
-      'paul signac': '시냐크(Paul Signac)',
+      'van gogh': '빈센트 반 고흐(Vincent van Gogh)',
+      'vincent van gogh': '빈센트 반 고흐(Vincent van Gogh)',
+      'cézanne': '폴 세잔(Paul Cézanne)',
+      'cezanne': '폴 세잔(Paul Cézanne)',
+      'paul cézanne': '폴 세잔(Paul Cézanne)',
+      'paul cezanne': '폴 세잔(Paul Cézanne)',
+      'gauguin': '폴 고갱(Paul Gauguin)',
+      'paul gauguin': '폴 고갱(Paul Gauguin)',
+      'seurat': '조르주 쇠라(Georges Seurat)',
+      'georges seurat': '조르주 쇠라(Georges Seurat)',
+      'signac': '폴 시냐크(Paul Signac)',
+      'paul signac': '폴 시냐크(Paul Signac)',
       
       // 야수파
-      'matisse': '마티스(Henri Matisse)',
-      'henri matisse': '마티스(Henri Matisse)',
-      'derain': '드랭(André Derain)',
-      'andré derain': '드랭(André Derain)',
-      'andre derain': '드랭(André Derain)',
-      'vlaminck': '블라맹크(Maurice de Vlaminck)',
-      'maurice de vlaminck': '블라맹크(Maurice de Vlaminck)',
+      'matisse': '앙리 마티스(Henri Matisse)',
+      'henri matisse': '앙리 마티스(Henri Matisse)',
+      'derain': '앙드레 드랭(André Derain)',
+      'andré derain': '앙드레 드랭(André Derain)',
+      'andre derain': '앙드레 드랭(André Derain)',
+      'vlaminck': '모리스 드 블라맹크(Maurice de Vlaminck)',
+      'maurice de vlaminck': '모리스 드 블라맹크(Maurice de Vlaminck)',
       
       // 표현주의
-      'munch': '뭉크(Edvard Munch)',
-      'edvard munch': '뭉크(Edvard Munch)',
-      'kirchner': '키르히너(Ernst Ludwig Kirchner)',
-      'ernst ludwig kirchner': '키르히너(Ernst Ludwig Kirchner)',
+      'munch': '에드바르 뭉크(Edvard Munch)',
+      'edvard munch': '에드바르 뭉크(Edvard Munch)',
+      'kirchner': '에른스트 루트비히 키르히너(Ernst Ludwig Kirchner)',
+      'ernst ludwig kirchner': '에른스트 루트비히 키르히너(Ernst Ludwig Kirchner)',
       'schiele': '에곤 실레(Egon Schiele)',
       'egon schiele': '에곤 실레(Egon Schiele)',
-      'kandinsky': '칸딘스키(Wassily Kandinsky)',
-      'wassily kandinsky': '칸딘스키(Wassily Kandinsky)',
-      'kokoschka': '코코슈카(Oskar Kokoschka)',
-      'oskar kokoschka': '코코슈카(Oskar Kokoschka)',
+      'kandinsky': '바실리 칸딘스키(Wassily Kandinsky)',
+      'wassily kandinsky': '바실리 칸딘스키(Wassily Kandinsky)',
+      'kokoschka': '오스카 코코슈카(Oskar Kokoschka)',
+      'oskar kokoschka': '오스카 코코슈카(Oskar Kokoschka)',
       
       // 입체주의
-      'picasso': '피카소(Pablo Picasso)',
-      'pablo picasso': '피카소(Pablo Picasso)',
+      'picasso': '파블로 피카소(Pablo Picasso)',
+      'pablo picasso': '파블로 피카소(Pablo Picasso)',
       
       // 초현실주의
-      'magritte': '마그리트(René Magritte)',
-      'rené magritte': '마그리트(René Magritte)',
-      'rene magritte': '마그리트(René Magritte)',
-      'miro': '미로(Joan Miró)',
-      'miró': '미로(Joan Miró)',
-      'joan miro': '미로(Joan Miró)',
-      'joan miró': '미로(Joan Miró)',
-      'chagall': '샤갈(Marc Chagall)',
-      'marc chagall': '샤갈(Marc Chagall)',
+      'magritte': '르네 마그리트(René Magritte)',
+      'rené magritte': '르네 마그리트(René Magritte)',
+      'rene magritte': '르네 마그리트(René Magritte)',
+      'miro': '호안 미로(Joan Miró)',
+      'miró': '호안 미로(Joan Miró)',
+      'joan miro': '호안 미로(Joan Miró)',
+      'joan miró': '호안 미로(Joan Miró)',
+      'chagall': '마르크 샤갈(Marc Chagall)',
+      'marc chagall': '마르크 샤갈(Marc Chagall)',
       
       // 팝아트
-      'warhol': '워홀(Andy Warhol)',
-      'andy warhol': '워홀(Andy Warhol)',
-      'lichtenstein': '리히텐슈타인(Roy Lichtenstein)',
-      'roy lichtenstein': '리히텐슈타인(Roy Lichtenstein)',
+      'warhol': '앤디 워홀(Andy Warhol)',
+      'andy warhol': '앤디 워홀(Andy Warhol)',
+      'lichtenstein': '로이 리히텐슈타인(Roy Lichtenstein)',
+      'roy lichtenstein': '로이 리히텐슈타인(Roy Lichtenstein)',
       'haring': '키스 해링(Keith Haring)',
       'keith haring': '키스 해링(Keith Haring)',
       'keith-haring': '키스 해링(Keith Haring)',
@@ -1333,7 +1392,17 @@ const ResultScreen = ({
       'ukiyoe': '우키요에(Ukiyo-e)',
       'ukiyo-e': '우키요에(Ukiyo-e)',
       'japanese-woodblock': '우키요에(Japanese Woodblock)',
-      'woodblock-print': '우키요에(Woodblock Print)'
+      'woodblock-print': '우키요에(Woodblock Print)',
+      
+      // 한글 화가명도 매핑 (API가 한글로 반환하는 경우)
+      '마티스': '앙리 마티스(Henri Matisse)',
+      '피카소': '파블로 피카소(Pablo Picasso)',
+      '뭉크': '에드바르 뭉크(Edvard Munch)',
+      '반 고흐': '빈센트 반 고흐(Vincent van Gogh)',
+      '클림트': '구스타프 클림트(Gustav Klimt)',
+      '워홀': '앤디 워홀(Andy Warhol)',
+      '프리다': '프리다 칼로(Frida Kahlo)',
+      '프리다 칼로': '프리다 칼로(Frida Kahlo)'
     };
     
     // 매핑에서 찾기
@@ -1715,14 +1784,25 @@ const ResultScreen = ({
                 {isFullTransform ? (currentResult?.style?.icon || '🎨') : (selectedStyle.icon || '🎨')}
               </div>
               <div>
-                <h2>{isFullTransform ? (currentResult?.style?.name || selectedStyle.name) : selectedStyle.name}</h2>
+                <h2>
+                  {/* 거장: 화가 풀네임 표시, 그 외: 스타일명 */}
+                  {(() => {
+                    const category = isFullTransform ? currentResult?.style?.category : selectedStyle.category;
+                    if (category === 'masters') {
+                      const masterInfo = getMasterInfo(displayArtist);
+                      return masterInfo.fullName;
+                    }
+                    return isFullTransform ? (currentResult?.style?.name || selectedStyle.name) : selectedStyle.name;
+                  })()}
+                </h2>
                 <p className="technique-subtitle">
                   <span className="artist-name">
-                    {/* 거장: 작품명 표시, 동양화: 기법명 통일, 그 외: 화가명 */}
+                    {/* 거장: 화파 표시, 동양화: 기법명 통일, 그 외: 화가명 */}
                     {(() => {
                       const category = isFullTransform ? currentResult?.style?.category : selectedStyle.category;
-                      if (category === 'masters' && displayWork) {
-                        return formatWorkName(displayWork);
+                      if (category === 'masters') {
+                        const masterInfo = getMasterInfo(displayArtist);
+                        return masterInfo.movement || '거장';
                       } else if (category === 'oriental') {
                         return formatOrientalStyle(displayArtist);
                       } else {
