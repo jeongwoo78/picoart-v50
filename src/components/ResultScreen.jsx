@@ -1235,7 +1235,8 @@ const ResultScreen = ({
       'titian': '티치아노 베첼리오(Tiziano Vecellio)',
       
       // 바로크
-      'caravaggio': '카라바조(Caravaggio)',
+      'caravaggio': '미켈란젤로 메리시 다 카라바조(Caravaggio)',
+      'michelangelo merisi da caravaggio': '미켈란젤로 메리시 다 카라바조(Caravaggio)',
       'rembrandt': '렘브란트 판 레인(Rembrandt van Rijn)',
       'vermeer': '요하네스 베르메르(Johannes Vermeer)',
       'velazquez': '디에고 벨라스케스(Diego Velázquez)',
@@ -1402,13 +1403,26 @@ const ResultScreen = ({
       '클림트': '구스타프 클림트(Gustav Klimt)',
       '워홀': '앤디 워홀(Andy Warhol)',
       '프리다': '프리다 칼로(Frida Kahlo)',
-      '프리다 칼로': '프리다 칼로(Frida Kahlo)'
+      '프리다 칼로': '프리다 칼로(Frida Kahlo)',
+      
+      // API가 대문자/공백 포함으로 반환하는 경우
+      'leonardo da vinci': '레오나르도 다 빈치(Leonardo da Vinci)',
+      'francois boucher': '프랑수아 부셰(François Boucher)',
+      'françois boucher': '프랑수아 부셰(François Boucher)'
     };
     
     // 매핑에서 찾기
     if (nameMap[normalized]) {
       console.log('🎨 formatArtistName found:', nameMap[normalized]);
       return nameMap[normalized];
+    }
+    
+    // 부분 매칭 시도 (대문자/공백 변형 대응)
+    for (const [key, value] of Object.entries(nameMap)) {
+      if (normalized.replace(/[\s-_]/g, '') === key.replace(/[\s-_]/g, '')) {
+        console.log('🎨 formatArtistName partial match:', value);
+        return value;
+      }
     }
     
     // 매핑에 없으면 원본 반환
