@@ -1,11 +1,5 @@
-// PicoArt v62.5 - FLUX Pro 테스트 (반 고흐/피카소/워홀)
-// v62.5: 3명 거장 선택 시 flux-depth-pro 사용
-//      - 반 고흐, 피카소, 워홀 → flux-depth-pro ($0.055/장)
-//      - 기타 → 기존 flux-depth-dev ($0.025/장)
-//      - 속도: Pro 5-10초 vs Dev 15-20초 (추정)
-//      - 품질/프롬프트 준수 비교 테스트
-//
-// v62.1: 대전제 PREFIX 위치 수정
+// PicoArt v62.1 - 대전제 PREFIX 위치 수정
+// v62.1: 대전제 PREFIX를 가중치 블록 바깥으로 이동 (항상 적용!)
 //      - 환각 방지 강화: "If 1 person in photo, output must have EXACTLY 1 person"
 //      - 스타일 적용 강화: "people must look PAINTED not photographic"
 //
@@ -4396,92 +4390,29 @@ export default async function handler(req, res) {
       console.log('🖌️ Applied BRUSHWORK rule (보강)');
     }
     
-    // ========================================
-    // 🧪 FLUX Pro 테스트: 반 고흐/피카소/워홀 선택 시 flux-depth-pro 사용
-    // ========================================
-    const isProTest = selectedArtist && (
-      // 반 고흐
-      selectedArtist.toLowerCase().includes('van gogh') || 
-      selectedArtist.toLowerCase().includes('gogh') ||
-      selectedArtist === '반 고흐' ||
-      selectedArtist === '고흐' ||
-      // 피카소
-      selectedArtist.toLowerCase().includes('picasso') ||
-      selectedArtist === '피카소' ||
-      // 워홀
-      selectedArtist.toLowerCase().includes('warhol') ||
-      selectedArtist === '워홀' ||
-      selectedArtist === '앤디 워홀'
-    );
-    
-    let response;
-    
-    if (isProTest) {
-      // 🎨 FLUX Depth Pro (품질/속도 테스트)
-      console.log('========================================');
-      console.log('🧪 [FLUX Pro 테스트]', selectedArtist);
-      console.log('========================================');
-      console.log('📦 모델: black-forest-labs/flux-depth-pro');
-      console.log('💰 비용: ~$0.055/장 (기존 $0.025 대비 +$0.030)');
-      console.log('⚡ 예상 속도: 5-10초 (기존 15-20초)');
-      console.log('========================================');
-      
-      // FLUX Depth Pro - Official Models API
-      response = await fetch(
-        'https://api.replicate.com/v1/models/black-forest-labs/flux-depth-pro/predictions',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Token ${process.env.REPLICATE_API_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'wait'
-          },
-          body: JSON.stringify({
-            input: {
-              control_image: image,
-              prompt: finalPrompt,
-              steps: 25,
-              guidance: 3,
-              safety_tolerance: 5,
-              output_format: 'jpg'
-            }
-          })
-        }
-      );
-      
-      if (response.ok) {
-        console.log('✅ [FLUX Pro] 호출 성공!');
-      } else {
-        console.log('❌ [FLUX Pro] 호출 실패');
+    // FLUX Depth 변환 (최신 API 버전)
+    const response = await fetch(
+      'https://api.replicate.com/v1/models/black-forest-labs/flux-depth-dev/predictions',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${process.env.REPLICATE_API_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'wait'
+        },
+        body: JSON.stringify({
+          input: {
+            control_image: image,
+            prompt: finalPrompt,
+            num_inference_steps: 24,
+            guidance: 12,
+            control_strength: controlStrength,  // 기본 0.80, 레오나르도 0.65
+            output_format: 'jpg',
+            output_quality: 90
+          }
+        })
       }
-      
-    } else {
-      // 기존: FLUX Depth Dev
-      console.log('📦 [기존 모델] black-forest-labs/flux-depth-dev');
-      
-      response = await fetch(
-        'https://api.replicate.com/v1/models/black-forest-labs/flux-depth-dev/predictions',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Token ${process.env.REPLICATE_API_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'wait'
-          },
-          body: JSON.stringify({
-            input: {
-              control_image: image,
-              prompt: finalPrompt,
-              num_inference_steps: 24,
-              guidance: 12,
-              control_strength: controlStrength,
-              output_format: 'jpg',
-              output_quality: 90
-            }
-          })
-        }
-      );
-    }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
