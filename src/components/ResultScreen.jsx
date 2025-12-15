@@ -81,10 +81,12 @@ const ResultScreen = ({
       const saveAllResults = async () => {
         for (const result of fullTransformResults) {
           if (result.success && result.resultUrl) {
-            const styleName = result.aiSelectedArtist || result.style?.name || '변환 이미지';
-            const categoryName = selectedStyle?.category === 'movements' ? '미술사조' 
-              : selectedStyle?.category === 'masters' ? '거장' 
-              : selectedStyle?.category === 'oriental' ? '동양화' 
+            const category = result.style?.category || selectedStyle?.category;
+            const rawName = result.aiSelectedArtist || result.style?.name || '변환 이미지';
+            const styleName = formatGalleryName(rawName, category);
+            const categoryName = category === 'movements' ? '미술사조' 
+              : category === 'masters' ? '거장' 
+              : category === 'oriental' ? '동양화' 
               : '';
             await saveToGallery(result.resultUrl, styleName, categoryName);
           }
@@ -102,16 +104,15 @@ const ResultScreen = ({
     if (hasSavedRef.current || !resultImage) return;
     
     const saveToGalleryAsync = async () => {
-      // 스타일 이름 결정
-      let styleName = selectedStyle?.name || '변환 이미지';
-      if (aiSelectedArtist) {
-        styleName = aiSelectedArtist;
-      }
+      // 스타일 이름 결정 - 한글(영문) 짧은 형식
+      const category = selectedStyle?.category;
+      const rawName = aiSelectedArtist || selectedStyle?.name || '변환 이미지';
+      const styleName = formatGalleryName(rawName, category);
       
       // 카테고리 이름
-      const categoryName = selectedStyle?.category === 'movements' ? '미술사조' 
-        : selectedStyle?.category === 'masters' ? '거장' 
-        : selectedStyle?.category === 'oriental' ? '동양화' 
+      const categoryName = category === 'movements' ? '미술사조' 
+        : category === 'masters' ? '거장' 
+        : category === 'oriental' ? '동양화' 
         : '';
       
       // 갤러리에 저장 (async)
@@ -143,14 +144,14 @@ const ResultScreen = ({
       const failed = failedResults[i];
       const failedIndex = results.findIndex(r => r.style?.id === failed.style?.id);
       
-      setRetryProgress(`재시도 중... (${i + 1}/${failedResults.length}) ${failed.style?.name || ''}`);
+      setRetryProgress('재시도 중...');
       
       try {
         const result = await processStyleTransfer(
           originalPhoto,
           failed.style,
           null,
-          (progress) => setRetryProgress(`${failed.style?.name}: ${progress}`)
+          () => {}  // 진행 콜백 불필요
         );
         
         if (result.success) {
@@ -169,11 +170,13 @@ const ResultScreen = ({
           successCount++;
           console.log(`✅ 재시도 성공: ${failed.style?.name}`);
           
-          // 갤러리에 저장
-          const styleName = result.aiSelectedArtist || failed.style?.name || '변환 이미지';
-          const categoryName = failed.style?.category === 'movements' ? '미술사조' 
-            : failed.style?.category === 'masters' ? '거장' 
-            : failed.style?.category === 'oriental' ? '동양화' 
+          // 갤러리에 저장 - 한글(영문) 짧은 형식
+          const category = failed.style?.category;
+          const rawName = result.aiSelectedArtist || failed.style?.name || '변환 이미지';
+          const styleName = formatGalleryName(rawName, category);
+          const categoryName = category === 'movements' ? '미술사조' 
+            : category === 'masters' ? '거장' 
+            : category === 'oriental' ? '동양화' 
             : '';
           await saveToGallery(result.resultUrl, styleName, categoryName);
         } else {
@@ -192,84 +195,6 @@ const ResultScreen = ({
     } else {
       alert('재시도했지만 모두 실패했습니다. 나중에 다시 시도해주세요.');
     }
-  };
-
-  // ========== 단일 스타일 재시도 함수 ==========
-  const handleRetrySingle = async (index) => {
-    if (!originalPhoto || isRetrying) return;
-    
-    const failed = results[index];
-    if (!failed || failed.success) return;
-    
-    setIsRetrying(true);
-    setRetryProgress(`${failed.style?.name} 재시도 중...`);
-    console.log(`🔄 단일 재시도: ${failed.style?.name}`);
-    
-    try {
-      const result = await processStyleTransfer(
-        originalPhoto,
-        failed.style,
-        null,
-        (progress) => setRetryProgress(`${failed.style?.name}: ${progress}`)
-      );
-      
-      if (result.success) {
-        // 성공하면 해당 인덱스 결과 업데이트
-        setResults(prev => {
-          const newResults = [...prev];
-          newResults[index] = {
-            style: failed.style,
-            resultUrl: result.resultUrl,
-            aiSelectedArtist: result.aiSelectedArtist,
-            selected_work: result.selected_work,
-            success: true
-          };
-          return newResults;
-        });
-        console.log(`✅ 재시도 성공: ${failed.style?.name}`);
-        
-        // 갤러리에 저장
-        const styleName = result.aiSelectedArtist || failed.style?.name || '변환 이미지';
-        const categoryName = failed.style?.category === 'movements' ? '미술사조' 
-          : failed.style?.category === 'masters' ? '거장' 
-          : failed.style?.category === 'oriental' ? '동양화' 
-          : '';
-        await saveToGallery(result.resultUrl, styleName, categoryName);
-        
-        // 교육자료 다시 로드 (재시도 성공 후)
-        console.log('🔄 재시도 성공 - 교육자료 다시 로드');
-        const workName = result.selected_work;
-        const artistName = result.aiSelectedArtist;
-        const category = failed.style?.category;
-        
-        if (workName && artistName && category) {
-          const key = getOneclickEducationKey(workName, artistName, category);
-          if (key) {
-            const educationData = category === 'movements' 
-              ? oneclickMovementsEducation[key]
-              : category === 'masters'
-              ? oneclickMastersEducation[key]
-              : oneclickOrientalEducation[key];
-            
-            if (educationData) {
-              console.log(`✅ 재시도 후 교육자료 로드: ${key}`);
-              setEducationText(educationData);
-            }
-          }
-        }
-        
-        alert('재시도 성공!');
-      } else {
-        console.log(`❌ 재시도 실패: ${failed.style?.name} - ${result.error}`);
-        alert('재시도 실패. 나중에 다시 시도해주세요.');
-      }
-    } catch (error) {
-      console.error(`❌ 재시도 에러: ${failed.style?.name}`, error);
-      alert('재시도 중 오류가 발생했습니다.');
-    }
-    
-    setIsRetrying(false);
-    setRetryProgress('');
   };
 
   // ========== 단독변환 재시도 함수 ==========
@@ -292,11 +217,13 @@ const ResultScreen = ({
         console.log(`✅ 단독변환 재시도 성공: ${selectedStyle.name}`);
         setSingleRetryResultState(result);
         
-        // 갤러리에 저장
-        const styleName = result.aiSelectedArtist || selectedStyle.name || '변환 이미지';
-        const categoryName = selectedStyle.category === 'movements' ? '미술사조' 
-          : selectedStyle.category === 'masters' ? '거장' 
-          : selectedStyle.category === 'oriental' ? '동양화' 
+        // 갤러리에 저장 - 한글(영문) 짧은 형식
+        const category = selectedStyle.category;
+        const rawName = result.aiSelectedArtist || selectedStyle.name || '변환 이미지';
+        const styleName = formatGalleryName(rawName, category);
+        const categoryName = category === 'movements' ? '미술사조' 
+          : category === 'masters' ? '거장' 
+          : category === 'oriental' ? '동양화' 
           : '';
         await saveToGallery(result.resultUrl, styleName, categoryName);
         
@@ -417,9 +344,29 @@ const ResultScreen = ({
         'Soup Cans': 'warhol-soup',
       };
       
-      const key = mastersWorkKeyMap[workName];
+      // 1. 직접 매칭 시도
+      let key = mastersWorkKeyMap[workName];
       if (key) {
-        console.log('✅ Masters workKeyMap matched:', key);
+        console.log('✅ Masters workKeyMap matched (direct):', key);
+        return key;
+      }
+      
+      // 2. 괄호 포함된 경우: "Woman with a Hat (모자를 쓴 여인)" → "Woman with a Hat" 추출
+      const englishPart = workName.split('(')[0].trim();
+      const koreanMatch = workName.match(/\(([^)]+)\)/);
+      const koreanPart = koreanMatch ? koreanMatch[1].trim() : '';
+      
+      // 영문으로 시도
+      if (englishPart && mastersWorkKeyMap[englishPart]) {
+        key = mastersWorkKeyMap[englishPart];
+        console.log('✅ Masters workKeyMap matched (english part):', key);
+        return key;
+      }
+      
+      // 한글로 시도
+      if (koreanPart && mastersWorkKeyMap[koreanPart]) {
+        key = mastersWorkKeyMap[koreanPart];
+        console.log('✅ Masters workKeyMap matched (korean part):', key);
         return key;
       }
     }
@@ -1084,6 +1031,140 @@ const ResultScreen = ({
     return { fullName: artistName, movement: '' };
   };
 
+  // ========== 갤러리용 짧은 이름 포맷: 한글(영문) ==========
+  const formatGalleryName = (artistName, category) => {
+    if (!artistName) return '변환 이미지';
+    
+    const normalized = artistName.toLowerCase().trim();
+    
+    // 거장 짧은 이름 매핑
+    const mastersShortMap = {
+      'van gogh': '반 고흐(Van Gogh)',
+      'vangogh': '반 고흐(Van Gogh)',
+      'vincent van gogh': '반 고흐(Van Gogh)',
+      '반 고흐': '반 고흐(Van Gogh)',
+      'klimt': '클림트(Klimt)',
+      'gustav klimt': '클림트(Klimt)',
+      '클림트': '클림트(Klimt)',
+      'munch': '뭉크(Munch)',
+      'edvard munch': '뭉크(Munch)',
+      '뭉크': '뭉크(Munch)',
+      'matisse': '마티스(Matisse)',
+      'henri matisse': '마티스(Matisse)',
+      '마티스': '마티스(Matisse)',
+      'picasso': '피카소(Picasso)',
+      'pablo picasso': '피카소(Picasso)',
+      '피카소': '피카소(Picasso)',
+      'frida': '프리다(Frida)',
+      'frida kahlo': '프리다(Frida)',
+      '프리다': '프리다(Frida)',
+      '프리다 칼로': '프리다(Frida)',
+      'warhol': '워홀(Warhol)',
+      'andy warhol': '워홀(Warhol)',
+      '워홀': '워홀(Warhol)',
+      '앤디 워홀': '워홀(Warhol)',
+    };
+    
+    // 미술사조 화가 짧은 이름 매핑
+    const movementsShortMap = {
+      // 고대
+      'greek sculpture': '그리스 조각(Greek)',
+      'roman mosaic': '로마 모자이크(Roman)',
+      'classical sculpture': '고대 조각(Classical)',
+      // 중세
+      'byzantine': '비잔틴(Byzantine)',
+      'gothic': '고딕(Gothic)',
+      'islamic miniature': '이슬람 세밀화(Islamic)',
+      // 르네상스
+      'leonardo': '다 빈치(Da Vinci)',
+      'leonardo da vinci': '다 빈치(Da Vinci)',
+      'michelangelo': '미켈란젤로(Michelangelo)',
+      'raphael': '라파엘로(Raphael)',
+      'botticelli': '보티첼리(Botticelli)',
+      'titian': '티치아노(Titian)',
+      // 바로크
+      'caravaggio': '카라바조(Caravaggio)',
+      'rembrandt': '렘브란트(Rembrandt)',
+      'vermeer': '베르메르(Vermeer)',
+      'velazquez': '벨라스케스(Velázquez)',
+      'rubens': '루벤스(Rubens)',
+      // 로코코
+      'watteau': '와토(Watteau)',
+      'boucher': '부셰(Boucher)',
+      'fragonard': '프라고나르(Fragonard)',
+      'françois boucher': '부셰(Boucher)',
+      // 신고전/낭만/사실
+      'david': '다비드(David)',
+      'ingres': '앵그르(Ingres)',
+      'turner': '터너(Turner)',
+      'friedrich': '프리드리히(Friedrich)',
+      'delacroix': '들라크루아(Delacroix)',
+      'goya': '고야(Goya)',
+      'millet': '밀레(Millet)',
+      'courbet': '쿠르베(Courbet)',
+      // 인상주의
+      'monet': '모네(Monet)',
+      'renoir': '르누아르(Renoir)',
+      'degas': '드가(Degas)',
+      'pissarro': '피사로(Pissarro)',
+      'sisley': '시슬레(Sisley)',
+      // 후기인상주의
+      'cézanne': '세잔(Cézanne)',
+      'cezanne': '세잔(Cézanne)',
+      'seurat': '쇠라(Seurat)',
+      'gauguin': '고갱(Gauguin)',
+      'toulouse-lautrec': '로트렉(Lautrec)',
+      // 야수파/표현주의
+      'derain': '드랭(Derain)',
+      'vlaminck': '블라맹크(Vlaminck)',
+      'kirchner': '키르히너(Kirchner)',
+      'kandinsky': '칸딘스키(Kandinsky)',
+      'kokoschka': '코코슈카(Kokoschka)',
+      // 모더니즘
+      'mondrian': '몬드리안(Mondrian)',
+      'malevich': '말레비치(Malevich)',
+      'chagall': '샤갈(Chagall)',
+      'miró': '미로(Miró)',
+      'miro': '미로(Miró)',
+      'magritte': '마그리트(Magritte)',
+    };
+    
+    // 동양화 짧은 이름 매핑
+    const orientalShortMap = {
+      '한국 전통화': '한국화(Korean)',
+      'korean minhwa': '민화(Minhwa)',
+      'korean pungsokdo': '풍속화(Pungsok)',
+      'korean jingyeong': '진경산수(Jingyeong)',
+      'chinese gongbi': '공필화(Gongbi)',
+      'chinese ink wash': '수묵화(Ink Wash)',
+      'japanese ukiyo-e': '우키요에(Ukiyo-e)',
+      '일본 우키요에': '우키요에(Ukiyo-e)',
+      '중국 공필화': '공필화(Gongbi)',
+    };
+    
+    // 카테고리별 매핑 선택
+    if (category === 'masters') {
+      if (mastersShortMap[normalized]) return mastersShortMap[normalized];
+      if (mastersShortMap[artistName]) return mastersShortMap[artistName];
+    } else if (category === 'oriental') {
+      if (orientalShortMap[normalized]) return orientalShortMap[normalized];
+      if (orientalShortMap[artistName]) return orientalShortMap[artistName];
+    } else {
+      if (movementsShortMap[normalized]) return movementsShortMap[normalized];
+      if (movementsShortMap[artistName]) return movementsShortMap[artistName];
+    }
+    
+    // 부분 매칭 시도
+    const allMaps = { ...mastersShortMap, ...movementsShortMap, ...orientalShortMap };
+    for (const [key, value] of Object.entries(allMaps)) {
+      if (normalized.includes(key) || key.includes(normalized)) {
+        return value;
+      }
+    }
+    
+    return artistName;
+  };
+
 
   // ========== 거장 작품명 포맷 ==========
   const formatWorkName = (workName) => {
@@ -1614,6 +1695,11 @@ const ResultScreen = ({
 
   // ========== Fallback 메시지 ==========
   const getFallbackMessage = () => {
+    // 원클릭 모드에서 현재 결과가 실패인 경우
+    if (isFullTransform && currentResult && !currentResult.success) {
+      return '변환에 실패하였습니다. 아래 재시도 버튼을 눌러주세요.';
+    }
+    
     // 원클릭인 경우 currentResult에서 정보 가져오기
     const category = isFullTransform ? currentResult?.style?.category : selectedStyle?.category;
     const styleName = isFullTransform 
@@ -1765,7 +1851,7 @@ const ResultScreen = ({
               </div>
             ) : (
               <div className="retry-prompt">
-                <p className="fail-message">변환에 실패하였습니다. 재시도 하세요.</p>
+                <p className="fail-message">변환에 실패하였습니다. 재시도 버튼을 눌러주세요.</p>
                 <button 
                   className="btn btn-retry"
                   onClick={handleSingleModeRetry}
@@ -1811,12 +1897,18 @@ const ResultScreen = ({
                 </h2>
                 <p className="technique-subtitle">
                   <span className="artist-name">
-                    {/* 거장: 화파 표시, 동양화: 기법명 통일, 그 외: 화가명 */}
+                    {/* 거장: 미술사조, <대표작> / 동양화: 기법명 / 그 외: 화가명 */}
                     {(() => {
                       const category = isFullTransform ? currentResult?.style?.category : selectedStyle.category;
                       if (category === 'masters') {
                         const masterInfo = getMasterInfo(displayArtist);
-                        return masterInfo.movement || '거장';
+                        const movement = masterInfo.movement || '거장';
+                        const workName = displayWork ? formatWorkName(displayWork) : '';
+                        const workShort = workName ? workName.split('(')[0].trim() : '';
+                        if (workShort) {
+                          return `${movement}, <${workShort}>`;
+                        }
+                        return movement;
                       } else if (category === 'oriental') {
                         return formatOrientalStyle(displayArtist);
                       } else {
@@ -1911,8 +2003,8 @@ const ResultScreen = ({
           </div>
         )}
 
-        {/* 재시도 버튼 (현재 보고 있는 결과가 실패한 경우 또는 재시도 중일 때 표시) */}
-        {isFullTransform && (isRetrying || (currentResult && !currentResult.success)) && (
+        {/* 재시도 버튼 (실패한 결과가 있고 현재 보고 있는 결과가 실패한 경우 표시) */}
+        {isFullTransform && (currentResult && !currentResult.success) && (
           <div className="retry-section">
             {isRetrying ? (
               <div className="retry-in-progress">
@@ -1926,13 +2018,13 @@ const ResultScreen = ({
               </div>
             ) : (
               <div className="retry-prompt">
-                <p className="fail-message">변환에 실패하였습니다. 재시도 하세요.</p>
+                <p className="fail-message">변환에 실패하였습니다. 재시도 버튼을 눌러주세요.</p>
                 <button 
                   className="btn btn-retry"
-                  onClick={() => handleRetrySingle(currentIndex)}
+                  onClick={handleRetry}
                 >
                   <span className="btn-icon">🔄</span>
-                  재시도
+                  {failedCount > 1 ? `전체 재시도 (${failedCount}개)` : '재시도'}
                 </button>
               </div>
             )}

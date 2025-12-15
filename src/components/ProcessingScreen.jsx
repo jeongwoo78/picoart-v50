@@ -356,19 +356,75 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
     return styleName;
   };
 
-  // 카테고리별 부제 포맷
+  // 거장 화가명 풀네임 + 미술사조 매핑
+  const getMasterInfo = (artistName) => {
+    const masterMap = {
+      '반 고흐': { fullName: '빈센트 반 고흐(Vincent van Gogh)', movement: '후기인상주의' },
+      'vangogh': { fullName: '빈센트 반 고흐(Vincent van Gogh)', movement: '후기인상주의' },
+      'van gogh': { fullName: '빈센트 반 고흐(Vincent van Gogh)', movement: '후기인상주의' },
+      '클림트': { fullName: '구스타프 클림트(Gustav Klimt)', movement: '아르누보' },
+      'klimt': { fullName: '구스타프 클림트(Gustav Klimt)', movement: '아르누보' },
+      '뭉크': { fullName: '에드바르 뭉크(Edvard Munch)', movement: '표현주의' },
+      'munch': { fullName: '에드바르 뭉크(Edvard Munch)', movement: '표현주의' },
+      '마티스': { fullName: '앙리 마티스(Henri Matisse)', movement: '야수파' },
+      'matisse': { fullName: '앙리 마티스(Henri Matisse)', movement: '야수파' },
+      '피카소': { fullName: '파블로 피카소(Pablo Picasso)', movement: '입체주의' },
+      'picasso': { fullName: '파블로 피카소(Pablo Picasso)', movement: '입체주의' },
+      '프리다': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
+      '프리다 칼로': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
+      'frida': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
+      'frida kahlo': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
+      '워홀': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' },
+      'warhol': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' },
+      'andy warhol': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' }
+    };
+    
+    if (!artistName) return { fullName: '거장', movement: '' };
+    const normalized = artistName.toLowerCase().trim();
+    if (masterMap[artistName]) return masterMap[artistName];
+    if (masterMap[normalized]) return masterMap[normalized];
+    
+    // 부분 매칭
+    for (const [key, value] of Object.entries(masterMap)) {
+      if (normalized.includes(key.toLowerCase()) || key.toLowerCase().includes(normalized)) {
+        return value;
+      }
+    }
+    return { fullName: artistName, movement: '' };
+  };
+
+  // 카테고리별 부제 포맷 (거장: 미술사조 + 대표작)
   const getSubtitle = (result) => {
     const cat = result?.style?.category;
     const artist = result?.aiSelectedArtist;
     const work = result?.selected_work;
     
-    if (cat === 'masters' && work) {
-      return formatWorkName(work);
+    if (cat === 'masters') {
+      const masterInfo = getMasterInfo(artist);
+      const movement = masterInfo.movement || '거장';
+      if (work) {
+        const workFormatted = formatWorkName(work);
+        const workShort = workFormatted.split('(')[0].trim();
+        return `${movement}, <${workShort}>`;
+      }
+      return movement;
     } else if (cat === 'oriental') {
       return formatOrientalStyle(artist);
     } else {
       return formatArtistName(artist);
     }
+  };
+
+  // 거장 모드: 화가 풀네임 반환
+  const getMasterFullName = (result) => {
+    const cat = result?.style?.category;
+    const artist = result?.aiSelectedArtist;
+    
+    if (cat === 'masters' && artist) {
+      const masterInfo = getMasterInfo(artist);
+      return masterInfo.fullName;
+    }
+    return result?.style?.name || '';
   };
 
   // 원클릭 2차 교육 (결과별) - 카테고리에 따라 분리된 파일 사용
@@ -462,8 +518,25 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
         '마릴린 먼로': 'warhol-marilyn',
         '캠벨 수프 캔': 'warhol-soup',
       };
+      
+      // 1. 직접 매칭 시도
       if (mastersWorkKeyMap[workName]) {
         return mastersWorkKeyMap[workName];
+      }
+      
+      // 2. 괄호 포함된 경우: "Woman with a Hat (모자를 쓴 여인)" → "Woman with a Hat" 추출
+      const englishPart = workName.split('(')[0].trim();
+      const koreanMatch = workName.match(/\(([^)]+)\)/);
+      const koreanPart = koreanMatch ? koreanMatch[1].trim() : '';
+      
+      // 영문으로 시도
+      if (englishPart && mastersWorkKeyMap[englishPart]) {
+        return mastersWorkKeyMap[englishPart];
+      }
+      
+      // 한글로 시도
+      if (koreanPart && mastersWorkKeyMap[koreanPart]) {
+        return mastersWorkKeyMap[koreanPart];
       }
     }
     
@@ -742,7 +815,11 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
               <div className="preview">
                 <img src={previewResult.resultUrl} alt="" />
                 <div className="preview-info">
-                  <div className="preview-style">{previewResult.style.name}</div>
+                  <div className="preview-style">
+                    {previewResult.style?.category === 'masters' 
+                      ? getMasterFullName(previewResult) 
+                      : previewResult.style.name}
+                  </div>
                   <div className="preview-subtitle">{getSubtitle(previewResult)}</div>
                 </div>
                 {previewEdu && (
