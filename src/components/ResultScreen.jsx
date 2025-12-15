@@ -83,7 +83,8 @@ const ResultScreen = ({
           if (result.success && result.resultUrl) {
             const category = result.style?.category || selectedStyle?.category;
             const rawName = result.aiSelectedArtist || result.style?.name || '변환 이미지';
-            const styleName = formatGalleryName(rawName, category);
+            const workName = result.selected_work || null;
+            const styleName = formatGalleryName(rawName, category, workName);
             const categoryName = category === 'movements' ? '미술사조' 
               : category === 'masters' ? '거장' 
               : category === 'oriental' ? '동양화' 
@@ -104,10 +105,11 @@ const ResultScreen = ({
     if (hasSavedRef.current || !resultImage) return;
     
     const saveToGalleryAsync = async () => {
-      // 스타일 이름 결정 - 한글(영문) 짧은 형식
+      // 스타일 이름 결정 - <카테고리> 세부정보 형식
       const category = selectedStyle?.category;
       const rawName = aiSelectedArtist || selectedStyle?.name || '변환 이미지';
-      const styleName = formatGalleryName(rawName, category);
+      const workName = aiSelectedWork || null;
+      const styleName = formatGalleryName(rawName, category, workName);
       
       // 카테고리 이름
       const categoryName = category === 'movements' ? '미술사조' 
@@ -121,6 +123,7 @@ const ResultScreen = ({
         hasSavedRef.current = true;
         setSavedToGallery(true);
         console.log('✅ 갤러리에 자동 저장 완료 (IndexedDB):', styleName);
+      }
       }
     };
     
@@ -170,10 +173,11 @@ const ResultScreen = ({
           successCount++;
           console.log(`✅ 재시도 성공: ${failed.style?.name}`);
           
-          // 갤러리에 저장 - 한글(영문) 짧은 형식
+          // 갤러리에 저장 - <카테고리> 세부정보 형식
           const category = failed.style?.category;
           const rawName = result.aiSelectedArtist || failed.style?.name || '변환 이미지';
-          const styleName = formatGalleryName(rawName, category);
+          const workName = result.selected_work || null;
+          const styleName = formatGalleryName(rawName, category, workName);
           const categoryName = category === 'movements' ? '미술사조' 
             : category === 'masters' ? '거장' 
             : category === 'oriental' ? '동양화' 
@@ -217,10 +221,11 @@ const ResultScreen = ({
         console.log(`✅ 단독변환 재시도 성공: ${selectedStyle.name}`);
         setSingleRetryResultState(result);
         
-        // 갤러리에 저장 - 한글(영문) 짧은 형식
+        // 갤러리에 저장 - <카테고리> 세부정보 형식
         const category = selectedStyle.category;
         const rawName = result.aiSelectedArtist || selectedStyle.name || '변환 이미지';
-        const styleName = formatGalleryName(rawName, category);
+        const workName = result.selected_work || null;
+        const styleName = formatGalleryName(rawName, category, workName);
         const categoryName = category === 'movements' ? '미술사조' 
           : category === 'masters' ? '거장' 
           : category === 'oriental' ? '동양화' 
@@ -1032,134 +1037,196 @@ const ResultScreen = ({
   };
 
   // ========== 갤러리용 짧은 이름 포맷: 한글(영문) ==========
-  const formatGalleryName = (artistName, category) => {
+  const formatGalleryName = (artistName, category, workName = null) => {
     if (!artistName) return '변환 이미지';
     
     const normalized = artistName.toLowerCase().trim();
     
-    // 거장 짧은 이름 매핑
-    const mastersShortMap = {
-      'van gogh': '반 고흐(Van Gogh)',
-      'vangogh': '반 고흐(Van Gogh)',
-      'vincent van gogh': '반 고흐(Van Gogh)',
-      '반 고흐': '반 고흐(Van Gogh)',
-      'klimt': '클림트(Klimt)',
-      'gustav klimt': '클림트(Klimt)',
-      '클림트': '클림트(Klimt)',
-      'munch': '뭉크(Munch)',
-      'edvard munch': '뭉크(Munch)',
-      '뭉크': '뭉크(Munch)',
-      'matisse': '마티스(Matisse)',
-      'henri matisse': '마티스(Matisse)',
-      '마티스': '마티스(Matisse)',
-      'picasso': '피카소(Picasso)',
-      'pablo picasso': '피카소(Picasso)',
-      '피카소': '피카소(Picasso)',
-      'frida': '프리다(Frida)',
-      'frida kahlo': '프리다(Frida)',
-      '프리다': '프리다(Frida)',
-      '프리다 칼로': '프리다(Frida)',
-      'warhol': '워홀(Warhol)',
-      'andy warhol': '워홀(Warhol)',
-      '워홀': '워홀(Warhol)',
-      '앤디 워홀': '워홀(Warhol)',
-    };
-    
-    // 미술사조 화가 짧은 이름 매핑
-    const movementsShortMap = {
-      // 고대
-      'greek sculpture': '그리스 조각(Greek)',
-      'roman mosaic': '로마 모자이크(Roman)',
-      'classical sculpture': '고대 조각(Classical)',
-      // 중세
-      'byzantine': '비잔틴(Byzantine)',
-      'gothic': '고딕(Gothic)',
-      'islamic miniature': '이슬람 세밀화(Islamic)',
-      // 르네상스
-      'leonardo': '다 빈치(Da Vinci)',
-      'leonardo da vinci': '다 빈치(Da Vinci)',
-      'michelangelo': '미켈란젤로(Michelangelo)',
-      'raphael': '라파엘로(Raphael)',
-      'botticelli': '보티첼리(Botticelli)',
-      'titian': '티치아노(Titian)',
-      // 바로크
-      'caravaggio': '카라바조(Caravaggio)',
-      'rembrandt': '렘브란트(Rembrandt)',
-      'vermeer': '베르메르(Vermeer)',
-      'velazquez': '벨라스케스(Velázquez)',
-      'rubens': '루벤스(Rubens)',
-      // 로코코
-      'watteau': '와토(Watteau)',
-      'boucher': '부셰(Boucher)',
-      'fragonard': '프라고나르(Fragonard)',
-      'françois boucher': '부셰(Boucher)',
-      // 신고전/낭만/사실
-      'david': '다비드(David)',
-      'ingres': '앵그르(Ingres)',
-      'turner': '터너(Turner)',
-      'friedrich': '프리드리히(Friedrich)',
-      'delacroix': '들라크루아(Delacroix)',
-      'goya': '고야(Goya)',
-      'millet': '밀레(Millet)',
-      'courbet': '쿠르베(Courbet)',
-      // 인상주의
-      'monet': '모네(Monet)',
-      'renoir': '르누아르(Renoir)',
-      'degas': '드가(Degas)',
-      'pissarro': '피사로(Pissarro)',
-      'sisley': '시슬레(Sisley)',
-      // 후기인상주의
-      'cézanne': '세잔(Cézanne)',
-      'cezanne': '세잔(Cézanne)',
-      'seurat': '쇠라(Seurat)',
-      'gauguin': '고갱(Gauguin)',
-      'toulouse-lautrec': '로트렉(Lautrec)',
-      // 야수파/표현주의
-      'derain': '드랭(Derain)',
-      'vlaminck': '블라맹크(Vlaminck)',
-      'kirchner': '키르히너(Kirchner)',
-      'kandinsky': '칸딘스키(Kandinsky)',
-      'kokoschka': '코코슈카(Kokoschka)',
-      // 모더니즘
-      'mondrian': '몬드리안(Mondrian)',
-      'malevich': '말레비치(Malevich)',
-      'chagall': '샤갈(Chagall)',
-      'miró': '미로(Miró)',
-      'miro': '미로(Miró)',
-      'magritte': '마그리트(Magritte)',
-    };
-    
-    // 동양화 짧은 이름 매핑
-    const orientalShortMap = {
-      '한국 전통화': '한국화(Korean)',
-      'korean minhwa': '민화(Minhwa)',
-      'korean pungsokdo': '풍속화(Pungsok)',
-      'korean jingyeong': '진경산수(Jingyeong)',
-      'chinese gongbi': '공필화(Gongbi)',
-      'chinese ink wash': '수묵화(Ink Wash)',
-      'japanese ukiyo-e': '우키요에(Ukiyo-e)',
-      '일본 우키요에': '우키요에(Ukiyo-e)',
-      '중국 공필화': '공필화(Gongbi)',
-    };
-    
-    // 카테고리별 매핑 선택
+    // ========== 거장: <화가명> 작품명 ==========
     if (category === 'masters') {
-      if (mastersShortMap[normalized]) return mastersShortMap[normalized];
-      if (mastersShortMap[artistName]) return mastersShortMap[artistName];
-    } else if (category === 'oriental') {
-      if (orientalShortMap[normalized]) return orientalShortMap[normalized];
-      if (orientalShortMap[artistName]) return orientalShortMap[artistName];
-    } else {
-      if (movementsShortMap[normalized]) return movementsShortMap[normalized];
-      if (movementsShortMap[artistName]) return movementsShortMap[artistName];
+      const mastersMap = {
+        'van gogh': '반 고흐',
+        'vangogh': '반 고흐',
+        'vincent van gogh': '반 고흐',
+        '반 고흐': '반 고흐',
+        'klimt': '클림트',
+        'gustav klimt': '클림트',
+        '클림트': '클림트',
+        'munch': '뭉크',
+        'edvard munch': '뭉크',
+        '뭉크': '뭉크',
+        'matisse': '마티스',
+        'henri matisse': '마티스',
+        '마티스': '마티스',
+        'picasso': '피카소',
+        'pablo picasso': '피카소',
+        '피카소': '피카소',
+        'frida': '프리다',
+        'frida kahlo': '프리다',
+        '프리다': '프리다',
+        '프리다 칼로': '프리다',
+        'warhol': '워홀',
+        'andy warhol': '워홀',
+        '워홀': '워홀',
+        '앤디 워홀': '워홀',
+      };
+      
+      const artistShort = mastersMap[normalized] || mastersMap[artistName] || artistName;
+      
+      // 작품명 한글화
+      const workMap = {
+        'the kiss': '키스',
+        'kiss': '키스',
+        'the scream': '절규',
+        'scream': '절규',
+        'starry night': '별이 빛나는 밤',
+        'the starry night': '별이 빛나는 밤',
+        'woman with a hat': '모자를 쓴 여인',
+        'les demoiselles d\'avignon': '아비뇽의 처녀들',
+        'marilyn monroe': '마릴린 먼로',
+        'marilyn': '마릴린 먼로',
+        'me and my parrots': '나와 앵무새',
+        'judith': '유디트',
+        'judith i': '유디트',
+        'portrait of adele': '아델레 초상',
+        'the dance': '춤',
+        'dance': '춤',
+      };
+      
+      let workShort = '대표작';
+      if (workName) {
+        const workNorm = workName.toLowerCase().trim();
+        workShort = workMap[workNorm] || workName;
+      }
+      
+      return `<${artistShort}> ${workShort}`;
     }
     
-    // 부분 매칭 시도
-    const allMaps = { ...mastersShortMap, ...movementsShortMap, ...orientalShortMap };
-    for (const [key, value] of Object.entries(allMaps)) {
-      if (normalized.includes(key) || key.includes(normalized)) {
-        return value;
+    // ========== 미술사조: <미술사조명> 화가명 ==========
+    if (category === 'movements') {
+      // 화가 → 미술사조 매핑
+      const movementMap = {
+        // 고대
+        'greek sculpture': { movement: '고대', artist: '그리스 조각' },
+        'classical sculpture': { movement: '고대', artist: '그리스 조각' },
+        'roman mosaic': { movement: '고대', artist: '로마 모자이크' },
+        // 중세
+        'byzantine': { movement: '중세', artist: '비잔틴' },
+        'gothic': { movement: '중세', artist: '고딕' },
+        'gothic stained glass': { movement: '중세', artist: '고딕' },
+        'islamic miniature': { movement: '중세', artist: '이슬람 세밀화' },
+        // 르네상스
+        'leonardo': { movement: '르네상스', artist: '다 빈치' },
+        'leonardo da vinci': { movement: '르네상스', artist: '다 빈치' },
+        'michelangelo': { movement: '르네상스', artist: '미켈란젤로' },
+        'raphael': { movement: '르네상스', artist: '라파엘로' },
+        'botticelli': { movement: '르네상스', artist: '보티첼리' },
+        'titian': { movement: '르네상스', artist: '티치아노' },
+        // 바로크
+        'caravaggio': { movement: '바로크', artist: '카라바조' },
+        'rembrandt': { movement: '바로크', artist: '렘브란트' },
+        'vermeer': { movement: '바로크', artist: '베르메르' },
+        'velazquez': { movement: '바로크', artist: '벨라스케스' },
+        'rubens': { movement: '바로크', artist: '루벤스' },
+        // 로코코
+        'watteau': { movement: '로코코', artist: '와토' },
+        'boucher': { movement: '로코코', artist: '부셰' },
+        'fragonard': { movement: '로코코', artist: '프라고나르' },
+        // 신고전주의
+        'david': { movement: '신고전주의', artist: '다비드' },
+        'ingres': { movement: '신고전주의', artist: '앵그르' },
+        // 낭만주의
+        'turner': { movement: '낭만주의', artist: '터너' },
+        'friedrich': { movement: '낭만주의', artist: '프리드리히' },
+        'delacroix': { movement: '낭만주의', artist: '들라크루아' },
+        'goya': { movement: '낭만주의', artist: '고야' },
+        // 사실주의
+        'millet': { movement: '사실주의', artist: '밀레' },
+        'courbet': { movement: '사실주의', artist: '쿠르베' },
+        'manet': { movement: '사실주의', artist: '마네' },
+        // 인상주의
+        'monet': { movement: '인상주의', artist: '모네' },
+        'renoir': { movement: '인상주의', artist: '르누아르' },
+        'degas': { movement: '인상주의', artist: '드가' },
+        'pissarro': { movement: '인상주의', artist: '피사로' },
+        'sisley': { movement: '인상주의', artist: '시슬레' },
+        // 후기인상주의
+        'cézanne': { movement: '후기인상주의', artist: '세잔' },
+        'cezanne': { movement: '후기인상주의', artist: '세잔' },
+        'seurat': { movement: '후기인상주의', artist: '쇠라' },
+        'gauguin': { movement: '후기인상주의', artist: '고갱' },
+        'toulouse-lautrec': { movement: '후기인상주의', artist: '로트렉' },
+        // 야수파
+        'matisse': { movement: '야수파', artist: '마티스' },
+        'derain': { movement: '야수파', artist: '드랭' },
+        'vlaminck': { movement: '야수파', artist: '블라맹크' },
+        // 표현주의
+        'munch': { movement: '표현주의', artist: '뭉크' },
+        'kirchner': { movement: '표현주의', artist: '키르히너' },
+        'kandinsky': { movement: '표현주의', artist: '칸딘스키' },
+        'kokoschka': { movement: '표현주의', artist: '코코슈카' },
+        // 모더니즘
+        'mondrian': { movement: '모더니즘', artist: '몬드리안' },
+        'malevich': { movement: '모더니즘', artist: '말레비치' },
+        'chagall': { movement: '모더니즘', artist: '샤갈' },
+        'miró': { movement: '모더니즘', artist: '미로' },
+        'miro': { movement: '모더니즘', artist: '미로' },
+        'magritte': { movement: '모더니즘', artist: '마그리트' },
+        // 팝아트
+        'keith haring': { movement: '팝아트', artist: '키스 해링' },
+        'lichtenstein': { movement: '팝아트', artist: '리히텐슈타인' },
+      };
+      
+      const info = movementMap[normalized] || movementMap[artistName];
+      if (info) {
+        return `<${info.movement}> ${info.artist}`;
       }
+      
+      // 부분 매칭
+      for (const [key, value] of Object.entries(movementMap)) {
+        if (normalized.includes(key) || key.includes(normalized)) {
+          return `<${value.movement}> ${value.artist}`;
+        }
+      }
+      
+      return artistName;
+    }
+    
+    // ========== 동양화: <국가 전통회화> 스타일명 ==========
+    if (category === 'oriental') {
+      const orientalMap = {
+        // 한국
+        'korean minhwa': { country: '한국 전통회화', style: '민화' },
+        'korean pungsokdo': { country: '한국 전통회화', style: '풍속화' },
+        'korean jingyeong': { country: '한국 전통회화', style: '진경산수화' },
+        '한국 전통화': { country: '한국 전통회화', style: '전통화' },
+        '민화': { country: '한국 전통회화', style: '민화' },
+        '풍속화': { country: '한국 전통회화', style: '풍속화' },
+        '진경산수': { country: '한국 전통회화', style: '진경산수화' },
+        // 중국
+        'chinese gongbi': { country: '중국 전통회화', style: '공필화' },
+        'chinese ink wash': { country: '중국 전통회화', style: '수묵화' },
+        '공필화': { country: '중국 전통회화', style: '공필화' },
+        '수묵화': { country: '중국 전통회화', style: '수묵화' },
+        // 일본
+        'japanese ukiyo-e': { country: '일본 전통회화', style: '우키요에' },
+        '우키요에': { country: '일본 전통회화', style: '우키요에' },
+        '일본 우키요에': { country: '일본 전통회화', style: '우키요에' },
+      };
+      
+      const info = orientalMap[normalized] || orientalMap[artistName];
+      if (info) {
+        return `<${info.country}> ${info.style}`;
+      }
+      
+      // 부분 매칭
+      for (const [key, value] of Object.entries(orientalMap)) {
+        if (normalized.includes(key) || key.includes(normalized)) {
+          return `<${value.country}> ${value.style}`;
+        }
+      }
+      
+      return artistName;
     }
     
     return artistName;

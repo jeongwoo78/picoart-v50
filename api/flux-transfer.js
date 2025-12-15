@@ -1912,7 +1912,7 @@ function getAncientArtistPrompt(styleName) {
   const prompts = {
     'CLASSICAL SCULPTURE': 'Ancient Greek-Roman MARBLE SCULPTURE: PURE WHITE CARRARA MARBLE throughout entire image, ALL skin becomes smooth polished marble with subtle veining, CRITICAL COSTUME: person MUST wear WHITE DRAPED TOGA - loose flowing WHITE FABRIC wrapped and draped around body like Roman senator or Greek philosopher, OFF-WHITE or CREAM colored cloth with elegant folds, absolutely NO modern clothing NO dress NO gold NO colorful fabric NO bikini NO swimsuit, realistic carved stone fabric folds and drapery, MONOCHROMATIC white/cream/grey tones ONLY, heroic classical proportions like Discobolus or Augustus of Prima Porta, MUSEUM PEDESTAL DISPLAY with neutral grey background, dramatic sculptural lighting, frozen dynamic moment in eternal marble, NOT colorful NOT mosaic, ancient sculpture masterpiece quality',
     
-    'ROMAN MOSAIC': 'Ancient Roman floor MOSAIC: LARGE VISIBLE TESSERAE TILES (20-30mm square stone pieces), THICK DARK GROUT LINES clearly visible between EVERY tile creating grid pattern, LIMITED ANCIENT COLOR PALETTE (terracotta orange, ochre yellow, umber brown, ivory white, slate blue, olive green), CRITICAL COSTUME: person MUST wear WHITE or OFF-WHITE DRAPED TOGA - loose flowing fabric wrapped around body like Roman citizen, NO modern clothing NO dress NO gold fabric NO bikini NO swimsuit, Pompeii villa floor style like Alexander Mosaic, each tile INDIVIDUALLY DISTINGUISHABLE, APPLY MOSAIC TILES TO FACE AND SKIN - face must be made of small square tiles NOT smooth, NOT smooth painting NOT marble sculpture, authentic Roman mosaic craftsmanship'
+    'ROMAN MOSAIC': 'Ancient Roman floor MOSAIC: MOST CRITICAL - THE ENTIRE PERSON including FACE SKIN HAIR must be made of VISIBLE SQUARE MOSAIC TILES, NOT smooth skin. LARGE TESSERAE TILES (visible square stone pieces) covering EVERYTHING including the face and body, THICK DARK GROUT LINES between EVERY tile on face and skin creating grid pattern even on cheeks forehead and nose, LIMITED ANCIENT COLOR PALETTE (terracotta orange, ochre yellow, umber brown, ivory white, slate blue, olive green), COSTUME: WHITE DRAPED TOGA, Pompeii villa floor style like Alexander Mosaic, if the face looks smooth and realistic YOU ARE DOING IT WRONG - face must look like it is made of small stone tiles, authentic Roman mosaic craftsmanship'
   };
   
   const normalized = styleName.toUpperCase().trim();
@@ -3403,8 +3403,8 @@ export default async function handler(req, res) {
           '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
           '2. ATTRACTIVE: Render all people beautifully handsomely (unless expressive distortion work). ' +
           '3. ANTI-HALLUCINATION: Do NOT add ANY people or elements not in original photo. If 1 person in photo, output must have EXACTLY 1 person. ' +
-          '4. STYLE ON PEOPLE: Apply painting style to BOTH subject AND background - people must look PAINTED not photographic. ' +
-          '5. BRUSHWORK: Visible brushstrokes paint texture throughout including on skin NOT smooth NOT digital NOT airbrushed. ' +
+          '4. STYLE ON PEOPLE: Apply painting style to BOTH subject AND background - people must look PAINTED not photographic, skin must have paint texture NOT smooth. ' +
+          '5. BRUSHWORK: VISIBLE OIL PAINT BRUSHSTROKES throughout ENTIRE image including on FACE and SKIN - must see individual brush marks and paint texture like real oil painting, NOT smooth NOT digital NOT airbrushed NOT like photo. ' +
           '6. NO TEXT (Western): No signatures letters writing watermarks. ' +
           '7. ANATOMY: Anatomically correct arms hands fingers body proportions - no missing limbs no extra limbs no distorted body parts. ' +
           'END CORE RULES. ';
