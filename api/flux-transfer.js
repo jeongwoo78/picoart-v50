@@ -4423,8 +4423,10 @@ export default async function handler(req, res) {
       console.log('💰 비용: ~$0.068/장 (기존 $0.025 대비 +$0.043)');
       console.log('========================================');
       
+      // XLabs는 /v1/predictions + version 방식으로 호출!
+      // (Official Models API가 아님)
       response = await fetch(
-        'https://api.replicate.com/v1/models/xlabs-ai/flux-dev-controlnet/predictions',
+        'https://api.replicate.com/v1/predictions',
         {
           method: 'POST',
           headers: {
@@ -4433,6 +4435,8 @@ export default async function handler(req, res) {
             'Prefer': 'wait'
           },
           body: JSON.stringify({
+            // XLabs flux-dev-controlnet 최신 버전
+            version: "f2c31c31d81278a91b2447a304dae654c64a0f5fcbdbec299054a20c15956e10",
             input: {
               prompt: finalPrompt + ', gogh style',  // 트리거 워드 추가
               control_image: image,
@@ -4445,7 +4449,7 @@ export default async function handler(req, res) {
               
               steps: 28,
               guidance_scale: 3.5,
-              output_format: "jpg",
+              output_format: "webp",
               output_quality: 90
             }
           })
