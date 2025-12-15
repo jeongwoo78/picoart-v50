@@ -1072,24 +1072,59 @@ const ResultScreen = ({
       
       const artistShort = mastersMap[normalized] || mastersMap[artistName] || artistName;
       
-      // 작품명 한글화
+      // 작품명 한글화 (API 반환값 기준)
       const workMap = {
+        // 클림트
         'the kiss': '키스',
         'kiss': '키스',
-        'the scream': '절규',
-        'scream': '절규',
-        'starry night': '별이 빛나는 밤',
-        'the starry night': '별이 빛나는 밤',
-        'woman with a hat': '모자를 쓴 여인',
-        'les demoiselles d\'avignon': '아비뇽의 처녀들',
-        'marilyn monroe': '마릴린 먼로',
-        'marilyn': '마릴린 먼로',
-        'me and my parrots': '나와 앵무새',
         'judith': '유디트',
         'judith i': '유디트',
         'portrait of adele': '아델레 초상',
+        'portrait of adele bloch-bauer i': '아델레 초상',
+        'the tree of life': '생명의 나무',
+        'tree of life': '생명의 나무',
+        'death and life': '죽음과 삶',
+        'danae': '다나에',
+        // 뭉크
+        'the scream': '절규',
+        'scream': '절규',
+        'the sick child': '아픈 아이',
+        'vampire': '뱀파이어',
+        'anxiety': '불안',
+        'melancholy': '우울',
+        'madonna': '마돈나',
+        // 반 고흐
+        'starry night': '별이 빛나는 밤',
+        'the starry night': '별이 빛나는 밤',
+        'self-portrait': '자화상',
+        'self portrait': '자화상',
+        'sunflowers': '해바라기',
+        'the bedroom': '침실',
+        'cafe terrace at night': '밤의 카페 테라스',
+        // 마티스
+        'woman with a hat': '모자를 쓴 여인',
         'the dance': '춤',
         'dance': '춤',
+        'the red room': '붉은 방',
+        'red room': '붉은 방',
+        'blue nude': '푸른 누드',
+        'the joy of life': '삶의 기쁨',
+        // 피카소
+        'les demoiselles d\'avignon': '아비뇽의 처녀들',
+        'guernica': '게르니카',
+        'the weeping woman': '우는 여인',
+        'weeping woman': '우는 여인',
+        'girl before a mirror': '거울 앞의 소녀',
+        // 워홀
+        'marilyn monroe': '마릴린 먼로',
+        'marilyn': '마릴린 먼로',
+        'campbell\'s soup cans': '캠벨 수프 캔',
+        // 프리다
+        'me and my parrots': '나와 앵무새',
+        'self-portrait with monkeys': '원숭이와 자화상',
+        'the two fridas': '두 프리다',
+        'the broken column': '부러진 기둥',
+        'self-portrait with thorn necklace': '가시 목걸이 자화상',
       };
       
       let workShort = '대표작';
@@ -1126,6 +1161,7 @@ const ResultScreen = ({
         'rembrandt': { movement: '바로크', artist: '렘브란트' },
         'vermeer': { movement: '바로크', artist: '베르메르' },
         'velazquez': { movement: '바로크', artist: '벨라스케스' },
+        'velázquez': { movement: '바로크', artist: '벨라스케스' },
         'rubens': { movement: '바로크', artist: '루벤스' },
         // 로코코
         'watteau': { movement: '로코코', artist: '와토' },
@@ -1133,6 +1169,7 @@ const ResultScreen = ({
         'fragonard': { movement: '로코코', artist: '프라고나르' },
         // 신고전주의
         'david': { movement: '신고전주의', artist: '다비드' },
+        'jacques-louis david': { movement: '신고전주의', artist: '다비드' },
         'ingres': { movement: '신고전주의', artist: '앵그르' },
         // 낭만주의
         'turner': { movement: '낭만주의', artist: '터너' },
@@ -1149,12 +1186,15 @@ const ResultScreen = ({
         'degas': { movement: '인상주의', artist: '드가' },
         'pissarro': { movement: '인상주의', artist: '피사로' },
         'sisley': { movement: '인상주의', artist: '시슬레' },
+        'caillebotte': { movement: '인상주의', artist: '카유보트' },
         // 후기인상주의
         'cézanne': { movement: '후기인상주의', artist: '세잔' },
         'cezanne': { movement: '후기인상주의', artist: '세잔' },
         'seurat': { movement: '후기인상주의', artist: '쇠라' },
+        'signac': { movement: '후기인상주의', artist: '시냐크' },
         'gauguin': { movement: '후기인상주의', artist: '고갱' },
         'toulouse-lautrec': { movement: '후기인상주의', artist: '로트렉' },
+        'van gogh': { movement: '후기인상주의', artist: '반 고흐' },
         // 야수파
         'matisse': { movement: '야수파', artist: '마티스' },
         'derain': { movement: '야수파', artist: '드랭' },
@@ -1164,7 +1204,9 @@ const ResultScreen = ({
         'kirchner': { movement: '표현주의', artist: '키르히너' },
         'kandinsky': { movement: '표현주의', artist: '칸딘스키' },
         'kokoschka': { movement: '표현주의', artist: '코코슈카' },
-        // 모더니즘
+        // 입체주의/모더니즘
+        'picasso': { movement: '입체주의', artist: '피카소' },
+        'braque': { movement: '입체주의', artist: '브라크' },
         'mondrian': { movement: '모더니즘', artist: '몬드리안' },
         'malevich': { movement: '모더니즘', artist: '말레비치' },
         'chagall': { movement: '모더니즘', artist: '샤갈' },
@@ -1174,6 +1216,7 @@ const ResultScreen = ({
         // 팝아트
         'keith haring': { movement: '팝아트', artist: '키스 해링' },
         'lichtenstein': { movement: '팝아트', artist: '리히텐슈타인' },
+        'warhol': { movement: '팝아트', artist: '워홀' },
       };
       
       const info = movementMap[normalized] || movementMap[artistName];
