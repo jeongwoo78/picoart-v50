@@ -2272,7 +2272,7 @@ const fallbackPrompts = {
   
   japanese: {
     name: '일본 우키요에',
-    prompt: 'Japanese Ukiyo-e woodblock print style with flat areas of bold solid colors, strong clear black outlines, completely flat two-dimensional composition, transform clothing to traditional kimono, decorative patterns, stylized simplified forms, elegant refined Japanese aesthetic, painted in authentic Japanese ukiyo-e masterpiece quality, single unified composition with all figures together in one cohesive scene NOT separated into multiple distinct groups, CRITICAL: preserve EXACT number of people from original photo DO NOT add extra people in background'
+    prompt: 'Japanese Ukiyo-e woodblock print style with flat areas of bold solid colors, strong clear black outlines, completely flat two-dimensional composition, transform clothing to traditional kimono, decorative patterns, stylized simplified forms, elegant refined Japanese aesthetic, painted in authentic Japanese ukiyo-e masterpiece quality, CRITICAL ANTI-HALLUCINATION: preserve EXACT number of people from original photo, if 1 person then ONLY 1 person in result, DO NOT add crowds or extra figures in background, NO background people, NO audience, simple scenic background ONLY (Mt Fuji/cherry blossom/waves/sky)'
   },
   
   masters: {
@@ -2326,30 +2326,33 @@ async function selectArtistWithAI(imageBase64, selectedStyle, timeoutMs = 15000)
 VINCENT VAN GOGH - SELECT ONE:
 1. "The Starry Night" (별이 빛나는 밤) → night scene, sky, landscape, evening | Style: SWIRLING SPIRAL brushstrokes, COBALT BLUE and YELLOW, cypress trees
 2. "Sunflowers" (해바라기) → flowers, still life, bouquet | Style: THICK IMPASTO, CHROME YELLOW dominates, expressive petal strokes
-3. "Self-Portrait" (자화상, 1889 Saint-Rémy) → single portrait, face, upper body | Style: TURQUOISE SWIRLING BACKGROUND, red-orange beard, blue-green coat, intense gaze`,
+3. "Self-Portrait" (자화상, 1889 Saint-Rémy) → MALE portrait, face, upper body | Style: TURQUOISE SWIRLING BACKGROUND, intense gaze, directional brushstrokes
+4. "L'Arlésienne" (아를의 여인) → FEMALE portrait | Style: YELLOW BACKGROUND, black clothing, bold outlines, simplified forms`,
 
         'klimt': `
 GUSTAV KLIMT - SELECT ONE:
-1. "The Kiss" (키스) → couple, romantic, embracing | Style: GOLD LEAF patterns, geometric robes, floral meadow, Byzantine mosaic
-2. "The Tree of Life" (생명의 나무) → tree, nature, landscape | Style: SPIRAL BRANCHES, gold and bronze, decorative swirls
-3. "Judith I" (유디트) → woman portrait, powerful female | Style: GOLD CHOKER, bare shoulders, fierce expression`,
+1. "The Kiss" (키스) → COUPLE ONLY (2 people), romantic, embracing | Style: GOLD LEAF patterns, geometric robes, floral meadow, Byzantine mosaic
+2. "The Tree of Life" (생명의 나무) → ANY subject, tree, nature, landscape, SINGLE MALE | Style: SPIRAL BRANCHES, gold and bronze, decorative swirls
+3. "Judith I" (유디트) → FEMALE portrait, powerful woman | Style: GOLD CHOKER, bare shoulders, fierce expression`,
 
         'munch': `
 EDVARD MUNCH - SELECT ONE:
-1. "The Scream" (절규) → single figure, emotional, anxious | Style: WAVY DISTORTED lines, BLOOD RED sky, agonized figure, existential terror
-2. "Madonna" (마돈나) → woman portrait, sensual, mysterious | Style: FLOWING DARK HAIR like halo, closed eyes, red lips`,
+1. "The Scream" (절규) → ANY gender, emotional, anxious | Style: WAVY DISTORTED lines, BLOOD RED sky, agonized figure, existential terror
+2. "Madonna" (마돈나) → FEMALE portrait, sensual, mysterious | Style: FLOWING DARK HAIR like halo, closed eyes, red lips
+3. "Jealousy" (질투) → MALE portrait, psychological | Style: PALE GREEN face, intense stare, swirling background, emotional tension`,
 
         'matisse': `
 HENRI MATISSE - SELECT ONE:
-1. "The Dance" (댄스) → group, people in motion, dancing | Style: FLAT BOLD colors (red figures, blue sky, green ground), rhythmic circular
+1. "The Dance" (춤) → group, people in motion, dancing | Style: FLAT BOLD colors (red figures, blue sky, green ground), rhythmic circular
 2. "The Red Room" (붉은 방) → interior, room, dining | Style: DOMINANT RED with blue patterns, flat decorative surface
-3. "Woman with a Hat" (모자를 쓴 여인) → woman portrait, colorful | Style: WILD FAUVE colors on face (green, purple, red), bold brushwork`,
+3. "Woman with a Hat" (모자를 쓴 여인) → FEMALE portrait, colorful | Style: WILD FAUVE colors on face (green, purple, red), bold brushwork`,
 
         'picasso': `
 PABLO PICASSO - SELECT ONE:
-1. "Les Demoiselles d'Avignon" (아비뇽의 처녀들) → group of figures, women | Style: ANGULAR FRAGMENTED faces, African mask influence, geometric planes
-2. "Guernica" (게르니카) → dramatic scene, chaos, large group | Style: BLACK WHITE GREY only, anguished figures, fragmented bodies
-3. "Weeping Woman" (우는 여인) → emotional portrait, woman | Style: SHARP ANGULAR tears, fractured face, yellow-green-purple`,
+1. "Les Demoiselles d'Avignon" (아비뇽의 처녀들) → ANY gender (use CUBIST STYLE), group | Style: ANGULAR FRAGMENTED faces, African mask influence, geometric planes
+2. "Guernica" (게르니카) → dramatic scene, chaos, ANY subject | Style: BLACK WHITE GREY only, anguished figures, fragmented bodies
+3. "Weeping Woman" (우는 여인) → FEMALE portrait, emotional | Style: SHARP ANGULAR tears, fractured face, yellow-green-purple
+4. "The Dream" (꿈) → FEMALE portrait, peaceful, relaxed | Style: SOFT CURVES, bold colors (red, yellow, purple), sensual, dreamy`,
 
         'frida': `
 FRIDA KAHLO - SELECT ONE:
@@ -2359,16 +2362,34 @@ FRIDA KAHLO - SELECT ONE:
 4. "Self-Portrait with Monkeys" (원숭이와 자화상) → person with pets/animals, warm mood | Style: MONKEYS EMBRACING from behind, lush green leaves, intimate warm atmosphere`,
 
         'warhol': `
-ANDY WARHOL - USE THIS STYLE:
-1. "Marilyn Monroe" (마릴린 먼로) → any portrait, glamorous | Style: 2x2 FOUR-PANEL GRID, DIFFERENT BOLD COLORS each panel, silkscreen`
+ANDY WARHOL - SELECT ONE:
+1. "Marilyn Monroe" (마릴린 먼로) → FEMALE portrait, glamorous | Style: 2x2 FOUR-PANEL GRID, DIFFERENT BOLD COLORS each panel, silkscreen
+2. "Elvis" (엘비스) → MALE portrait | Style: SILVER BACKGROUND, repeated image, silkscreen ink variations, cowboy stance`
       };
 
       const masterWorks = masterWorksDB[masterId] || '';
       
       promptText = `You are selecting the BEST masterwork from ${categoryName}'s collection for this photo.
 
+CRITICAL MATCHING RULES:
+- If MALE subject → AVOID works with "Woman/여인/Madonna/Judith" in title, choose neutral or male-themed works
+- If FEMALE subject → CAN select any work, female-themed preferred
+- If SINGLE person (1) → NEVER select "The Kiss" (requires couple)
+- If COUPLE (2 people) → prefer "The Kiss"
+
 AVAILABLE MASTERWORKS:
 ${masterWorks}
+
+CRITICAL MATCHING RULES (MUST FOLLOW):
+- If photo shows MALE → NEVER select works with female subjects ("Woman", "여인", "Madonna", "Judith", "Demoiselles", "Marilyn")
+- If photo shows FEMALE → CAN select any work, female-themed works preferred
+- If photo shows 1 PERSON → NEVER select "The Kiss" (requires couple)
+- If photo shows COUPLE → prefer "The Kiss" or romantic works
+- MATCH the subject's GENDER and COUNT to the artwork's theme
+
+STYLE APPLICATION RULE:
+- Apply the artwork's TECHNIQUE, COLOR, MOOD to the subject.
+- Do NOT literally copy figures from the artwork onto the subject.
 
 INSTRUCTIONS:
 1. Analyze the photo THOROUGHLY:
@@ -2377,10 +2398,11 @@ INSTRUCTIONS:
    - PERSON COUNT: How many people are in the photo? (1, 2, 3+)
    - BACKGROUND: What's in the background? (simple/complex/outdoor/indoor)
    - Mood, composition
-2. Match to the MOST SUITABLE masterwork from the list above
-3. Generate a FLUX prompt that STARTS with detailed subject description
-4. IMPORTANT: Preserve the original subject - if it's a baby, keep it as a baby; if elderly, keep elderly
-5. CRITICAL: If only 1 person in photo, add "DO NOT add extra people in background"
+2. Apply CRITICAL MATCHING RULES above - eliminate unsuitable works first
+3. From remaining works, select the MOST SUITABLE one
+4. Generate a FLUX prompt that STARTS with detailed subject description
+5. IMPORTANT: Preserve the original subject - if it's a baby, keep it as a baby; if elderly, keep elderly
+6. CRITICAL: If only 1 person in photo, add "DO NOT add extra people in background"
 
 Return ONLY valid JSON (no markdown):
 {
@@ -2394,7 +2416,7 @@ Return ONLY valid JSON (no markdown):
   "background_type": "simple" or "complex" or "outdoor" or "indoor" or "studio",
   "selected_artist": "${categoryName}",
   "selected_work": "exact title of the masterwork you selected",
-  "reason": "why this masterwork matches this photo",
+  "reason": "why this masterwork matches this photo (mention gender/count compatibility)",
   "prompt": "Start with 'MALE/FEMALE SUBJECT with [physical features]' if person, then 'painting by ${categoryName} in the style of [selected work title], [that work's distinctive techniques]'. If person_count=1, END with 'DO NOT add extra people, NO hallucinated figures in background'"
 }`;
       
@@ -2416,6 +2438,7 @@ Style 1: Korean Minhwa Folk Painting (민화)
 Style 2: Korean Pungsokdo Genre Painting (풍속도)
 - Best for: people, portraits, daily life, couples, festivals, human activities  
 - Characteristics: KOREAN INK PAINTING on ROUGH TEXTURED HANJI, BLACK INK BRUSHWORK dominates (70-80%), then EXTREMELY MINIMAL pale color washes (20-30% only), visible hanji fiber texture throughout, spontaneous confident ink strokes, Kim Hong-do's elegant restraint, earth-tone washes ONLY (pale brown, grey-green, faint ochre), NOT colorful NOT bright, distinctly different from Chinese gongbi's detailed colors
+- CLOTHING: MUST transform modern clothing to traditional Joseon hanbok (저고리/치마 for women, 도포/갓 for men), NO modern clothes allowed
 - When: Photo has people, faces, human subjects
 
 Style 3: Korean Jingyeong Landscape (진경산수)
@@ -3422,6 +3445,7 @@ export default async function handler(req, res) {
           '4. BRUSHWORK: Visible thick brush marks on FACE, SKIN, CLOTHING - impasto texture throughout. ' +
           '5. NO TEXT: No signatures, letters, writing, watermarks. ' +
           '6. ANATOMY: Correct proportions - no missing or extra limbs. ' +
+          '7. NO PAINTER APPEARANCE: Never apply painter physical features to subject - NO Van Gogh red beard, NO Frida unibrow, NO Marilyn/Elvis face. Apply painting TECHNIQUE only. ' +
           'END RULES. ';
         finalPrompt = coreRulesPrefix + finalPrompt;
         console.log('🎯 v62: Applied CORE RULES PREFIX (항상 적용)');

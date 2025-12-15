@@ -793,6 +793,10 @@ const ResultScreen = ({
         '감자 먹는 사람들': 'vangogh-potatoeaters',
         'Self-Portrait': 'vangogh-selfportrait',
         '자화상': 'vangogh-selfportrait',
+        'L\'Arlésienne': 'vangogh-arlesienne',
+        'LArlesienne': 'vangogh-arlesienne',
+        '아를의 여인': 'vangogh-arlesienne',
+        'Arlesienne': 'vangogh-arlesienne',
         
         // 클림트
         'The Kiss': 'klimt-kiss',
@@ -815,6 +819,8 @@ const ResultScreen = ({
         'Scream': 'munch-scream',
         'Madonna': 'munch-madonna',
         '마돈나': 'munch-madonna',
+        'Jealousy': 'munch-jealousy',
+        '질투': 'munch-jealousy',
         'The Sick Child': 'munch-sickchild',
         '병든 아이': 'munch-sickchild',
         'Sick Child': 'munch-sickchild',
@@ -873,6 +879,8 @@ const ResultScreen = ({
         'Marilyn Monroe': 'warhol-marilyn',
         '마릴린 먼로': 'warhol-marilyn',
         'Marilyn': 'warhol-marilyn',
+        'Elvis': 'warhol-elvis',
+        '엘비스': 'warhol-elvis',
         'Campbell\'s Soup Cans': 'warhol-soup',
         '캠벨 수프 캔': 'warhol-soup',
         'Soup Cans': 'warhol-soup',
@@ -2492,8 +2500,9 @@ const ResultScreen = ({
         }
 
         .retry-text {
-          color: rgba(255, 255, 255, 0.9);
+          color: #5b21b6;
           font-size: 1rem;
+          font-weight: 500;
         }
 
         .spinner-medium {

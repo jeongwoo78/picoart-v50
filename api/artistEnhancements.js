@@ -86,7 +86,7 @@ export const movementEnhancements = {
   
   'gothic': {
     name: '고딕',
-    prompt: ', Gothic cathedral STAINED GLASS window style: THICK BLACK LEAD LINES dividing entire image into glass-like segments, JEWEL-TONE TRANSLUCENT COLORS (ruby red/sapphire blue/emerald green/amber gold), FLAT TWO-DIMENSIONAL medieval style, pointed arches ribbed vaults intricate details, CRITICAL: apply stained glass effect to SUBJECT including skin and clothing as glass-like colored segments not just background, transform clothing to medieval style, divine light streaming through',
+    prompt: ', Gothic cathedral STAINED GLASS window style: MANDATORY THICK BLACK LEAD LINES (cames) dividing ENTIRE image into distinct glass segments - face/body/clothing/background ALL separated by bold black outlines, JEWEL-TONE TRANSLUCENT COLORS (ruby red/sapphire blue/emerald green/amber gold) filling each segment, FLAT TWO-DIMENSIONAL medieval style with NO realistic shading, every area must look like colored glass piece outlined in BLACK LEAD, pointed arch frame, divine light streaming through, transform clothing to medieval style, NOT oil painting NOT realistic',
     controlStrength: 0.55,
     costume: 'medieval clothing'
   },
@@ -490,6 +490,13 @@ export const masterworkEnhancements = {
     controlStrength: 0.55
   },
   
+  'vangogh-arlesienne': {
+    name: '아를의 여인',
+    artist: 'vangogh',
+    prompt: ', LArlesienne by Vincent van Gogh, Van Gogh Post-Impressionist art style: BRIGHT YELLOW background, subject in BLACK clothing creating strong contrast, simplified bold forms with thick outlines, directional visible brushstrokes, intense psychological gaze, thick impasto texture, palette knife marks, Gauguin collaboration period style',
+    controlStrength: 0.55
+  },
+  
   // ========================================
   // 2. 클림트 (Klimt) - 3개 대표작
   // ========================================
@@ -535,6 +542,13 @@ export const masterworkEnhancements = {
     prompt: ', Madonna by Edvard Munch, Munch Expressionist art style: flowing long dark hair spreading like HALO around head, RED AURA glowing around body, pale luminous skin with red lips, mysterious seductive expression with half-closed eyes, ecstatic sensual gaze (NOT bright smile), wavy flowing lines throughout, mystical power and danger, visible thick expressive brushwork, NO bright expressions NO happy smile',
     controlStrength: 0.55,
     expressionRule: 'femme fatale/ecstatic/mysterious allowed, NO bright, NO smiling'
+  },
+  
+  'munch-jealousy': {
+    name: '질투',
+    artist: 'munch',
+    prompt: ', Jealousy by Edvard Munch, Munch Expressionist art style: PALE GREEN sickly face in foreground, intense haunted stare, psychological tension, wavy distorted background lines, emotional turmoil color palette (green/red/yellow contrast), thick visible brushstrokes, anguished expression, existential anxiety, swirling expressionist forms',
+    controlStrength: 0.55
   },
   
   // ========================================
@@ -589,6 +603,13 @@ export const masterworkEnhancements = {
     attractiveException: true
   },
   
+  'picasso-dream': {
+    name: '꿈',
+    artist: 'picasso',
+    prompt: ', The Dream Le Reve by Pablo Picasso, Picasso art style: SOFT SENSUAL CURVES, face split into TWO HALVES showing profile and frontal simultaneously, peaceful dreaming expression with closed eyes, RED and YELLOW bold color contrast, reclining relaxed pose, simplified rounded forms, visible oil brushwork, intimate tender atmosphere, 1932 Marie-Therese period style',
+    controlStrength: 0.50
+  },
+  
   // ========================================
   // 6. 프리다 칼로 (Frida Kahlo) - 4개 대표작
   // ========================================
@@ -638,6 +659,13 @@ export const masterworkEnhancements = {
     name: '캠벨 수프 캔',
     artist: 'warhol',
     prompt: ', Campbells Soup Cans style by Andy Warhol, Warhol pop art style: commercial product art aesthetic, clean graphic outlines, flat color areas, red/white/gold can label colors, supermarket display repetition, pop art commercial design, silkscreen print flatness, bold colors mass culture theme, for portrait photos recommend switching to Marilyn style',
+    controlStrength: 0.50
+  },
+  
+  'warhol-elvis': {
+    name: '엘비스',
+    artist: 'warhol',
+    prompt: ', Elvis by Andy Warhol, Warhol pop art style: SILVER METALLIC background, repeated figure slightly offset, silkscreen print effect with INK DENSITY VARIATIONS, high contrast black on silver, cowboy gunslinger stance energy, celebrity icon mythology, mechanical reproduction aesthetic, ink bleed imperfections, DO NOT draw Elvis himself - apply style to subject only',
     controlStrength: 0.50
   }
 };
