@@ -295,8 +295,8 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
       // 클림트
       'The Kiss': '키스(The Kiss)',
       'The Tree of Life': '생명의 나무(The Tree of Life)',
+      'Judith I': '유디트(Judith)',
       'Judith': '유디트(Judith)',
-      'Judith I': '유디트 I(Judith I)',
       // 뭉크
       'The Scream': '절규(The Scream)',
       'Madonna': '마돈나(Madonna)',

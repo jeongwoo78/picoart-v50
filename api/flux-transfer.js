@@ -2228,7 +2228,7 @@ const fallbackPrompts = {
     artist: 'Pablo Picasso (1881-1973)',
     movement: '입체주의 (Cubism)',
     defaultWork: 'Les Demoiselles d\'Avignon',
-    prompt: 'Cubist painting by Pablo Picasso: CRITICAL: FACE must be GEOMETRICALLY FRAGMENTED into angular planes NOT realistic face, NOSE from SIDE PROFILE while BOTH EYES visible from FRONT VIEW simultaneously, JAW and CHIN broken into geometric segments, ENTIRE FACE deconstructed into flat angular shapes, Les Demoiselles d Avignon African mask influence, earth tone palette (ochre sienna brown olive grey), analytical cubist dissection, ROUGH VISIBLE BRUSHSTROKES with paint texture, NOT photographic preserve subject identity, Picasso Cubist masterpiece quality'
+    prompt: 'Cubist painting by Pablo Picasso: MOST IMPORTANT - THE FACE MUST BE CUBIST DECONSTRUCTED, NOT REALISTIC. REQUIRED DISTORTIONS: show PROFILE NOSE (side view) while BOTH EYES face FORWARD on same face, FRAGMENT face into FLAT ANGULAR GEOMETRIC PLANES, break JAW FOREHEAD CHEEKS into separate angular shapes like shattered glass. Les Demoiselles d Avignon African mask angular style. Earth tones (ochre brown olive grey). If the face looks normal/realistic YOU ARE DOING IT WRONG - faces must look abstracted and geometrically impossible. Picasso Cubist masterpiece quality'
   },
   
   frida: {
@@ -2244,7 +2244,7 @@ const fallbackPrompts = {
     artist: 'Andy Warhol (1928-1987)',
     movement: '팝아트 (Pop Art)',
     defaultWork: 'Marilyn Monroe',
-    prompt: 'Pop Art by Andy Warhol: MUST create 2x2 FOUR-PANEL GRID layout, the EXACT SAME PERSON or OBJECT from the ORIGINAL PHOTO repeated 4 times - once in each quadrant, each of the 4 panels with DIFFERENT BOLD NEON COLOR scheme (hot pink cyan yellow orange electric blue lime green turquoise), HIGH CONTRAST silkscreen printing effect, FLAT graphic colors with NO gradients, ABSOLUTELY DO NOT draw Marilyn Monroe - ONLY draw the person from the original photo, visible ink texture and print imperfections, Warhol Pop Art masterpiece quality'
+    prompt: 'Pop Art silkscreen by Andy Warhol: MUST create 2x2 FOUR-PANEL GRID layout. CRITICAL: REPEAT THE FACE FROM INPUT PHOTO 4 TIMES - one in each quadrant. PRESERVE EXACT BODY PROPORTIONS from original photo - do not elongate neck or distort body shape. Each panel uses DIFFERENT BOLD NEON COLOR scheme (hot pink, cyan, yellow, orange, electric blue, lime green). HIGH CONTRAST flat silkscreen effect, NO gradients only FLAT SOLID COLORS, visible halftone dots and screen printing texture. The subject face from the photo must appear identically in all 4 panels with only color variations. Warhol Pop Art masterpiece quality'
   },
   
   // ========================================
@@ -3406,6 +3406,7 @@ export default async function handler(req, res) {
           '4. STYLE ON PEOPLE: Apply painting style to BOTH subject AND background - people must look PAINTED not photographic. ' +
           '5. BRUSHWORK: Visible brushstrokes paint texture throughout including on skin NOT smooth NOT digital NOT airbrushed. ' +
           '6. NO TEXT (Western): No signatures letters writing watermarks. ' +
+          '7. ANATOMY: Anatomically correct arms hands fingers body proportions - no missing limbs no extra limbs no distorted body parts. ' +
           'END CORE RULES. ';
         finalPrompt = coreRulesPrefix + finalPrompt;
         console.log('🎯 v62: Applied CORE RULES PREFIX (항상 적용)');
