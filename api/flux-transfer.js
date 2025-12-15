@@ -1,4 +1,8 @@
-// PicoArt v62 - 퀄리티 프로젝트 대수술 완성
+// PicoArt v62.1 - 대전제 PREFIX 위치 수정
+// v62.1: 대전제 PREFIX를 가중치 블록 바깥으로 이동 (항상 적용!)
+//      - 환각 방지 강화: "If 1 person in photo, output must have EXACTLY 1 person"
+//      - 스타일 적용 강화: "people must look PAINTED not photographic"
+//
 // v62: artistEnhancements.js 연동 + 프롬프트 순서 최적화
 //      - 대전제 6개 규칙 → 프롬프트 맨 앞으로 이동 (AI 우선순위)
 //      - 거장 대표작별 세부 프롬프트 실제 적용 (20개)
@@ -3354,20 +3358,6 @@ export default async function handler(req, res) {
             finalPrompt = genderPrefix + finalPrompt;
             
             // ========================================
-            // v62: 대전제 6개 → 맨 앞 PREFIX로 적용 (AI 우선순위!)
-            // ========================================
-            const coreRulesPrefix = 'CORE RULES (HIGHEST PRIORITY): ' +
-              '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
-              '2. ATTRACTIVE: Render all people beautifully handsomely (unless expressive distortion work). ' +
-              '3. ANTI-HALLUCINATION: Do NOT add elements not in original photo. ' +
-              '4. STYLE APPLICATION: Apply painting style to BOTH subject AND background (not just background). ' +
-              '5. BRUSHWORK: Visible brushstrokes paint texture throughout NOT smooth NOT digital NOT airbrushed. ' +
-              '6. NO TEXT (Western): No signatures letters writing watermarks. ' +
-              'END CORE RULES. ';
-            finalPrompt = coreRulesPrefix + finalPrompt;
-            console.log('🎯 v62: Applied CORE RULES PREFIX (대전제 맨 앞 적용)');
-            
-            // ========================================
             // 🚫 환각 방지: 원본에 없는 요소 추가 금지
             // ========================================
             let antiHallucinationRule = ' STRICT ANTI-HALLUCINATION: DO NOT add ANY elements not present in the original photo. ';
@@ -3404,6 +3394,21 @@ export default async function handler(req, res) {
         // ========================================
         // 끝: 가중치 기반 화가 재선택
         // ========================================
+        
+        // ========================================
+        // v62: 대전제 6개 → 항상 맨 앞 PREFIX로 적용!
+        // (가중치 선택 여부와 무관하게 항상 적용)
+        // ========================================
+        const coreRulesPrefix = 'CORE RULES (HIGHEST PRIORITY): ' +
+          '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
+          '2. ATTRACTIVE: Render all people beautifully handsomely (unless expressive distortion work). ' +
+          '3. ANTI-HALLUCINATION: Do NOT add ANY people or elements not in original photo. If 1 person in photo, output must have EXACTLY 1 person. ' +
+          '4. STYLE ON PEOPLE: Apply painting style to BOTH subject AND background - people must look PAINTED not photographic. ' +
+          '5. BRUSHWORK: Visible brushstrokes paint texture throughout including on skin NOT smooth NOT digital NOT airbrushed. ' +
+          '6. NO TEXT (Western): No signatures letters writing watermarks. ' +
+          'END CORE RULES. ';
+        finalPrompt = coreRulesPrefix + finalPrompt;
+        console.log('🎯 v62: Applied CORE RULES PREFIX (항상 적용)');
         
         // ===== 디버그 시작 =====
         console.log('DEBUG: selectedArtist raw value:', selectedArtist);
