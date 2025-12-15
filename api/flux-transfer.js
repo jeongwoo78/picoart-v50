@@ -1,4 +1,158 @@
-// PicoArt v59 - 모더니즘 7명 + 사진 유형별 비중
+// PicoArt v62 - 퀄리티 프로젝트 대수술 완성
+// v62: artistEnhancements.js 연동 + 프롬프트 순서 최적화
+//      - 대전제 6개 규칙 → 프롬프트 맨 앞으로 이동 (AI 우선순위)
+//      - 거장 대표작별 세부 프롬프트 실제 적용 (20개)
+//      - avoidFor 관계 체크 (부모-자녀 → The Kiss 금지 등)
+//      - expressionRule 적용 (뭉크 NO bright NO smiling 등)
+//      - artistEnhancements.js에서 프롬프트 import
+//
+// v61: 의상 변환 체계화 + 붓터치 강화 + 거장 표정 규칙
+//      - 대전제 6개 규칙 (신원/관계/매력/환각/스타일+붓터치/텍스트)
+//      - 사조별 강화 프롬프트 53개 (체계화)
+//      - 거장 대표작별 강화 프롬프트 20개 (신규)
+//      - 붓터치 필수 규칙 공통 적용
+//      - 거장 모드: 사조 개인 + 대표작 프롬프트 결합
+
+// ========================================
+// v62: artistEnhancements.js에서 프롬프트 가져오기
+// ========================================
+import { 
+  getMasterworkEnhancement,
+  getMovementEnhancement,
+  CORE_RULES 
+} from './artistEnhancements.js';
+
+// ========================================
+// v62: 대표작 키 변환 함수
+// "The Kiss" → "klimt-kiss"
+// "The Starry Night" → "vangogh-starrynight"
+// ========================================
+function convertToWorkKey(artistName, workTitle) {
+  if (!artistName || !workTitle) return null;
+  
+  // 화가명 정규화
+  const artistMap = {
+    'van gogh': 'vangogh',
+    'vincent van gogh': 'vangogh',
+    'vincent': 'vangogh',
+    '반 고흐': 'vangogh',
+    '고흐': 'vangogh',
+    'klimt': 'klimt',
+    'gustav klimt': 'klimt',
+    '클림트': 'klimt',
+    'munch': 'munch',
+    'edvard munch': 'munch',
+    '뭉크': 'munch',
+    'matisse': 'matisse',
+    'henri matisse': 'matisse',
+    '마티스': 'matisse',
+    'picasso': 'picasso',
+    'pablo picasso': 'picasso',
+    '피카소': 'picasso',
+    'frida': 'frida',
+    'frida kahlo': 'frida',
+    '프리다': 'frida',
+    '프리다 칼로': 'frida',
+    'warhol': 'warhol',
+    'andy warhol': 'warhol',
+    '워홀': 'warhol',
+    '앤디 워홀': 'warhol'
+  };
+  
+  // 대표작 정규화
+  const workMap = {
+    // 반 고흐
+    'the starry night': 'starrynight',
+    '별이 빛나는 밤': 'starrynight',
+    'sunflowers': 'sunflowers',
+    '해바라기': 'sunflowers',
+    'self-portrait': 'selfportrait',
+    '자화상': 'selfportrait',
+    // 클림트
+    'the kiss': 'kiss',
+    '키스': 'kiss',
+    'the tree of life': 'treeoflife',
+    '생명의 나무': 'treeoflife',
+    'judith i': 'judith',
+    'judith': 'judith',
+    '유디트': 'judith',
+    // 뭉크
+    'the scream': 'scream',
+    '절규': 'scream',
+    'madonna': 'madonna',
+    '마돈나': 'madonna',
+    // 마티스
+    'the dance': 'dance',
+    '춤': 'dance',
+    '댄스': 'dance',
+    'the red room': 'redroom',
+    '붉은 방': 'redroom',
+    'woman with a hat': 'womanhat',
+    '모자를 쓴 여인': 'womanhat',
+    // 피카소
+    'les demoiselles d\'avignon': 'demoiselles',
+    '아비뇽의 처녀들': 'demoiselles',
+    'guernica': 'guernica',
+    '게르니카': 'guernica',
+    'weeping woman': 'weepingwoman',
+    '우는 여인': 'weepingwoman',
+    // 프리다
+    'me and my parrots': 'parrots',
+    '나와 앵무새들': 'parrots',
+    'the broken column': 'brokencolumn',
+    '부러진 기둥': 'brokencolumn',
+    'self-portrait with thorn necklace': 'thornnecklace',
+    '가시 목걸이와 벌새': 'thornnecklace',
+    '가시 목걸이 자화상': 'thornnecklace',
+    'self-portrait with monkeys': 'monkeys',
+    '원숭이와 자화상': 'monkeys',
+    // 워홀
+    'marilyn monroe': 'marilyn',
+    '마릴린 먼로': 'marilyn',
+    'campbell\'s soup cans': 'soup',
+    '캠벨 수프 캔': 'soup'
+  };
+  
+  const normalizedArtist = artistMap[artistName.toLowerCase().trim()] || artistName.toLowerCase().trim();
+  const normalizedWork = workMap[workTitle.toLowerCase().trim()] || workTitle.toLowerCase().replace(/[^a-z0-9]/g, '');
+  
+  return `${normalizedArtist}-${normalizedWork}`;
+}
+
+// ========================================
+// v62: 대체 대표작 선택 (avoidFor 적용시)
+// ========================================
+function getAlternativeWork(artistName, avoidedWork) {
+  const alternatives = {
+    'klimt': {
+      'kiss': 'treeoflife',      // The Kiss 대신 → 생명의 나무
+      'treeoflife': 'judith',
+      'judith': 'treeoflife'
+    },
+    'munch': {
+      'scream': 'madonna',       // 절규 대신 → 마돈나
+      'madonna': 'scream'
+    },
+    'picasso': {
+      'demoiselles': 'weepingwoman',
+      'guernica': 'demoiselles',
+      'weepingwoman': 'demoiselles'
+    },
+    'frida': {
+      'brokencolumn': 'parrots', // 부러진 기둥 대신 → 앵무새
+      'thornnecklace': 'monkeys',
+      'parrots': 'monkeys',
+      'monkeys': 'parrots'
+    }
+  };
+  
+  const artistKey = artistName.toLowerCase().trim();
+  if (alternatives[artistKey] && alternatives[artistKey][avoidedWork]) {
+    return alternatives[artistKey][avoidedWork];
+  }
+  return null;
+}
+//
 // v59: 20세기 모더니즘 7명으로 축소 + 사진 유형별 비중 시스템
 //      - 7명: 피카소, 마그리트, 미로, 샤갈, 워홀, 리히텐슈타인, 키스해링
 //      - 제외: 브라크(피카소 중복), 달리(완전 삭제)
@@ -1712,7 +1866,7 @@ function getModernismArtistPrompt(artistName) {
   const genderRule = 'ABSOLUTE GENDER AND ETHNICITY REQUIREMENT: If photo shows MALE - MUST have MASCULINE face with STRONG JAW, male bone structure, NO feminine features, DO NOT feminize, DO NOT soften, DO NOT make delicate, KEEP AS MAN. If photo shows FEMALE - MUST have FEMININE face with SOFT features, female bone structure, NO masculine features, DO NOT masculinize, DO NOT make rough, KEEP AS WOMAN. PRESERVE ORIGINAL ETHNICITY AND SKIN COLOR EXACTLY - DO NOT change race, DO NOT lighten or darken skin, Asian must stay Asian, Caucasian must stay Caucasian, African must stay African. ';
   const paintTexture = ' MUST look like HAND-PAINTED artwork with VISIBLE PAINT TEXTURE, NOT photorealistic, NOT smooth digital, NOT AI-generated photo.';
   const prompts = {
-    'PICASSO': genderRule + 'Cubist painting by Pablo Picasso: SINGLE UNIFIED IMAGE not divided into panels, GEOMETRIC FRAGMENTED forms broken into angular planes, MULTIPLE SIMULTANEOUS PERSPECTIVES showing different angles at once, show NOSE from SIDE PROFILE while BOTH EYES visible from FRONT VIEW, Les Demoiselles d\'Avignon style, earth tone palette (ochre sienna brown olive grey), analytical cubist dissection, VISIBLE BRUSHSTROKES with rough paint texture, painterly NOT illustrative, Picasso Cubist masterpiece quality' + paintTexture,
+    'PICASSO': genderRule + 'Cubist painting by Pablo Picasso: SINGLE UNIFIED IMAGE not divided into panels, CRITICAL: FACE must be GEOMETRICALLY FRAGMENTED into angular planes NOT realistic face, NOSE from SIDE PROFILE while BOTH EYES visible from FRONT VIEW simultaneously, JAW and CHIN broken into geometric segments, ENTIRE FACE deconstructed into flat angular shapes NOT just background, Les Demoiselles d\'Avignon African mask influence, earth tone palette (ochre sienna brown olive grey), analytical cubist dissection, ROUGH VISIBLE BRUSHSTROKES with paint texture, canvas texture visible, NOT smooth NOT digital, Picasso Cubist masterpiece quality' + paintTexture,
     
     'MAGRITTE': genderRule + 'Surrealist painting by René Magritte: philosophical visual paradox, The Son of Man style with mysterious object partially obscuring face, or Golconda style MULTIPLICATION of same figure repeated in grid pattern floating/falling through sky, bowler hat gentleman aesthetic, smooth but VISIBLE oil painting technique with subtle brushwork, dreamlike impossible scenarios, thought-provoking conceptual art, Belgian Surrealist masterpiece quality' + paintTexture,
     
@@ -1720,7 +1874,7 @@ function getModernismArtistPrompt(artistName) {
     
     'CHAGALL': genderRule + 'Dreamlike painting by Marc Chagall: FLOATING FIGURES defying gravity in romantic nocturnal sky, soft MUTED PASTEL colors (lavender pale blue rose), nostalgic village scenes with tilted houses, lovers embracing mid-air, symbolic imagery (violins roosters flowers), poetic lyrical atmosphere, Jewish folklore dreamscape, VISIBLE BRUSHWORK with soft feathery strokes, Chagall romantic masterpiece quality' + paintTexture,
     
-    'WARHOL': genderRule + 'Pop Art by Andy Warhol: MUST create 2x2 FOUR-PANEL GRID layout, the EXACT SAME PERSON or OBJECT from the ORIGINAL PHOTO repeated 4 times - once in each quadrant, each of the 4 panels with DIFFERENT BOLD COLOR scheme (hot pink cyan yellow orange electric blue lime green), HIGH CONTRAST silkscreen printing effect, FLAT graphic colors with NO gradients, DO NOT draw Marilyn Monroe - draw only the person from the original photo, visible ink texture and print imperfections, Warhol Pop Art masterpiece quality',
+    'WARHOL': genderRule + 'Pop Art by Andy Warhol: MUST create 2x2 FOUR-PANEL GRID layout, the EXACT SAME PERSON or OBJECT from the ORIGINAL PHOTO repeated 4 times - once in each quadrant, each of the 4 panels with DIFFERENT BOLD NEON COLOR scheme (hot pink cyan yellow orange electric blue lime green turquoise), HIGH CONTRAST silkscreen printing effect, FLAT graphic colors with NO gradients, ABSOLUTELY DO NOT draw Marilyn Monroe - ONLY draw the person from the original photo, visible ink texture and print imperfections, Warhol Pop Art masterpiece quality',
     
     'LICHTENSTEIN': genderRule + 'Pop Art by Roy Lichtenstein: comic book style with VISIBLE BEN-DAY DOTS pattern throughout entire image, THICK BLACK OUTLINES around all forms, PRIMARY COLORS (red yellow blue) with white, speech bubble aesthetic, dramatic comic panel composition, halftone printing effect, bold graphic simplification, visible paint texture on dots, Lichtenstein Pop Art masterpiece quality',
     
@@ -1752,9 +1906,9 @@ function getModernismArtistPrompt(artistName) {
 // 고대 그리스-로마 스타일별 프롬프트
 function getAncientArtistPrompt(styleName) {
   const prompts = {
-    'CLASSICAL SCULPTURE': 'Ancient Greek-Roman MARBLE SCULPTURE: PURE WHITE CARRARA MARBLE throughout entire image, ALL skin becomes smooth polished marble with subtle veining, ALL clothing transformed to carved marble drapery with realistic stone fabric folds, MONOCHROMATIC white/cream/grey tones ONLY, heroic classical proportions like Discobolus or Augustus of Prima Porta, MUSEUM PEDESTAL DISPLAY with neutral grey background, dramatic sculptural lighting, frozen dynamic moment in eternal marble, NOT colorful NOT mosaic, NOT photorealistic NOT AI-generated, ancient sculpture masterpiece quality',
+    'CLASSICAL SCULPTURE': 'Ancient Greek-Roman MARBLE SCULPTURE: PURE WHITE CARRARA MARBLE throughout entire image, ALL skin becomes smooth polished marble with subtle veining, transform clothing to carved marble toga or tunic with realistic stone fabric folds, MONOCHROMATIC white/cream/grey tones ONLY, heroic classical proportions like Discobolus or Augustus of Prima Porta, MUSEUM PEDESTAL DISPLAY with neutral grey background, dramatic sculptural lighting, frozen dynamic moment in eternal marble, NOT colorful NOT mosaic, NOT photorealistic NOT AI-generated, ancient sculpture masterpiece quality',
     
-    'ROMAN MOSAIC': 'Ancient Roman floor MOSAIC: LARGE VISIBLE TESSERAE TILES (20-30mm each square stone pieces), THICK DARK GROUT LINES clearly visible between EVERY tile creating grid pattern, LIMITED ANCIENT COLOR PALETTE (terracotta orange, ochre yellow, umber brown, ivory white, slate blue, olive green), Pompeii villa floor style like Alexander Mosaic, each tile INDIVIDUALLY DISTINGUISHABLE, NOT smooth painting NOT marble sculpture, NOT photorealistic NOT AI-generated, authentic Roman mosaic craftsmanship'
+    'ROMAN MOSAIC': 'Ancient Roman floor MOSAIC: LARGE VISIBLE TESSERAE TILES (20-30mm each square stone pieces), THICK DARK GROUT LINES clearly visible between EVERY tile creating grid pattern, LIMITED ANCIENT COLOR PALETTE (terracotta orange, ochre yellow, umber brown, ivory white, slate blue, olive green), transform clothing to ancient Roman toga or tunic, Pompeii villa floor style like Alexander Mosaic, each tile INDIVIDUALLY DISTINGUISHABLE, APPLY MOSAIC STYLE TO SUBJECT including skin and clothing as tiles NOT just background, NOT smooth painting NOT marble sculpture, NOT photorealistic NOT AI-generated, authentic Roman mosaic craftsmanship'
   };
   
   const normalized = styleName.toUpperCase().trim();
@@ -1766,11 +1920,11 @@ function getAncientArtistPrompt(styleName) {
 // 중세 스타일별 프롬프트
 function getMedievalArtistPrompt(styleName) {
   const prompts = {
-    'BYZANTINE': 'Byzantine sacred icon painting: CIRCULAR GOLDEN HALO (nimbus) behind head as bright radiating disc, ENTIRE BACKGROUND must be SHIMMERING GOLD LEAF mosaic with visible tiny square tesserae tiles, flat hieratic frontal pose with LARGE SOLEMN EYES gazing directly at viewer, rich jewel colors (deep red, royal blue, purple) for robes, gold decorative patterns on clothing, Eastern Orthodox icon style like Christ Pantocrator, NOT Gothic NOT Islamic, NOT photorealistic NOT AI-generated, Byzantine masterpiece quality',
+    'BYZANTINE': 'Byzantine sacred icon painting: CIRCULAR GOLDEN HALO (nimbus) behind head as bright radiating disc, ENTIRE BACKGROUND must be SHIMMERING GOLD LEAF mosaic with visible tiny square tesserae tiles, flat hieratic frontal pose with LARGE SOLEMN EYES gazing directly at viewer, transform clothing to Byzantine robes with rich jewel colors (deep red, royal blue, purple) and gold decorative patterns, Eastern Orthodox icon style like Christ Pantocrator, NOT Gothic NOT Islamic, NOT photorealistic NOT AI-generated, Byzantine masterpiece quality',
     
-    'GOTHIC': 'Gothic cathedral STAINED GLASS window style: THICK BLACK LEAD LINES (cames) dividing image into segments like actual stained glass, JEWEL-TONE TRANSLUCENT COLORS (ruby red, sapphire blue, emerald green, amber gold) as if light shining through colored glass, FLAT TWO-DIMENSIONAL medieval aesthetic, elongated vertical figures, Gothic pointed arch frame, divine holy light streaming through, NOT Byzantine gold NOT mosaic, NOT photorealistic NOT AI-generated, Gothic stained glass masterpiece quality',
+    'GOTHIC': 'Gothic cathedral STAINED GLASS window style: THICK BLACK LEAD LINES (cames) dividing ENTIRE image into glass-like segments, JEWEL-TONE TRANSLUCENT COLORS (ruby red, sapphire blue, emerald green, amber gold) as if light shining through colored glass, FLAT TWO-DIMENSIONAL medieval aesthetic, CRITICAL: apply stained glass effect to SUBJECT including skin and clothing as colored glass segments NOT just background, transform clothing to medieval style, elongated vertical figures, Gothic pointed arch frame, divine holy light streaming through, NOT Byzantine gold NOT mosaic, NOT photorealistic NOT AI-generated, Gothic stained glass masterpiece quality',
     
-    'ISLAMIC MINIATURE': 'Persian/Ottoman COURT MINIATURE painting: intricate delicate details with fine brushwork VISIBLE, vibrant jewel colors (ruby red, sapphire blue, emerald green, gold), flat decorative composition, ornamental floral patterns and arabesques, courtly elegant aesthetic, richly decorated background, luxurious manuscript illumination quality, NOT Byzantine NOT Gothic NOT geometric pattern, NOT photorealistic NOT AI-generated, Islamic miniature masterpiece quality'
+    'ISLAMIC MINIATURE': 'Persian/Ottoman COURT MINIATURE painting: intricate delicate details with fine brushwork VISIBLE, vibrant jewel colors (ruby red, sapphire blue, emerald green, gold), flat decorative composition, ornamental floral patterns and arabesques, transform clothing to Persian/Ottoman court style, courtly elegant aesthetic, richly decorated background, luxurious manuscript illumination quality, NOT Byzantine NOT Gothic NOT geometric pattern, NOT photorealistic NOT AI-generated, Islamic miniature masterpiece quality'
   };
   
   const normalized = styleName.toUpperCase().trim();
@@ -1836,9 +1990,9 @@ function getRococoArtistPrompt(artistName) {
   const genderRule = 'ABSOLUTE GENDER AND ETHNICITY REQUIREMENT: If photo shows MALE - MUST have MASCULINE face with STRONG JAW, male bone structure, NO feminine features, DO NOT feminize, DO NOT soften, DO NOT make delicate, KEEP AS MAN. If photo shows FEMALE - MUST have FEMININE face with SOFT features, female bone structure, NO masculine features, DO NOT masculinize, DO NOT make rough, KEEP AS WOMAN. PRESERVE ORIGINAL ETHNICITY AND SKIN COLOR EXACTLY - DO NOT change race, DO NOT lighten or darken skin, Asian must stay Asian, Caucasian must stay Caucasian, African must stay African. ';
   const paintTexture = ' MUST look like HAND-PAINTED oil painting with VISIBLE PAINT TEXTURE and brushwork, NOT photorealistic, NOT smooth digital, NOT AI-generated photo.';
   const prompts = {
-    'WATTEAU': genderRule + 'painting by Antoine Watteau: FÊTE GALANTE outdoor aristocratic gathering, elegant figures in shimmering silk costumes, soft dreamy pastoral landscape, delicate feathery brushwork VISIBLE throughout, romantic melancholic atmosphere, Pilgrimage to Cythera style poetic reverie, pale pastel colors with touches of rose and gold, theatrical graceful poses, Watteau masterpiece quality' + paintTexture,
+    'WATTEAU': genderRule + 'painting by Antoine Watteau: FÊTE GALANTE outdoor aristocratic gathering, transform clothing to Rococo aristocratic silk costumes, soft dreamy pastoral landscape, delicate feathery brushwork VISIBLE throughout, romantic melancholic atmosphere, Pilgrimage to Cythera style poetic reverie, pale pastel colors with touches of rose and gold, theatrical graceful poses, Watteau masterpiece quality' + paintTexture,
     
-    'BOUCHER': genderRule + 'painting by François Boucher: DECORATIVE BEAUTY with soft rosy flesh tones, playful mythological or pastoral scenes, light pastel palette of pink blue and cream, fluffy clouds and lush foliage, ornate Rococo decoration, sweet idealized figures, VISIBLE SOFT BRUSHWORK with delicate paint texture, Boucher masterpiece quality' + paintTexture
+    'BOUCHER': genderRule + 'painting by François Boucher: DECORATIVE BEAUTY with soft rosy flesh tones, transform clothing to Rococo aristocratic style, playful mythological or pastoral scenes, light pastel palette of pink blue and cream, fluffy clouds and lush foliage, ornate Rococo decoration, sweet idealized figures, VISIBLE SOFT BRUSHWORK with delicate paint texture, Boucher masterpiece quality' + paintTexture
   };
   
   const normalized = artistName.toUpperCase().trim();
@@ -1866,9 +2020,9 @@ function getNeoclassicismArtistPrompt(artistName) {
     'DELACROIX': genderRule + 'painting by Eugène Delacroix: PASSIONATE REVOLUTIONARY ENERGY with Liberty Leading the People style dramatic action, vivid intense colors with bold reds blues and warm golden tones, dynamic diagonal compositions with turbulent swirling movement, LOOSE EXPRESSIVE BRUSHSTROKES full of emotion with VISIBLE PAINT TEXTURE, dramatic gestures and heroic romantic intensity, Delacroix Romantic masterpiece quality' + paintTexture,
     
     // 사실주의
-    'MILLET': genderRule + 'painting by Jean-François Millet: DIGNIFIED RURAL LABOR with monumental peasant figures, warm earthy palette of browns and ochres, The Gleaners style quiet nobility, soft diffused light, serene contemplative mood, VISIBLE BRUSHWORK with textured paint surface, honest depiction of agricultural life, Millet Realist masterpiece quality' + paintTexture,
+    'MILLET': genderRule + 'painting by Jean-François Millet: DIGNIFIED RURAL LABOR with monumental peasant figures, transform clothing to 19th century peasant work clothes, warm earthy palette of browns and ochres, The Gleaners style quiet nobility, soft diffused light, serene contemplative mood, VISIBLE BRUSHWORK with textured paint surface, honest depiction of agricultural life, Millet Realist masterpiece quality' + paintTexture,
     
-    'MANET': genderRule + 'painting by Édouard Manet: MODERN PARIS REALISM with Olympia-style bold flat composition and striking contrasts, dramatic blacks and pure whites with minimal mid-tones, sophisticated urban café society atmosphere, frank direct confrontational gaze, LOOSE CONFIDENT BRUSHWORK with VISIBLE ENERGETIC STROKES, metropolitan elegance and modern audacity, Manet masterpiece quality' + paintTexture
+    'MANET': genderRule + 'painting by Édouard Manet: MODERN PARIS REALISM with Olympia-style bold flat composition and striking contrasts, transform clothing to 19th century Parisian bourgeois fashion, dramatic blacks and pure whites with minimal mid-tones, sophisticated urban café society atmosphere, frank direct confrontational gaze, LOOSE CONFIDENT BRUSHWORK with VISIBLE ENERGETIC STROKES, metropolitan elegance and modern audacity, Manet masterpiece quality' + paintTexture
   };
   
   const normalized = artistName.toUpperCase().trim();
@@ -1929,11 +2083,11 @@ function getFauvismArtistPrompt(artistName) {
   const genderRule = 'ABSOLUTE GENDER AND ETHNICITY REQUIREMENT: If photo shows MALE - MUST have MASCULINE face with STRONG JAW, male bone structure, NO feminine features, DO NOT feminize, DO NOT soften, DO NOT make delicate, KEEP AS MAN. If photo shows FEMALE - MUST have FEMININE face with SOFT features, female bone structure, NO masculine features, DO NOT masculinize, DO NOT make rough, KEEP AS WOMAN. PRESERVE ORIGINAL ETHNICITY AND SKIN COLOR EXACTLY - DO NOT change race, DO NOT lighten or darken skin, Asian must stay Asian, Caucasian must stay Caucasian, African must stay African. ';
   const paintTexture = ' MUST look like HAND-PAINTED oil painting with VISIBLE PAINT TEXTURE, NOT photorealistic, NOT smooth digital, NOT AI-generated photo.';
   const prompts = {
-    'MATISSE': genderRule + 'painting by Henri Matisse Fauvist period: PURE BOLD UNMIXED COLORS in flat decorative areas, The Dance style simplified joyful forms, complete liberation of color from reality, saturated intense primary colors (red blue green), rhythmic flowing harmonious lines, VISIBLE BRUSHSTROKES with paint texture, life-affirming energetic atmosphere, Matisse Fauvist masterpiece quality' + paintTexture,
+    'MATISSE': genderRule + 'painting by Henri Matisse Fauvist period: PURE BOLD UNMIXED COLORS in flat decorative areas, The Dance style simplified joyful forms, complete liberation of color from reality, saturated intense primary colors (red blue green), APPLY UNREALISTIC COLORS TO FACE AND SKIN (green purple red on face OK), simplified facial features, rhythmic flowing harmonious lines, ROUGH FAUVIST BRUSHSTROKES clearly visible throughout including on skin, VISIBLE BRUSH MARKS with paint texture NOT smooth NOT blended, life-affirming energetic atmosphere, Matisse Fauvist masterpiece quality' + paintTexture,
     
-    'DERAIN': genderRule + 'painting by André Derain: BOLD FAUVIST LANDSCAPE colors with vivid unnatural hues, Charing Cross Bridge style vibrant scenery, strong color contrasts, energetic expressive brushwork VISIBLE, liberated pure colors, dynamic compositions, Derain Fauvist masterpiece quality' + paintTexture,
+    'DERAIN': genderRule + 'painting by André Derain: BOLD FAUVIST LANDSCAPE colors with vivid unnatural hues, Charing Cross Bridge style vibrant scenery, strong color contrasts, ROUGH ENERGETIC BRUSHWORK clearly VISIBLE throughout, liberated pure colors, dynamic compositions, Derain Fauvist masterpiece quality' + paintTexture,
     
-    'VLAMINCK': genderRule + 'painting by Maurice de Vlaminck: VIOLENT EXPRESSIVE COLORS with turbulent emotional intensity, most aggressive Fauvist palette, THICK IMPULSIVE BRUSHWORK visible, raw powerful energy, dramatic color explosions, Van Gogh-influenced passion, Vlaminck Fauvist masterpiece quality' + paintTexture
+    'VLAMINCK': genderRule + 'painting by Maurice de Vlaminck: VIOLENT EXPRESSIVE COLORS with turbulent emotional intensity, most aggressive Fauvist palette, THICK IMPULSIVE ROUGH BRUSHWORK visible throughout, raw powerful energy, dramatic color explosions, Van Gogh-influenced passion, Vlaminck Fauvist masterpiece quality' + paintTexture
   };
   
   const normalized = artistName.toUpperCase().trim();
@@ -2046,7 +2200,7 @@ const fallbackPrompts = {
     artist: 'Gustav Klimt (1862-1918)',
     movement: '아르누보 (Art Nouveau)',
     defaultWork: 'The Kiss',
-    prompt: 'painting by Gustav Klimt Golden Phase: GOLD LEAF decorative patterns throughout background, Byzantine mosaic geometric ornaments, The Kiss style intimate sensuous atmosphere, jewel-like rich colors (gold, bronze, deep reds), flowing organic Art Nouveau lines, symbolic decorative elements, NOT photographic preserve subject identity, Klimt masterpiece quality'
+    prompt: 'painting by Gustav Klimt Golden Phase: GOLD LEAF decorative patterns throughout background, Byzantine mosaic geometric ornaments, The Kiss style intimate sensuous atmosphere, MYSTERIOUS ALLURING EXPRESSION (femme fatale for women, homme fatale for men), jewel-like rich colors (gold, bronze, deep reds), flowing organic Art Nouveau lines, symbolic decorative elements, golden glow on skin, NOT photographic preserve subject identity, Klimt masterpiece quality'
   },
   
   munch: {
@@ -2054,7 +2208,7 @@ const fallbackPrompts = {
     artist: 'Edvard Munch (1863-1944)',
     movement: '표현주의 (Expressionism)',
     defaultWork: 'The Scream',
-    prompt: 'painting by Edvard Munch: INTENSE PSYCHOLOGICAL emotional depth, The Scream style existential anxiety atmosphere, WAVY DISTORTED flowing lines in background, haunting symbolic colors (blood red sky, sickly yellows, deep blues), raw emotional vulnerability exposed, NOT photographic preserve subject identity, Munch Expressionist masterpiece quality'
+    prompt: 'painting by Edvard Munch: INTENSE PSYCHOLOGICAL emotional depth, The Scream style existential anxiety atmosphere, WAVY DISTORTED flowing lines throughout background AND on figure, haunting symbolic colors (blood red orange sky, sickly yellows, deep blues), ANXIOUS ANGUISHED EXPRESSION on face NOT happy NOT smiling, raw emotional vulnerability exposed, visible brushwork, NOT photographic preserve subject identity, Munch Expressionist masterpiece quality'
   },
   
   matisse: {
@@ -2062,7 +2216,7 @@ const fallbackPrompts = {
     artist: 'Henri Matisse (1869-1954)',
     movement: '야수파 (Fauvism)',
     defaultWork: 'The Dance',
-    prompt: 'painting by Henri Matisse Fauvist period: PURE BOLD UNMIXED COLORS in flat decorative areas, The Dance style simplified joyful forms, complete liberation of color from reality, saturated intense primary colors (red blue green), rhythmic flowing harmonious lines, life-affirming energetic atmosphere, NOT photographic preserve subject identity, Matisse Fauvist masterpiece quality'
+    prompt: 'painting by Henri Matisse Fauvist period: PURE BOLD UNMIXED COLORS in flat decorative areas, The Dance style simplified joyful forms, complete liberation of color from reality, saturated intense primary colors (red blue green), APPLY UNREALISTIC COLORS TO FACE AND SKIN (green purple red on face OK), simplified facial features, rhythmic flowing harmonious lines, ROUGH FAUVIST BRUSHSTROKES clearly visible throughout including on skin NOT smooth NOT blended, life-affirming energetic atmosphere, NOT photographic preserve subject identity, Matisse Fauvist masterpiece quality'
   },
   
   picasso: {
@@ -2070,7 +2224,7 @@ const fallbackPrompts = {
     artist: 'Pablo Picasso (1881-1973)',
     movement: '입체주의 (Cubism)',
     defaultWork: 'Les Demoiselles d\'Avignon',
-    prompt: 'Cubist painting by Pablo Picasso: GEOMETRIC FRAGMENTED forms broken into angular planes, MULTIPLE SIMULTANEOUS PERSPECTIVES showing different angles at once, Les Demoiselles d Avignon style revolutionary deconstruction, monochromatic or limited earth palette, analytical cubist dissection of form, NOT photographic preserve subject identity, Picasso Cubist masterpiece quality'
+    prompt: 'Cubist painting by Pablo Picasso: CRITICAL: FACE must be GEOMETRICALLY FRAGMENTED into angular planes NOT realistic face, NOSE from SIDE PROFILE while BOTH EYES visible from FRONT VIEW simultaneously, JAW and CHIN broken into geometric segments, ENTIRE FACE deconstructed into flat angular shapes, Les Demoiselles d Avignon African mask influence, earth tone palette (ochre sienna brown olive grey), analytical cubist dissection, ROUGH VISIBLE BRUSHSTROKES with paint texture, NOT photographic preserve subject identity, Picasso Cubist masterpiece quality'
   },
   
   frida: {
@@ -2078,7 +2232,7 @@ const fallbackPrompts = {
     artist: 'Frida Kahlo (1907-1954)',
     movement: '멕시코 초현실주의 (Mexican Surrealism)',
     defaultWork: 'Me and My Parrots',
-    prompt: 'painting by Frida Kahlo: INTENSE DIRECT GAZE portrait style, vibrant Mexican folk art colors, symbolic personal imagery (flowers, animals, vines, hearts), unibrow and distinctive bold features, emotional raw vulnerability, Tehuana traditional Mexican dress and floral headpiece, lush tropical foliage background, autobiographical symbolic elements, rich saturated colors, NOT photographic, Frida Kahlo masterpiece quality'
+    prompt: 'painting by Frida Kahlo: INTENSE DIRECT GAZE portrait style, vibrant Mexican folk art colors, symbolic personal imagery (flowers, animals, vines, hearts), emotional raw vulnerability, Mexican traditional dress and floral headpiece, lush tropical green foliage background, autobiographical symbolic elements, rich saturated colors, detailed oil painting brushwork visible, NOT photographic preserve subject identity, Frida Kahlo masterpiece quality'
   },
   
   warhol: {
@@ -2086,25 +2240,26 @@ const fallbackPrompts = {
     artist: 'Andy Warhol (1928-1987)',
     movement: '팝아트 (Pop Art)',
     defaultWork: 'Marilyn Monroe',
-    prompt: 'Pop Art by Andy Warhol: MUST create 2x2 FOUR-PANEL GRID layout, the EXACT SAME PERSON or OBJECT from the ORIGINAL PHOTO repeated 4 times - once in each quadrant, each of the 4 panels with DIFFERENT BOLD COLOR scheme (hot pink cyan yellow orange electric blue lime green), HIGH CONTRAST silkscreen printing effect, FLAT graphic colors with NO gradients, DO NOT draw Marilyn Monroe - draw only the person from the original photo, Warhol Pop Art masterpiece quality'
+    prompt: 'Pop Art by Andy Warhol: MUST create 2x2 FOUR-PANEL GRID layout, the EXACT SAME PERSON or OBJECT from the ORIGINAL PHOTO repeated 4 times - once in each quadrant, each of the 4 panels with DIFFERENT BOLD NEON COLOR scheme (hot pink cyan yellow orange electric blue lime green turquoise), HIGH CONTRAST silkscreen printing effect, FLAT graphic colors with NO gradients, ABSOLUTELY DO NOT draw Marilyn Monroe - ONLY draw the person from the original photo, visible ink texture and print imperfections, Warhol Pop Art masterpiece quality'
   },
   
   // ========================================
   // 동양화 - AI가 스타일 자동 선택
+  // v60: 텍스트는 A가 생성 → F가 그림 (텍스트 금지 규칙 제거)
   // ========================================
   korean: {
     name: '한국 전통화',
-    prompt: 'Korean traditional painting in authentic Joseon Dynasty style. CRITICAL INSTRUCTIONS: 1) GENDER PRESERVATION - preserve exact gender and facial features from original photo, 2) Choose appropriate Korean style: [Minhwa folk art for animals/flowers: light subtle Obangsaek colors, soft gentle pigments] [Pungsokdo genre painting for people: LIGHT INK WASH technique, subtle colors over ink lines, Kim Hong-do and Shin Yun-bok style] [Jingyeong landscape for nature: expressive ink with minimal color], 3) SINGLE UNIFIED COMPOSITION. 🚨 NO TEXT ON PAINTING - leave all areas completely blank, no characters, no writing, no seals, no inscriptions, PURE VISUAL ART ONLY'
+    prompt: 'Korean traditional painting in authentic Joseon Dynasty style. CRITICAL INSTRUCTIONS: 1) GENDER PRESERVATION - preserve exact gender and facial features from original photo, 2) Choose appropriate Korean style: [Minhwa folk art for animals/flowers: light subtle Obangsaek colors, soft gentle pigments] [Pungsokdo genre painting for people: LIGHT INK WASH technique, subtle colors over ink lines, Kim Hong-do and Shin Yun-bok style] [Jingyeong landscape for nature: expressive ink with minimal color], 3) SINGLE UNIFIED COMPOSITION'
   },
   
   chinese: {
     name: '중국 전통화',
-    prompt: 'Chinese traditional painting in authentic classical style. CRITICAL INSTRUCTIONS: 1) GENDER PRESERVATION - preserve exact gender and facial features from original photo, 2) Choose appropriate Chinese style: [Shuimohua ink wash for landscapes with monochrome gradations] [Gongbi meticulous painting for people with fine detailed brushwork and rich colors] [Huaniao bird-and-flower for animals with precise naturalistic rendering], 3) Chinese aesthetic principles, 4) SINGLE UNIFIED COMPOSITION. 🚨 NO TEXT ON PAINTING - leave all areas completely blank, no characters, no writing, no seals, no inscriptions, PURE VISUAL ART ONLY'
+    prompt: 'Chinese traditional painting in authentic classical style. CRITICAL INSTRUCTIONS: 1) GENDER PRESERVATION - preserve exact gender and facial features from original photo, 2) Choose appropriate Chinese style: [Shuimohua ink wash for landscapes with monochrome gradations] [Gongbi meticulous painting for people with fine detailed brushwork and rich colors] [Huaniao bird-and-flower for animals with precise naturalistic rendering], 3) Chinese aesthetic principles, 4) SINGLE UNIFIED COMPOSITION'
   },
   
   japanese: {
     name: '일본 우키요에',
-    prompt: 'Japanese Ukiyo-e woodblock print style with flat areas of bold solid colors, strong clear black outlines, completely flat two-dimensional composition, decorative patterns, stylized simplified forms, elegant refined Japanese aesthetic, painted in authentic Japanese ukiyo-e masterpiece quality, single unified composition with all figures together in one cohesive scene NOT separated into multiple distinct groups, Japanese kana allowed, NO Chinese characters, pure Japanese style only'
+    prompt: 'Japanese Ukiyo-e woodblock print style with flat areas of bold solid colors, strong clear black outlines, completely flat two-dimensional composition, transform clothing to traditional kimono, decorative patterns, stylized simplified forms, elegant refined Japanese aesthetic, painted in authentic Japanese ukiyo-e masterpiece quality, single unified composition with all figures together in one cohesive scene NOT separated into multiple distinct groups, CRITICAL: preserve EXACT number of people from original photo DO NOT add extra people in background'
   },
   
   masters: {
@@ -2270,14 +2425,12 @@ CRITICAL INSTRUCTIONS FOR PROMPT GENERATION:
    - If FEMALE in photo → prompt MUST start with "CRITICAL GENDER RULE: This photo shows FEMALE person, PRESERVE FEMININE FEATURES - soft face, feminine features, female body structure, KEEP FEMALE GENDER."
    - This gender instruction MUST be the FIRST thing in your generated prompt
 
-3. TEXT RULE - CRITICAL:
-   - NO TEXT ON PAINTING AT ALL
-   - Leave blank where text would go
-   - No characters, no seals, no inscriptions
-   - PURE VISUAL ART ONLY
-
-5. PROMPT MUST INCLUDE THIS EXACT ENDING:
-   "🚨 NO TEXT ON PAINTING - leave all areas completely blank, no characters, no writing, no seals, PURE VISUAL ART ONLY"
+3. CALLIGRAPHY TEXT - YOU GENERATE:
+   - Choose ONE appropriate Korean/Hanja text from these options:
+   - For portraits/people: "風流" (풍류) or "雅趣" (아취) or "淸雅" (청아)
+   - For landscapes: "山水" (산수) or "眞景" (진경) or "江山" (강산)
+   - For folk art: "福" (복) or "壽" (수) or "囍" (희)
+   - Include in your prompt: "include calligraphic text '[YOUR CHOSEN TEXT]' as vertical calligraphy with red seal stamp in corner"
 
 Return ONLY valid JSON (no markdown):
 {
@@ -2288,8 +2441,9 @@ Return ONLY valid JSON (no markdown):
   "physical_description": "for MALE: strong jaw, angular face, short hair, broad shoulders etc. For FEMALE: soft features, delicate face etc." or null,
   "selected_artist": "Korean Minhwa" or "Korean Pungsokdo" or "Korean Jingyeong Landscape",
   "selected_style": "minhwa" or "pungsokdo" or "landscape",
+  "calligraphy_text": "YOUR CHOSEN KOREAN/HANJA TEXT (e.g. 風流, 山水, 福)",
   "reason": "why this style fits (1 sentence)",
-  "prompt": "KEEP UNDER 150 WORDS. [Gender rule] Korean [style] with key characteristics. 🚨 NO TEXT ON PAINTING - completely blank, PURE VISUAL ART ONLY"
+  "prompt": "KEEP UNDER 150 WORDS. [Gender rule] Korean [style] with key characteristics, include calligraphic text '[calligraphy_text]' as vertical calligraphy with red seal stamp in corner"
 }
 
 CRITICAL: Keep prompt field UNDER 150 WORDS to avoid truncation.`;
@@ -2308,8 +2462,9 @@ Style 1: Chinese Ink Wash Painting (水墨畫 Shuimohua)
 
 Style 2: Chinese Gongbi Meticulous Painting (工筆畫)
 - Best for: portraits, people, detailed subjects, colorful compositions
-- Characteristics: Extremely fine detailed brushwork, delicate precise lines, rich mineral pigments and brilliant colors, ornate decorative patterns, imperial court quality
+- Characteristics: EXTREMELY FINE detailed brushwork with DELICATE HAIR-THIN brush lines, SILK SURFACE TEXTURE throughout (not paper), rich MINERAL PIGMENT colors (malachite green, azurite blue, cinnabar red), ornate decorative patterns, TRADITIONAL PAINTED FEEL not digital, imperial court quality, VISIBLE FINE BRUSHSTROKES showing meticulous hand-painted technique
 - When: Photo has people, faces, or needs detailed colorful treatment
+- CRITICAL: Must look like TRADITIONAL HAND-PAINTED silk painting, NOT smooth digital art, NOT AI-generated look
 
 Style 3: Chinese Huaniao Bird-and-Flower Painting (花鳥畫)
 - Best for: birds, flowers, animals (dogs, cats, rabbits), fish, insects, any natural creatures
@@ -2326,14 +2481,13 @@ CRITICAL INSTRUCTIONS FOR PROMPT GENERATION:
    - If FEMALE in photo → prompt MUST start with "CRITICAL GENDER RULE: This photo shows FEMALE person, PRESERVE FEMININE FEATURES - soft face, feminine features, female body structure, KEEP FEMALE GENDER."
    - This gender instruction MUST be the FIRST thing in your generated prompt
 
-2. TEXT RULE - CRITICAL:
-   - NO TEXT ON PAINTING AT ALL
-   - Leave blank where text would go
-   - No characters, no seals, no inscriptions
-   - PURE VISUAL ART ONLY
-
-3. PROMPT MUST INCLUDE THIS EXACT ENDING:
-   "🚨 NO TEXT ON PAINTING - leave all areas completely blank, no characters, no writing, no seals, PURE VISUAL ART ONLY"
+2. CALLIGRAPHY TEXT - YOU GENERATE:
+   - Choose ONE appropriate Chinese text (Hanzi) from these options:
+   - For portraits/people: "仙姿" (선자) or "雅趣" (아취) or "淸雅" (청아)
+   - For landscapes: "山水" (산수) or "水墨" (수묵) or "雲山" (운산)
+   - For flowers/birds: "花鳥" (화조) or "梅蘭竹菊" (매란국죽) or "春" (춘)
+   - For Gongbi: "仙鶴圖" (선학도) or "牡丹" (모란) or "宮廷" (궁정)
+   - Include in your prompt: "include calligraphic text '[YOUR CHOSEN TEXT]' as vertical calligraphy with red seal stamp in corner"
 
 Return ONLY valid JSON (no markdown):
 {
@@ -2344,8 +2498,9 @@ Return ONLY valid JSON (no markdown):
   "physical_description": "for MALE: strong jaw, angular face, short hair, broad shoulders etc. For FEMALE: soft features, delicate face etc." or null,
   "selected_artist": "Chinese Ink Wash" or "Chinese Gongbi" or "Chinese Huaniao",
   "selected_style": "ink_wash" or "gongbi" or "huaniao",
+  "calligraphy_text": "YOUR CHOSEN CHINESE TEXT (e.g. 仙鶴圖, 山水, 花鳥)",
   "reason": "why this style fits (1 sentence)",
-  "prompt": "KEEP UNDER 150 WORDS. [Gender rule] Chinese [style] with key characteristics. 🚨 NO TEXT ON PAINTING - completely blank, PURE VISUAL ART ONLY"
+  "prompt": "KEEP UNDER 150 WORDS. [Gender rule] Chinese [style] with key characteristics, include calligraphic text '[calligraphy_text]' as vertical calligraphy with red seal stamp in corner"
 }
 
 CRITICAL: Keep prompt field UNDER 150 WORDS to avoid truncation.`;
@@ -3199,6 +3354,20 @@ export default async function handler(req, res) {
             finalPrompt = genderPrefix + finalPrompt;
             
             // ========================================
+            // v62: 대전제 6개 → 맨 앞 PREFIX로 적용 (AI 우선순위!)
+            // ========================================
+            const coreRulesPrefix = 'CORE RULES (HIGHEST PRIORITY): ' +
+              '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
+              '2. ATTRACTIVE: Render all people beautifully handsomely (unless expressive distortion work). ' +
+              '3. ANTI-HALLUCINATION: Do NOT add elements not in original photo. ' +
+              '4. STYLE APPLICATION: Apply painting style to BOTH subject AND background (not just background). ' +
+              '5. BRUSHWORK: Visible brushstrokes paint texture throughout NOT smooth NOT digital NOT airbrushed. ' +
+              '6. NO TEXT (Western): No signatures letters writing watermarks. ' +
+              'END CORE RULES. ';
+            finalPrompt = coreRulesPrefix + finalPrompt;
+            console.log('🎯 v62: Applied CORE RULES PREFIX (대전제 맨 앞 적용)');
+            
+            // ========================================
             // 🚫 환각 방지: 원본에 없는 요소 추가 금지
             // ========================================
             let antiHallucinationRule = ' STRICT ANTI-HALLUCINATION: DO NOT add ANY elements not present in the original photo. ';
@@ -3245,6 +3414,86 @@ export default async function handler(req, res) {
         console.log('DEBUG: includes LEONARDO?', selectedArtist.toUpperCase().trim().includes('LEONARDO'));
         console.log('DEBUG: includes DA VINCI?', selectedArtist.toUpperCase().trim().includes('DA VINCI'));
         // ===== 디버그 끝 =====
+        
+        // ========================================
+        // v62: 거장 대표작별 세부 프롬프트 적용
+        // artistEnhancements.js 연동
+        // ========================================
+        if (categoryType === 'masters' && selectedWork) {
+          console.log('🎨 [V62] Masters mode - applying masterwork enhancement');
+          console.log('   Artist:', selectedArtist);
+          console.log('   Work:', selectedWork);
+          
+          // 대표작 키 변환 (예: "KLIMT" + "The Kiss" → "klimt-kiss")
+          const workKey = convertToWorkKey(selectedArtist, selectedWork);
+          console.log('   WorkKey:', workKey);
+          
+          if (workKey) {
+            const masterworkEnhancement = getMasterworkEnhancement(workKey);
+            
+            if (masterworkEnhancement) {
+              console.log('✅ [V62] Found masterwork enhancement for:', workKey);
+              
+              // avoidFor 체크 (부모-자녀 관계 등)
+              // TODO: 관계 정보는 Claude 분석 결과에서 가져와야 함
+              // 현재는 프롬프트에서 parent/child 키워드 감지로 대체
+              const isParentChild = finalPrompt.toLowerCase().includes('parent') || 
+                                    finalPrompt.toLowerCase().includes('child') ||
+                                    finalPrompt.toLowerCase().includes('family');
+              
+              if (masterworkEnhancement.avoidFor && 
+                  masterworkEnhancement.avoidFor.includes('parent_child') && 
+                  isParentChild) {
+                console.log('⚠️ [V62] avoidFor triggered - parent_child detected');
+                console.log('   Switching to alternative work...');
+                
+                // 대체 대표작 선택
+                const artistKey = workKey.split('-')[0];
+                const currentWork = workKey.split('-')[1];
+                const altWork = getAlternativeWork(artistKey, currentWork);
+                
+                if (altWork) {
+                  const altWorkKey = `${artistKey}-${altWork}`;
+                  const altEnhancement = getMasterworkEnhancement(altWorkKey);
+                  if (altEnhancement) {
+                    console.log('✅ [V62] Switched to alternative:', altWorkKey);
+                    finalPrompt = finalPrompt + altEnhancement.prompt;
+                    if (altEnhancement.controlStrength) {
+                      controlStrength = altEnhancement.controlStrength;
+                    }
+                    // expressionRule 적용
+                    if (altEnhancement.expressionRule) {
+                      finalPrompt = finalPrompt + ', ' + altEnhancement.expressionRule;
+                      console.log('🎭 [V62] Applied expressionRule:', altEnhancement.expressionRule);
+                    }
+                  }
+                }
+              } else {
+                // 정상 적용
+                finalPrompt = finalPrompt + masterworkEnhancement.prompt;
+                console.log('✅ [V62] Applied masterwork prompt');
+                
+                if (masterworkEnhancement.controlStrength) {
+                  controlStrength = masterworkEnhancement.controlStrength;
+                  console.log('   ControlStrength:', controlStrength);
+                }
+                
+                // expressionRule 적용 (뭉크 "NO bright NO smiling" 등)
+                if (masterworkEnhancement.expressionRule) {
+                  finalPrompt = finalPrompt + ', ' + masterworkEnhancement.expressionRule;
+                  console.log('🎭 [V62] Applied expressionRule:', masterworkEnhancement.expressionRule);
+                }
+                
+                // attractiveException 체크
+                if (masterworkEnhancement.attractiveException) {
+                  console.log('🎭 [V62] attractiveException detected - will skip attractive enhancement');
+                }
+              }
+            } else {
+              console.log('ℹ️ [V62] No masterwork enhancement found for:', workKey);
+            }
+          }
+        }
         
         // ========================================
         // 고대 그리스-로마 강화 프롬프트
@@ -4036,30 +4285,36 @@ export default async function handler(req, res) {
     // 한국 민화 특별 처리
     const isKoreanMinhwa = finalPrompt.includes('Korean Minhwa') || finalPrompt.includes('Korean folk painting');
     const isKoreanPungsokdo = finalPrompt.includes('Korean Pungsokdo') || finalPrompt.includes('Kim Hong-do');
+    // v60: 중국 공필화 특별 처리
+    const isChineseGongbi = finalPrompt.includes('Chinese Gongbi') || finalPrompt.includes('Gongbi meticulous') || finalPrompt.includes('工筆');
     
     if (isKoreanMinhwa) {
       // 한국 민화: 두꺼운 한지 질감과 투박한 민속화
-      paintingEnforcement = ', CRITICAL: NOT photographic, Authentic Joseon folk painting on THICK ROUGH HANJI PAPER with PROMINENT FIBER TEXTURE throughout, UNEVEN PATCHY pigment absorption creating irregular color areas, genuinely FADED WEATHERED colors like 200-year museum piece, TREMBLING WOBBLY folk brushlines (amateur quality), thick black outlines but IRREGULAR, colors pooling in paper fibers, PRESERVE faces, PRESERVE GENDER, primitive naive artifact NOT digital NOT smooth, 🚨 NO Japanese';
+      paintingEnforcement = ', CRITICAL: NOT photographic, Authentic Joseon folk painting on THICK ROUGH HANJI PAPER with PROMINENT FIBER TEXTURE throughout, UNEVEN PATCHY pigment absorption creating irregular color areas, genuinely FADED WEATHERED colors like 200-year museum piece, TREMBLING WOBBLY folk brushlines (amateur quality), thick black outlines but IRREGULAR, colors pooling in paper fibers, PRESERVE faces, PRESERVE GENDER, transform clothing to simple folk hanbok, primitive naive artifact NOT digital NOT smooth';
       console.log('ℹ️ Korean Minhwa mode: thick hanji texture + wobbly folk brushwork');
     } else if (isKoreanPungsokdo) {
       // 한국 풍속도: 수묵 위주 + 극소량 담채
-      paintingEnforcement = ', CRITICAL: NOT photographic, Authentic Korean Pungsokdo on ROUGH TEXTURED HANJI with visible fibers, BLACK INK DOMINATES 70-80% (confident spontaneous brushwork), then MINIMAL PALE washes 20-30% ONLY, earth tones EXCLUSIVELY (pale brown grey-green faint ochre), NO bright NO saturated colors, Kim Hong-do elegant restraint, distinctly different from colorful Chinese gongbi, PRESERVE faces, PRESERVE GENDER, simple everyday hanbok, historical painting NOT illustration, 🚨 NO Japanese';
+      paintingEnforcement = ', CRITICAL: NOT photographic, Authentic Korean Pungsokdo on ROUGH TEXTURED HANJI with visible fibers, BLACK INK DOMINATES 70-80% (confident spontaneous brushwork), then MINIMAL PALE washes 20-30% ONLY, earth tones EXCLUSIVELY (pale brown grey-green faint ochre), NO bright NO saturated colors, Kim Hong-do elegant restraint, distinctly different from colorful Chinese gongbi, PRESERVE faces, PRESERVE GENDER, simple everyday hanbok, historical painting NOT illustration';
       console.log('ℹ️ Korean Pungsokdo mode: 70% ink 30% pale color on textured hanji');
+    } else if (isChineseGongbi) {
+      // v60: 중국 공필화: 전통 비단 질감 + 세밀한 붓터치
+      paintingEnforcement = ', CRITICAL: NOT photographic, Authentic Chinese Gongbi meticulous painting on SILK SURFACE TEXTURE throughout, EXTREMELY FINE HAIR-THIN brush lines visible, rich MINERAL PIGMENT colors (malachite green, azurite blue, cinnabar red, gold leaf accents), TRADITIONAL HAND-PAINTED feel NOT digital NOT smooth AI art, delicate layered color washes, imperial court quality refinement, PRESERVE faces, PRESERVE GENDER, transform clothing to Chinese court clothing, visible fine brushwork technique';
+      console.log('ℹ️ v60 Chinese Gongbi mode: silk texture + fine mineral pigments + traditional feel');
     } else if (isMosaic) {
       // 모자이크: brushstrokes 제외, 타일 느낌 강조, 인물도 스타일 적용
-      paintingEnforcement = ', CRITICAL: NOT photographic NOT photo-realistic, MOSAIC ART made of small stone or glass TESSERAE tiles, visible grid pattern of square tiles, NO brushstrokes NO oil painting texture, APPLY MOSAIC STYLE TO ENTIRE IMAGE INCLUDING THE PERSON (person must also look like mosaic tiles NOT photographic), preserve facial IDENTITY but render in mosaic tile style, PRESERVE GENDER accurately, unified composition all figures together';
+      paintingEnforcement = ', CRITICAL: NOT photographic NOT photo-realistic, MOSAIC ART made of small stone or glass TESSERAE tiles, visible grid pattern of square tiles, NO brushstrokes NO oil painting texture, APPLY MOSAIC STYLE TO ENTIRE IMAGE INCLUDING THE PERSON (person must also look like mosaic tiles NOT photographic), preserve facial IDENTITY but render in mosaic tile style, PRESERVE GENDER accurately, unified composition all figures together, NO text NO signatures NO letters NO writing anywhere';
       console.log('ℹ️ Mosaic mode: tesserae tiles WITHOUT brushstrokes, style applied to person too');
     } else if (isPointillism) {
       // 점묘법: brushstrokes 완전 금지, 작은 점들로만 구성
-      paintingEnforcement = ', CRITICAL: NOT photographic NOT photo-realistic, POINTILLIST painting style with TINY COLORED DOTS only, ABSOLUTELY NO brushstrokes NO brush texture NO oil painting strokes, entire image composed of small distinct points of pure unmixed color placed side by side, visible dot pattern throughout like Signac or Seurat, APPLY POINTILLIST DOT STYLE TO ENTIRE IMAGE INCLUDING ALL PEOPLE (people must also be rendered in dots NOT photographic), preserve facial IDENTITY but render entirely in colored dots, PRESERVE GENDER accurately, unified composition all figures together';
+      paintingEnforcement = ', CRITICAL: NOT photographic NOT photo-realistic, POINTILLIST painting style with TINY COLORED DOTS only, ABSOLUTELY NO brushstrokes NO brush texture NO oil painting strokes, entire image composed of small distinct points of pure unmixed color placed side by side, visible dot pattern throughout like Signac or Seurat, APPLY POINTILLIST DOT STYLE TO ENTIRE IMAGE INCLUDING ALL PEOPLE (people must also be rendered in dots NOT photographic), preserve facial IDENTITY but render entirely in colored dots, PRESERVE GENDER accurately, unified composition all figures together, NO text NO signatures NO letters NO writing anywhere';
       console.log('ℹ️ Pointillism mode: tiny dots only, NO brushstrokes');
     } else if (isOrientalArt) {
-      // 동양 미술: brushstrokes 포함 + 텍스트 완전 금지
-      paintingEnforcement = ', CRITICAL: NOT photographic NOT photo-realistic, APPLY PAINTING STYLE TO ENTIRE IMAGE INCLUDING ALL PEOPLE (people must look painted NOT photographic), traditional brush painting with visible brushstrokes, preserve facial IDENTITY but render in painting style, PRESERVE GENDER accurately (male stays male with masculine features, female stays female with feminine features), unified composition all figures together, 🚨 NO TEXT ON PAINTING - leave all areas completely blank, no characters, no writing, no seals, PURE VISUAL ART ONLY';
-      console.log('ℹ️ Oriental art mode: paintingEnforcement WITH no-text rule');
+      // v60: 동양 미술: brushstrokes 포함 + 텍스트는 A가 생성한 것만 허용
+      paintingEnforcement = ', CRITICAL: NOT photographic NOT photo-realistic, APPLY PAINTING STYLE TO ENTIRE IMAGE INCLUDING ALL PEOPLE (people must look painted NOT photographic), traditional brush painting with visible brushstrokes, preserve facial IDENTITY but render in painting style, PRESERVE GENDER accurately (male stays male with masculine features, female stays female with feminine features), unified composition all figures together';
+      console.log('ℹ️ v60 Oriental art mode: text will be generated by A (Claude) and passed to F');
     } else {
-      // 일반: brushstrokes 포함
-      paintingEnforcement = ', CRITICAL: NOT photographic NOT photo-realistic, APPLY PAINTING STYLE TO ENTIRE IMAGE INCLUDING ALL PEOPLE (people must look painted NOT photographic), fully oil painting with thick visible brushstrokes and canvas texture, preserve facial IDENTITY but render in painting style, PRESERVE GENDER accurately (male stays male with masculine features, female stays female with feminine features), unified composition all figures together';
+      // v60: 일반 서양화: brushstrokes 강화 + 텍스트/서명 완전 금지
+      paintingEnforcement = ', CRITICAL: NOT photographic NOT photo-realistic NOT digital NOT airbrushed, APPLY PAINTING STYLE TO ENTIRE IMAGE INCLUDING ALL PEOPLE (people must look painted NOT photographic), fully oil painting with THICK VISIBLE BRUSHSTROKES throughout including on skin and clothing, CANVAS TEXTURE visible, PAINT TEXTURE must be apparent, preserve facial IDENTITY but render in painting style with visible brushwork on face, PRESERVE GENDER accurately (male stays male with masculine features, female stays female with feminine features), unified composition all figures together, NO text NO signatures NO letters NO writing NO watermarks anywhere in the image';
     }
     
     // ========================================
@@ -4078,19 +4333,30 @@ export default async function handler(req, res) {
       'frida-brokencolumn' // 부러진 기둥 - 고통 시각화
     ];
     
-    const shouldApplyAttractive = !excludeAttractive.includes(selectedWork);
+    // v62: attractiveException 체크 - artistEnhancements.js에서 가져온 값 우선
+    // 거장 모드에서 masterworkEnhancement.attractiveException이 true면 스킵
+    const workKey = categoryType === 'masters' && selectedWork ? 
+      convertToWorkKey(selectedArtist, selectedWork) : null;
+    const masterworkEnhancementForAttractive = workKey ? getMasterworkEnhancement(workKey) : null;
+    const hasAttractiveException = masterworkEnhancementForAttractive?.attractiveException || 
+                                   excludeAttractive.includes(workKey);
     
-    // 🎯 Identity 보존 대전제 (항상 적용)
-    const identityPreservation = ', ABSOLUTE IDENTITY PRESERVATION: PRESERVE original subject FACE IDENTITY AGE GENDER and ETHNICITY exactly - Asian must remain Asian, Western must remain Western, child must remain child, adult must remain adult, CRITICAL GENDER: male MUST remain male with MASCULINE features STRONG JAW male bone structure DO NOT feminize DO NOT soften DO NOT make pretty or delicate, female must remain female with feminine features, DO NOT change hair color or skin tone, DO NOT Westernize Asian faces, DO NOT Asianize Western faces, keep original facial features and bone structure';
-    finalPrompt = finalPrompt + identityPreservation;
-    console.log('🎯 Applied identity preservation rule (including gender)');
+    const shouldApplyAttractive = !hasAttractiveException;
     
-    if (shouldApplyAttractive && selectedWork) {
+    // 🎯 v62: Identity 보존 - 이미 PREFIX에서 적용됨, 여기서는 보강만
+    // (이전 버전 호환성 위해 유지, 단 중복 체크)
+    if (!finalPrompt.includes('IDENTITY PRESERVATION')) {
+      const identityPreservation = ', ABSOLUTE IDENTITY PRESERVATION: PRESERVE original subject FACE IDENTITY AGE GENDER and ETHNICITY exactly - Asian must remain Asian, Western must remain Western, child must remain child, adult must remain adult, CRITICAL GENDER: male MUST remain male with MASCULINE features STRONG JAW male bone structure DO NOT feminize DO NOT soften DO NOT make pretty or delicate, female must remain female with feminine features, DO NOT change hair color or skin tone, DO NOT Westernize Asian faces, DO NOT Asianize Western faces, keep original facial features and bone structure';
+      finalPrompt = finalPrompt + identityPreservation;
+      console.log('🎯 Applied identity preservation rule (보강)');
+    }
+    
+    if (shouldApplyAttractive) {
       const attractiveEnhancement = ', render all people ATTRACTIVELY BEAUTIFULLY and YOUTHFULLY with appealing refined features, CRITICAL: while strictly preserving original GENDER - if MALE make him look HANDSOME MASCULINE and DIGNIFIED, if FEMALE make her look PRETTY FEMININE and ELEGANT, idealized flattering portrayal that enhances visual appeal';
       finalPrompt = finalPrompt + attractiveEnhancement;
-      console.log('✨ Applied attractive enhancement for:', selectedWork);
-    } else if (selectedWork) {
-      console.log('🎭 Skipped attractive enhancement (expressive distortion allowed):', selectedWork);
+      console.log('✨ Applied attractive enhancement');
+    } else {
+      console.log('🎭 Skipped attractive enhancement (expressive distortion allowed):', workKey || selectedWork);
     }
     
     if (categoryType === 'modernism') {
@@ -4105,6 +4371,17 @@ export default async function handler(req, res) {
       console.log('✅ Added Level 3+ painting enforcement (re-drawn with brush) + facial preservation');
     } else {
       console.log('ℹ️ Skipped paintingEnforcement (already in fallback prompt)');
+    }
+    
+    // ========================================
+    // v62: 붓터치 규칙 - 이미 PREFIX에서 적용됨, 중복 체크
+    // ========================================
+    if (!finalPrompt.toLowerCase().includes('brushstroke') && 
+        !finalPrompt.toLowerCase().includes('brush marks') &&
+        categoryType !== 'modernism') {
+      const brushworkRule = ', CRITICAL PAINTING QUALITY: visible brushstrokes and paint texture throughout, brush marks clearly visible on skin and clothing, canvas/paper texture feel, NOT smooth digital, NOT airbrushed, NOT photo-like skin';
+      finalPrompt = finalPrompt + brushworkRule;
+      console.log('🖌️ Applied BRUSHWORK rule (보강)');
     }
     
     // FLUX Depth 변환 (최신 API 버전)
