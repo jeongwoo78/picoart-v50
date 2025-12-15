@@ -1,5 +1,14 @@
-// PicoArt v62.1 - 대전제 PREFIX 위치 수정
-// v62.1: 대전제 PREFIX를 가중치 블록 바깥으로 이동 (항상 적용!)
+// PicoArt v63 - 프롬프트 대수술 (검색 결과 기반)
+// v63: 대전제 v2 + 화가별 프롬프트 개선
+//      - 대전제: 스타일 우선 + 사진 제외어 강화
+//      - 화가: "by XY, XY art style" 패턴 적용
+//      - 기법: 구체적 묘사 추가 (impasto, palette knife 등)
+//      - 사진 제외: NOT photograph, NOT photorealistic, NOT cinematic 추가
+//
+// v62.5: FLUX Pro 테스트 (반 고흐/피카소/워홀)
+//      - 결과: 비용 2배, 효과 없음 → 포기
+//
+// v62.1: 대전제 PREFIX 위치 수정
 //      - 환각 방지 강화: "If 1 person in photo, output must have EXACTLY 1 person"
 //      - 스타일 적용 강화: "people must look PAINTED not photographic"
 //
@@ -3396,18 +3405,24 @@ export default async function handler(req, res) {
         // ========================================
         
         // ========================================
-        // v62: 대전제 6개 → 항상 맨 앞 PREFIX로 적용!
-        // (가중치 선택 여부와 무관하게 항상 적용)
+        // v63: 대전제 v2 - 스타일 우선 + 사진 제외어 강화
+        // 검색 결과 기반: FLUX는 앞부분 더 잘 인식, 구체적 기법 명시 필요
         // ========================================
-        const coreRulesPrefix = 'CORE RULES (HIGHEST PRIORITY): ' +
+        const coreRulesPrefix = 
+          'PAINTING STYLE FIRST (CRITICAL): ' +
+          'This must look like a REAL TRADITIONAL OIL PAINTING with thick impasto technique, ' +
+          'visible palette knife marks, heavy textured brushstrokes on canvas. ' +
+          'NOT photograph, NOT photorealistic, NOT smooth, NOT digital render, NOT airbrushed, ' +
+          'NOT cinematic, NOT award-winning photo, NOT 3D. ' +
+          
+          'RULES: ' +
           '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
-          '2. ATTRACTIVE: Render all people beautifully handsomely (unless expressive distortion work). ' +
-          '3. ANTI-HALLUCINATION: Do NOT add ANY people or elements not in original photo. If 1 person in photo, output must have EXACTLY 1 person. ' +
-          '4. STYLE ON PEOPLE: Apply painting style to BOTH subject AND background - people must look PAINTED not photographic, skin must have paint texture NOT smooth. ' +
-          '5. BRUSHWORK: VISIBLE OIL PAINT BRUSHSTROKES throughout ENTIRE image including on FACE and SKIN - must see individual brush marks and paint texture like real oil painting, NOT smooth NOT digital NOT airbrushed NOT like photo. ' +
-          '6. NO TEXT (Western): No signatures letters writing watermarks. ' +
-          '7. ANATOMY: Anatomically correct arms hands fingers body proportions - no missing limbs no extra limbs no distorted body parts. ' +
-          'END CORE RULES. ';
+          '2. ATTRACTIVE: Render people beautifully (unless expressive distortion work). ' +
+          '3. NO HALLUCINATION: Do NOT add people or elements not in original photo. ' +
+          '4. BRUSHWORK: Visible thick brush marks on FACE, SKIN, CLOTHING - impasto texture throughout. ' +
+          '5. NO TEXT: No signatures, letters, writing, watermarks. ' +
+          '6. ANATOMY: Correct proportions - no missing or extra limbs. ' +
+          'END RULES. ';
         finalPrompt = coreRulesPrefix + finalPrompt;
         console.log('🎯 v62: Applied CORE RULES PREFIX (항상 적용)');
         
@@ -4390,7 +4405,9 @@ export default async function handler(req, res) {
       console.log('🖌️ Applied BRUSHWORK rule (보강)');
     }
     
-    // FLUX Depth 변환 (최신 API 버전)
+    // FLUX Depth Dev 변환 (v63: Pro 테스트 포기, Dev 유지)
+    console.log('📦 [v63] black-forest-labs/flux-depth-dev');
+    
     const response = await fetch(
       'https://api.replicate.com/v1/models/black-forest-labs/flux-depth-dev/predictions',
       {
@@ -4406,7 +4423,7 @@ export default async function handler(req, res) {
             prompt: finalPrompt,
             num_inference_steps: 24,
             guidance: 12,
-            control_strength: controlStrength,  // 기본 0.80, 레오나르도 0.65
+            control_strength: controlStrength,
             output_format: 'jpg',
             output_quality: 90
           }
