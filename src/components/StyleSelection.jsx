@@ -155,7 +155,12 @@ const StyleSelection = ({ onSelect }) => {
             
             {/* 전체 변환 버튼 */}
             <button 
-              className="full-transform-btn movements"
+              className="full-transform-btn"
+              style={{
+                background: 'linear-gradient(135deg, #a5d8ff 0%, #74c0fc 100%)',
+                boxShadow: '0 4px 15px rgba(165, 216, 255, 0.4)',
+                color: '#1e293b'
+              }}
               onClick={() => onSelect({ 
                 id: 'movements-all', 
                 name: '미술사조 전체 변환',
@@ -211,7 +216,12 @@ const StyleSelection = ({ onSelect }) => {
                 {/* 전체 변환 버튼 - 거장 */}
                 {mainCategory === 'masters' && (
                   <button 
-                    className="full-transform-btn masters"
+                    className="full-transform-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, #ffc9c9 0%, #ffa8a8 100%)',
+                      boxShadow: '0 4px 15px rgba(255, 201, 201, 0.4)',
+                      color: '#1e293b'
+                    }}
                     onClick={() => onSelect({ 
                       id: 'masters-all', 
                       name: '거장 전체 변환',
@@ -231,7 +241,12 @@ const StyleSelection = ({ onSelect }) => {
                 {/* 전체 변환 버튼 - 동양화 */}
                 {mainCategory === 'oriental' && (
                   <button 
-                    className="full-transform-btn oriental"
+                    className="full-transform-btn"
+                    style={{
+                      background: 'linear-gradient(135deg, #fcc2d7 0%, #f783ac 100%)',
+                      boxShadow: '0 4px 15px rgba(252, 194, 215, 0.4)',
+                      color: '#1e293b'
+                    }}
                     onClick={() => onSelect({ 
                       id: 'oriental-all', 
                       name: '동양화 전체 변환',

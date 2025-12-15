@@ -853,10 +853,6 @@ const ResultScreen = ({
         '게르니카': 'picasso-guernica',
         'Weeping Woman': 'picasso-weepingwoman',
         '우는 여인': 'picasso-weepingwoman',
-        'Guitar': 'picasso-dream',
-        'The Dream': 'picasso-dream',
-        '꿈': 'picasso-dream',
-        'Dream': 'picasso-dream',
         'Bull\'s Head': 'picasso-bullhead',
         '황소 머리': 'picasso-bullhead',
         
@@ -1100,6 +1096,7 @@ const ResultScreen = ({
         'anxiety': '불안',
         'melancholy': '우울',
         'madonna': '마돈나',
+        'jealousy': '질투',
         // 반 고흐
         'starry night': '별이 빛나는 밤',
         'the starry night': '별이 빛나는 밤',
@@ -1108,6 +1105,9 @@ const ResultScreen = ({
         'sunflowers': '해바라기',
         'the bedroom': '침실',
         'cafe terrace at night': '밤의 카페 테라스',
+        'l\'arlesienne': '아를의 여인',
+        'arlesienne': '아를의 여인',
+        'larlesienne': '아를의 여인',
         // 마티스
         'woman with a hat': '모자를 쓴 여인',
         'the dance': '춤',
@@ -1126,6 +1126,7 @@ const ResultScreen = ({
         'marilyn monroe': '마릴린 먼로',
         'marilyn': '마릴린 먼로',
         'campbell\'s soup cans': '캠벨 수프 캔',
+        'elvis': '엘비스',
         // 프리다
         'me and my parrots': '나와 앵무새',
         'self-portrait with monkeys': '원숭이와 자화상',

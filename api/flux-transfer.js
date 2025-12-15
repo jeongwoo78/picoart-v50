@@ -2351,8 +2351,7 @@ HENRI MATISSE - SELECT ONE:
 PABLO PICASSO - SELECT ONE:
 1. "Les Demoiselles d'Avignon" (아비뇽의 처녀들) → ANY gender (use CUBIST STYLE), group | Style: ANGULAR FRAGMENTED faces, African mask influence, geometric planes
 2. "Guernica" (게르니카) → dramatic scene, chaos, ANY subject | Style: BLACK WHITE GREY only, anguished figures, fragmented bodies
-3. "Weeping Woman" (우는 여인) → FEMALE portrait, emotional | Style: SHARP ANGULAR tears, fractured face, yellow-green-purple
-4. "The Dream" (꿈) → FEMALE portrait, peaceful, relaxed | Style: SOFT CURVES, bold colors (red, yellow, purple), sensual, dreamy`,
+3. "Weeping Woman" (우는 여인) → FEMALE portrait, emotional | Style: SHARP ANGULAR tears, fractured face, yellow-green-purple`,
 
         'frida': `
 FRIDA KAHLO - SELECT ONE:

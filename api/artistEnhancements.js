@@ -603,13 +603,6 @@ export const masterworkEnhancements = {
     attractiveException: true
   },
   
-  'picasso-dream': {
-    name: '꿈',
-    artist: 'picasso',
-    prompt: ', The Dream Le Reve by Pablo Picasso, Picasso art style: SOFT SENSUAL CURVES, face split into TWO HALVES showing profile and frontal simultaneously, peaceful dreaming expression with closed eyes, RED and YELLOW bold color contrast, reclining relaxed pose, simplified rounded forms, visible oil brushwork, intimate tender atmosphere, 1932 Marie-Therese period style',
-    controlStrength: 0.50
-  },
-  
   // ========================================
   // 6. 프리다 칼로 (Frida Kahlo) - 4개 대표작
   // ========================================
@@ -650,9 +643,9 @@ export const masterworkEnhancements = {
   'warhol-marilyn': {
     name: '마릴린 먼로',
     artist: 'warhol',
-    prompt: ', Marilyn Monroe style by Andy Warhol, Warhol pop art style: 2x2 FOUR-PANEL GRID mandatory with SAME PERSON repeated 4 times, DIFFERENT BOLD NEON COLOR each panel (hot pink/cyan/yellow/orange/turquoise/lime), high contrast silkscreen print effect with ink bleed imperfections and halftone, flat graphic high-contrast, glamorous iconic expression, DO NOT draw Marilyn Monroe herself - apply to subject only',
+    prompt: ', Warhol pop art portrait style: Transform THE PERSON IN PHOTO into 2x2 FOUR-PANEL GRID with SAME PERSON repeated 4 times, DIFFERENT BOLD NEON COLOR each panel (hot pink/cyan/yellow/orange/turquoise/lime), high contrast silkscreen print effect with ink bleed imperfections and halftone, flat graphic high-contrast, glamorous iconic expression, background must be SOLID COLORS only, NO celebrity faces anywhere, NO Marilyn Monroe face, apply pop art style to SUBJECT ONLY',
     controlStrength: 0.50,
-    specialRule: '4-panel mandatory, NO drawing Marilyn Monroe'
+    specialRule: '4-panel mandatory, NO Marilyn Monroe anywhere'
   },
   
   'warhol-soup': {
