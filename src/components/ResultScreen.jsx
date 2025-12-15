@@ -124,7 +124,6 @@ const ResultScreen = ({
         setSavedToGallery(true);
         console.log('✅ 갤러리에 자동 저장 완료 (IndexedDB):', styleName);
       }
-      }
     };
     
     saveToGalleryAsync();
