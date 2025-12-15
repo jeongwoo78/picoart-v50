@@ -486,31 +486,31 @@ const StyleSelection = ({ onSelect }) => {
           transition: all 0.3s;
         }
 
-        /* 미술사조 - 하늘색 */
+        /* 미술사조 - 파스텔 스카이 */
         .full-transform-btn.movements {
-          background: linear-gradient(135deg, #4FC3F7 0%, #29B6F6 100%);
-          box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+          background: linear-gradient(135deg, #a5d8ff 0%, #74c0fc 100%);
+          box-shadow: 0 4px 15px rgba(165, 216, 255, 0.4);
         }
         .full-transform-btn.movements:hover {
-          box-shadow: 0 8px 25px rgba(79, 195, 247, 0.4);
+          box-shadow: 0 8px 25px rgba(165, 216, 255, 0.5);
         }
 
-        /* 거장 - 주황색 */
+        /* 거장 - 파스텔 코랄 */
         .full-transform-btn.masters {
-          background: linear-gradient(135deg, #FFB74D 0%, #FFA726 100%);
-          box-shadow: 0 4px 15px rgba(255, 183, 77, 0.3);
+          background: linear-gradient(135deg, #ffc9c9 0%, #ffa8a8 100%);
+          box-shadow: 0 4px 15px rgba(255, 201, 201, 0.4);
         }
         .full-transform-btn.masters:hover {
-          box-shadow: 0 8px 25px rgba(255, 183, 77, 0.4);
+          box-shadow: 0 8px 25px rgba(255, 201, 201, 0.5);
         }
 
-        /* 동양화 - 분홍색 */
+        /* 동양화 - 파스텔 로즈 */
         .full-transform-btn.oriental {
-          background: linear-gradient(135deg, #F48FB1 0%, #F06292 100%);
-          box-shadow: 0 4px 15px rgba(244, 143, 177, 0.3);
+          background: linear-gradient(135deg, #fcc2d7 0%, #f783ac 100%);
+          box-shadow: 0 4px 15px rgba(252, 194, 215, 0.4);
         }
         .full-transform-btn.oriental:hover {
-          box-shadow: 0 8px 25px rgba(244, 143, 177, 0.4);
+          box-shadow: 0 8px 25px rgba(252, 194, 215, 0.5);
         }
 
         .full-transform-btn:hover {
@@ -531,12 +531,12 @@ const StyleSelection = ({ onSelect }) => {
         .full-transform-title {
           font-size: 1.1rem;
           font-weight: 700;
-          color: white;
+          color: #1e293b;
         }
 
         .full-transform-desc {
           font-size: 0.9rem;
-          color: rgba(255, 255, 255, 0.9);
+          color: rgba(30, 41, 59, 0.8);
           text-align: left;
         }
 

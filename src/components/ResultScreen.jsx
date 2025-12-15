@@ -130,7 +130,7 @@ const ResultScreen = ({
   }, [resultImage, selectedStyle, aiSelectedArtist, fullTransformResults, isFullTransform]);
 
 
-  // ========== 재시도 함수 ==========
+  // ========== 다시 시도 함수 ==========
   const handleRetry = async () => {
     if (!originalPhoto || isRetrying) return;
     
@@ -138,7 +138,7 @@ const ResultScreen = ({
     if (failedResults.length === 0) return;
     
     setIsRetrying(true);
-    console.log(`🔄 재시도 시작: ${failedResults.length}개 실패한 변환`);
+    console.log(`🔄 다시 시도 시작: ${failedResults.length}개 실패한 변환`);
     
     let successCount = 0;
     
@@ -146,7 +146,7 @@ const ResultScreen = ({
       const failed = failedResults[i];
       const failedIndex = results.findIndex(r => r.style?.id === failed.style?.id);
       
-      setRetryProgress('재시도 중...');
+      setRetryProgress('다시 시도 중...');
       
       try {
         const result = await processStyleTransfer(
@@ -170,7 +170,7 @@ const ResultScreen = ({
             return newResults;
           });
           successCount++;
-          console.log(`✅ 재시도 성공: ${failed.style?.name}`);
+          console.log(`✅ 다시 시도 성공: ${failed.style?.name}`);
           
           // 갤러리에 저장 - <카테고리> 세부정보 형식
           const category = failed.style?.category;
@@ -183,10 +183,10 @@ const ResultScreen = ({
             : '';
           await saveToGallery(result.resultUrl, styleName, categoryName);
         } else {
-          console.log(`❌ 재시도 실패: ${failed.style?.name} - ${result.error}`);
+          console.log(`❌ 다시 시도 실패: ${failed.style?.name} - ${result.error}`);
         }
       } catch (error) {
-        console.error(`❌ 재시도 에러: ${failed.style?.name}`, error);
+        console.error(`❌ 다시 시도 에러: ${failed.style?.name}`, error);
       }
     }
     
@@ -194,19 +194,18 @@ const ResultScreen = ({
     setRetryProgress('');
     
     if (successCount > 0) {
-      alert(`재시도 완료! ${successCount}개 성공`);
-    } else {
-      alert('재시도했지만 모두 실패했습니다. 나중에 다시 시도해주세요.');
+      alert('다시 시도 성공!');
     }
+    // 실패 시 alert 없이 자연스럽게 UI로 복귀
   };
 
-  // ========== 단독변환 재시도 함수 ==========
+  // ========== 단독변환 다시 시도 함수 ==========
   const handleSingleModeRetry = async () => {
     if (!originalPhoto || !selectedStyle || isRetrying) return;
     
     setIsRetrying(true);
-    setRetryProgress(`${selectedStyle.name} 재시도 중...`);
-    console.log(`🔄 단독변환 재시도: ${selectedStyle.name}`);
+    setRetryProgress(`${selectedStyle.name} 다시 시도 중...`);
+    console.log(`🔄 단독변환 다시 시도: ${selectedStyle.name}`);
     
     try {
       const result = await processStyleTransfer(
@@ -217,7 +216,7 @@ const ResultScreen = ({
       );
       
       if (result.success) {
-        console.log(`✅ 단독변환 재시도 성공: ${selectedStyle.name}`);
+        console.log(`✅ 단독변환 다시 시도 성공: ${selectedStyle.name}`);
         setSingleRetryResultState(result);
         
         // 갤러리에 저장 - <카테고리> 세부정보 형식
@@ -231,14 +230,14 @@ const ResultScreen = ({
           : '';
         await saveToGallery(result.resultUrl, styleName, categoryName);
         
-        alert('재시도 성공!');
+        alert('다시 시도 성공!');
       } else {
-        console.log(`❌ 단독변환 재시도 실패: ${selectedStyle.name} - ${result.error}`);
-        alert('재시도 실패. 나중에 다시 시도해주세요.');
+        console.log(`❌ 단독변환 다시 시도 실패: ${selectedStyle.name} - ${result.error}`);
+        // 실패 시 alert 없이 자연스럽게 UI로 복귀
       }
     } catch (error) {
-      console.error(`❌ 단독변환 재시도 에러:`, error);
-      alert('재시도 중 오류가 발생했습니다.');
+      console.error(`❌ 단독변환 다시 시도 에러:`, error);
+      // 에러 시에도 alert 없이 UI로 복귀
     }
     
     setIsRetrying(false);
@@ -1945,28 +1944,24 @@ const ResultScreen = ({
           </div>
         )}
 
-        {/* 단독변환 실패 시 재시도 버튼 */}
-        {!isFullTransform && !displayImage && (
+        {/* 단독변환 실패 시 다시 시도 버튼 */}
+        {!isFullTransform && (!displayImage || isRetrying) && (
           <div className="retry-section">
             {isRetrying ? (
               <div className="retry-in-progress">
-                <div className="retry-status">
-                  <div className="spinner-medium"></div>
-                  <p className="retry-text">{retryProgress}</p>
-                </div>
-                <div className="retry-education">
-                  <p>🎨 잠시만 기다려주세요. AI가 다시 변환 중입니다...</p>
-                </div>
+                <div className="spinner-medium"></div>
+                <p className="retry-text">🎨 AI가 다시 변환 중입니다...</p>
               </div>
             ) : (
               <div className="retry-prompt">
-                <p className="fail-message">변환에 실패하였습니다. 재시도 버튼을 눌러주세요.</p>
+                <div className="retry-icon">🎨</div>
+                <p className="fail-message">변환에 실패하였습니다.</p>
                 <button 
                   className="btn btn-retry"
                   onClick={handleSingleModeRetry}
                 >
-                  <span className="btn-icon">🔄</span>
-                  재시도
+                  <span className="btn-icon">✨</span>
+                  다시 시도
                 </button>
               </div>
             )}
@@ -2112,28 +2107,24 @@ const ResultScreen = ({
           </div>
         )}
 
-        {/* 재시도 버튼 (실패한 결과가 있고 현재 보고 있는 결과가 실패한 경우 표시) */}
-        {isFullTransform && (currentResult && !currentResult.success) && (
+        {/* 다시 시도 버튼 (실패한 결과가 있고 현재 보고 있는 결과가 실패한 경우 표시) */}
+        {isFullTransform && ((currentResult && !currentResult.success) || isRetrying) && (
           <div className="retry-section">
             {isRetrying ? (
               <div className="retry-in-progress">
-                <div className="retry-status">
-                  <div className="spinner-medium"></div>
-                  <p className="retry-text">{retryProgress}</p>
-                </div>
-                <div className="retry-education">
-                  <p>🎨 잠시만 기다려주세요. AI가 다시 변환 중입니다...</p>
-                </div>
+                <div className="spinner-medium"></div>
+                <p className="retry-text">🎨 AI가 다시 변환 중입니다...</p>
               </div>
             ) : (
               <div className="retry-prompt">
-                <p className="fail-message">변환에 실패하였습니다. 재시도 버튼을 눌러주세요.</p>
+                <div className="retry-icon">🎨</div>
+                <p className="fail-message">변환에 실패하였습니다.</p>
                 <button 
                   className="btn btn-retry"
                   onClick={handleRetry}
                 >
-                  <span className="btn-icon">🔄</span>
-                  {failedCount > 1 ? `전체 재시도 (${failedCount}개)` : '재시도'}
+                  <span className="btn-icon">✨</span>
+                  {failedCount > 1 ? `전체 다시 시도` : '다시 시도'}
                 </button>
               </div>
             )}
@@ -2447,27 +2438,31 @@ const ResultScreen = ({
           box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
         }
 
-        /* 재시도 섹션 */
+        /* 다시 시도 섹션 */
         .retry-section {
           margin-bottom: 1.5rem;
           text-align: center;
         }
 
         .retry-prompt {
-          background: rgba(239, 68, 68, 0.1);
-          border: 2px solid rgba(239, 68, 68, 0.3);
-          border-radius: 16px;
-          padding: 1.5rem;
+          background: rgba(139, 92, 246, 0.1);
+          border-radius: 20px;
+          padding: 2rem;
         }
 
-        .fail-message {
-          color: #fca5a5;
-          font-size: 1rem;
+        .retry-icon {
+          font-size: 3rem;
           margin-bottom: 1rem;
         }
 
+        .fail-message {
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 1rem;
+          margin-bottom: 1.25rem;
+        }
+
         .btn-retry {
-          background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+          background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
           color: white;
           border: none;
           padding: 1rem 2rem;
@@ -2483,46 +2478,29 @@ const ResultScreen = ({
 
         .btn-retry:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+          box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
         }
 
         .retry-in-progress {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 16px;
+          background: rgba(139, 92, 246, 0.1);
+          border-radius: 20px;
           padding: 2rem;
-        }
-
-        .retry-status {
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 1rem;
-          margin-bottom: 1.5rem;
         }
 
         .retry-text {
-          color: white;
-          font-size: 1.1rem;
-          font-weight: 500;
-        }
-
-        .retry-education {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 12px;
-          padding: 1rem;
-        }
-
-        .retry-education p {
-          color: rgba(255, 255, 255, 0.8);
-          font-size: 0.95rem;
-          margin: 0;
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 1rem;
         }
 
         .spinner-medium {
           width: 40px;
           height: 40px;
-          border: 3px solid rgba(255, 255, 255, 0.3);
-          border-top-color: white;
+          border: 3px solid rgba(139, 92, 246, 0.3);
+          border-top-color: #8b5cf6;
           border-radius: 50%;
           animation: spin 1s linear infinite;
         }
