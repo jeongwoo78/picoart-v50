@@ -280,14 +280,18 @@ const ResultScreen = ({
     // ========== 거장: workKeyMap으로 매칭 ==========
     if (category === 'masters' && workName) {
       const mastersWorkKeyMap = {
-        // 반 고흐
-        'The Starry Night': 'gogh-starrynight',
-        '별이 빛나는 밤': 'gogh-starrynight',
-        'Starry Night': 'gogh-starrynight',
-        'Sunflowers': 'gogh-sunflowers',
-        '해바라기': 'gogh-sunflowers',
-        'Self-Portrait': 'gogh-selfportrait',
-        '자화상': 'gogh-selfportrait',
+        // 반 고흐 (vangogh- 로 통일)
+        'The Starry Night': 'vangogh-starrynight',
+        '별이 빛나는 밤': 'vangogh-starrynight',
+        'Starry Night': 'vangogh-starrynight',
+        'Sunflowers': 'vangogh-sunflowers',
+        '해바라기': 'vangogh-sunflowers',
+        'Self-Portrait': 'vangogh-selfportrait',
+        '자화상': 'vangogh-selfportrait',
+        "L'Arlésienne": 'vangogh-arlesienne',
+        'LArlesienne': 'vangogh-arlesienne',
+        'Arlesienne': 'vangogh-arlesienne',
+        '아를의 여인': 'vangogh-arlesienne',
         
         // 클림트
         'The Kiss': 'klimt-kiss',
@@ -305,6 +309,8 @@ const ResultScreen = ({
         'Scream': 'munch-scream',
         'Madonna': 'munch-madonna',
         '마돈나': 'munch-madonna',
+        'Jealousy': 'munch-jealousy',
+        '질투': 'munch-jealousy',
         
         // 마티스
         'The Dance': 'matisse-dance',
@@ -313,8 +319,8 @@ const ResultScreen = ({
         'The Red Room': 'matisse-redroom',
         '붉은 방': 'matisse-redroom',
         'Red Room': 'matisse-redroom',
-        'Woman with a Hat': 'matisse-womanwithhat',
-        '모자를 쓴 여인': 'matisse-womanwithhat',
+        'Woman with a Hat': 'matisse-womanhat',
+        '모자를 쓴 여인': 'matisse-womanhat',
         
         // 피카소
         'Les Demoiselles d\'Avignon': 'picasso-demoiselles',
@@ -342,6 +348,8 @@ const ResultScreen = ({
         'Marilyn Monroe (마릴린 먼로)': 'warhol-marilyn',
         '마릴린 먼로': 'warhol-marilyn',
         'Marilyn': 'warhol-marilyn',
+        'Elvis': 'warhol-elvis',
+        '엘비스': 'warhol-elvis',
         'Campbell\'s Soup Cans': 'warhol-soup',
         '캠벨 수프 캔': 'warhol-soup',
         'Soup Cans': 'warhol-soup',
@@ -837,8 +845,8 @@ const ResultScreen = ({
         'The Red Room': 'matisse-redroom',
         '붉은 방': 'matisse-redroom',
         'Red Room': 'matisse-redroom',
-        'Woman with a Hat': 'matisse-womanwithhat',
-        '모자를 쓴 여인': 'matisse-womanwithhat',
+        'Woman with a Hat': 'matisse-womanhat',
+        '모자를 쓴 여인': 'matisse-womanhat',
         'Goldfish': 'matisse-goldfish',
         '금붕어': 'matisse-goldfish',
         'The Snail': 'matisse-snail',

@@ -658,7 +658,7 @@ export const masterworkEnhancements = {
   'warhol-elvis': {
     name: '엘비스',
     artist: 'warhol',
-    prompt: ', Elvis by Andy Warhol, Warhol pop art style: SILVER METALLIC background, repeated figure slightly offset, silkscreen print effect with INK DENSITY VARIATIONS, high contrast black on silver, cowboy gunslinger stance energy, celebrity icon mythology, mechanical reproduction aesthetic, ink bleed imperfections, DO NOT draw Elvis himself - apply style to subject only',
+    prompt: ', Warhol silver silkscreen portrait style: Transform THE PERSON IN PHOTO, SILVER METALLIC BACKGROUND mandatory, single figure or repeated 2-3 times slightly offset, silkscreen print effect with INK DENSITY VARIATIONS, high contrast black on silver, cowboy stance energy optional, mechanical reproduction aesthetic, ink bleed imperfections, NO 4-panel grid, NO colorful pop art, NO Marilyn Monroe style, NO celebrity faces in background, SILVER BACKGROUND ONLY',
     controlStrength: 0.50
   }
 };
