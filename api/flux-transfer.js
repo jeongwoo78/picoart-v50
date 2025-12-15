@@ -1,4 +1,8 @@
-// PicoArt v62.3 - LoRA 테스트 (반 고흐) - XLabs API 수정
+// PicoArt v62.4 - LoRA 테스트 (반 고흐) - 최신 버전 해시
+// v62.4: 최신 XLabs 버전 해시 적용
+//      - 버전: 56ac7b66bd9a1b5eb7d15da5ac5625e4c8c9c5bc26da892caf6249cf38a611ed
+//      - Official Models API 404 에러 → version 방식으로 복귀
+//
 // v62.3: XLabs Official Models API로 전환 (버전 해시 제거)
 //      - 기존: /v1/predictions + version 해시 방식 (만료됨 422 에러)
 //      - 수정: /v1/models/xlabs-ai/flux-dev-controlnet/predictions (정상)
@@ -4427,9 +4431,9 @@ export default async function handler(req, res) {
       console.log('💰 비용: ~$0.068/장 (기존 $0.025 대비 +$0.043)');
       console.log('========================================');
       
-      // ✅ XLabs Official Models API 방식 (버전 해시 필요 없음!)
+      // ✅ XLabs Version 방식 (최신 버전 해시 사용)
       response = await fetch(
-        'https://api.replicate.com/v1/models/xlabs-ai/flux-dev-controlnet/predictions',
+        'https://api.replicate.com/v1/predictions',
         {
           method: 'POST',
           headers: {
@@ -4438,6 +4442,8 @@ export default async function handler(req, res) {
             'Prefer': 'wait'
           },
           body: JSON.stringify({
+            // XLabs flux-dev-controlnet 최신 버전 (2024-12 확인)
+            version: "56ac7b66bd9a1b5eb7d15da5ac5625e4c8c9c5bc26da892caf6249cf38a611ed",
             input: {
               prompt: finalPrompt + ', gogh style',  // 트리거 워드 추가
               control_image: image,
