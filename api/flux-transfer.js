@@ -1,20 +1,11 @@
-// PicoArt v62.4 - LoRA 테스트 (반 고흐) - 최신 버전 해시
-// v62.4: 최신 XLabs 버전 해시 적용
-//      - 버전: 56ac7b66bd9a1b5eb7d15da5ac5625e4c8c9c5bc26da892caf6249cf38a611ed
-//      - Official Models API 404 에러 → version 방식으로 복귀
-//
-// v62.3: XLabs Official Models API로 전환 (버전 해시 제거)
-//      - 기존: /v1/predictions + version 해시 방식 (만료됨 422 에러)
-//      - 수정: /v1/models/xlabs-ai/flux-dev-controlnet/predictions (정상)
-//
-// v62.2: 반 고흐 선택 시 XLabs ControlNet + LoRA 적용 테스트
-//      - 반 고흐 → xlabs-ai/flux-dev-controlnet + openfree/van-gogh LoRA
-//      - 기타 화가 → 기존 black-forest-labs/flux-depth-dev 유지
-//      - 콘솔 로그로 LoRA 적용 여부 확인 가능
-//      - 비용: 반 고흐 $0.068/장, 기타 $0.025/장
+// PicoArt v62.5 - FLUX Pro 테스트 (반 고흐/피카소/워홀)
+// v62.5: 3명 거장 선택 시 flux-depth-pro 사용
+//      - 반 고흐, 피카소, 워홀 → flux-depth-pro ($0.055/장)
+//      - 기타 → 기존 flux-depth-dev ($0.025/장)
+//      - 속도: Pro 5-10초 vs Dev 15-20초 (추정)
+//      - 품질/프롬프트 준수 비교 테스트
 //
 // v62.1: 대전제 PREFIX 위치 수정
-// v62.1: 대전제 PREFIX를 가중치 블록 바깥으로 이동 (항상 적용!)
 //      - 환각 방지 강화: "If 1 person in photo, output must have EXACTLY 1 person"
 //      - 스타일 적용 강화: "people must look PAINTED not photographic"
 //
@@ -4406,34 +4397,38 @@ export default async function handler(req, res) {
     }
     
     // ========================================
-    // 🧪 LoRA 테스트: 반 고흐 선택 시 XLabs + LoRA 사용
+    // 🧪 FLUX Pro 테스트: 반 고흐/피카소/워홀 선택 시 flux-depth-pro 사용
     // ========================================
-    const isVanGoghTest = selectedArtist && 
-      (selectedArtist.toLowerCase().includes('van gogh') || 
-       selectedArtist.toLowerCase().includes('gogh') ||
-       selectedArtist === '반 고흐' ||
-       selectedArtist === '고흐');
+    const isProTest = selectedArtist && (
+      // 반 고흐
+      selectedArtist.toLowerCase().includes('van gogh') || 
+      selectedArtist.toLowerCase().includes('gogh') ||
+      selectedArtist === '반 고흐' ||
+      selectedArtist === '고흐' ||
+      // 피카소
+      selectedArtist.toLowerCase().includes('picasso') ||
+      selectedArtist === '피카소' ||
+      // 워홀
+      selectedArtist.toLowerCase().includes('warhol') ||
+      selectedArtist === '워홀' ||
+      selectedArtist === '앤디 워홀'
+    );
     
     let response;
     
-    if (isVanGoghTest) {
-      // 🎨 반 고흐: XLabs ControlNet + LoRA
-      const loraUrl = "https://huggingface.co/openfree/van-gogh/resolve/main/van-gogh.safetensors";
-      const loraStrength = 0.8;
-      
+    if (isProTest) {
+      // 🎨 FLUX Depth Pro (품질/속도 테스트)
       console.log('========================================');
-      console.log('🧪 [LoRA 테스트] 반 고흐');
+      console.log('🧪 [FLUX Pro 테스트]', selectedArtist);
       console.log('========================================');
-      console.log('📦 모델: xlabs-ai/flux-dev-controlnet');
-      console.log('🔗 LoRA URL:', loraUrl);
-      console.log('💪 LoRA Strength:', loraStrength);
-      console.log('🎯 트리거 워드: gogh');
-      console.log('💰 비용: ~$0.068/장 (기존 $0.025 대비 +$0.043)');
+      console.log('📦 모델: black-forest-labs/flux-depth-pro');
+      console.log('💰 비용: ~$0.055/장 (기존 $0.025 대비 +$0.030)');
+      console.log('⚡ 예상 속도: 5-10초 (기존 15-20초)');
       console.log('========================================');
       
-      // ✅ XLabs Version 방식 (최신 버전 해시 사용)
+      // FLUX Depth Pro - Official Models API
       response = await fetch(
-        'https://api.replicate.com/v1/predictions',
+        'https://api.replicate.com/v1/models/black-forest-labs/flux-depth-pro/predictions',
         {
           method: 'POST',
           headers: {
@@ -4442,36 +4437,26 @@ export default async function handler(req, res) {
             'Prefer': 'wait'
           },
           body: JSON.stringify({
-            // XLabs flux-dev-controlnet 최신 버전 (2024-12 확인)
-            version: "56ac7b66bd9a1b5eb7d15da5ac5625e4c8c9c5bc26da892caf6249cf38a611ed",
             input: {
-              prompt: finalPrompt + ', gogh style',  // 트리거 워드 추가
               control_image: image,
-              control_type: "depth",
-              control_strength: controlStrength,
-              
-              // ✅ LoRA 적용!
-              lora_url: loraUrl,
-              lora_strength: loraStrength,
-              
-              steps: 28,
-              guidance_scale: 3.5,
-              output_format: "webp",
-              output_quality: 90
+              prompt: finalPrompt,
+              steps: 25,
+              guidance: 3,
+              safety_tolerance: 5,
+              output_format: 'jpg'
             }
           })
         }
       );
       
-      // LoRA 적용 결과 로그
       if (response.ok) {
-        console.log('✅ [LoRA] XLabs + 반 고흐 LoRA 호출 성공!');
+        console.log('✅ [FLUX Pro] 호출 성공!');
       } else {
-        console.log('❌ [LoRA] XLabs 호출 실패 - 에러 확인 필요');
+        console.log('❌ [FLUX Pro] 호출 실패');
       }
       
     } else {
-      // 기존: FLUX Depth Dev (LoRA 없음)
+      // 기존: FLUX Depth Dev
       console.log('📦 [기존 모델] black-forest-labs/flux-depth-dev');
       
       response = await fetch(
@@ -4489,7 +4474,7 @@ export default async function handler(req, res) {
               prompt: finalPrompt,
               num_inference_steps: 24,
               guidance: 12,
-              control_strength: controlStrength,  // 기본 0.80, 레오나르도 0.65
+              control_strength: controlStrength,
               output_format: 'jpg',
               output_quality: 90
             }
@@ -4500,18 +4485,7 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.log('========================================');
-      console.log('❌ [API 에러]');
-      console.log('========================================');
-      console.log('🚫 Status:', response.status);
-      console.log('📝 Error:', errorText);
-      
-      // LoRA 파라미터 지원 안 하는 경우 체크
-      if (errorText.includes('lora_url') || errorText.includes('unknown')) {
-        console.log('⚠️ 이 모델은 LoRA를 지원하지 않을 수 있습니다!');
-      }
-      console.log('========================================');
-      
+      console.error('FLUX Depth error:', response.status, errorText);
       return res.status(response.status).json({ 
         error: `FLUX API error: ${response.status}`,
         details: errorText
@@ -4519,19 +4493,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    
-    // LoRA 적용 결과 상세 로그
-    console.log('========================================');
-    console.log('✅ [변환 완료]');
-    console.log('========================================');
-    console.log('📋 Prediction ID:', data.id);
-    console.log('🎨 Artist:', selectedArtist);
-    console.log('🖼️ Work:', selectedWork || 'N/A');
-    console.log('🧪 LoRA 테스트:', isVanGoghTest ? '✅ 적용됨 (반 고흐)' : '❌ 미적용 (기존 모델)');
-    if (data.output) {
-      console.log('🖼️ 출력:', data.output);
-    }
-    console.log('========================================');
+    console.log('✅ FLUX Depth completed');
     
     // 결과에 선택 정보 포함
     res.status(200).json({
@@ -4539,13 +4501,7 @@ export default async function handler(req, res) {
       selected_artist: selectedArtist,
       selected_work: selectedWork,  // 거장 모드: 선택된 대표작
       selection_method: selectionMethod,
-      selection_details: selectionDetails,
-      lora_test: isVanGoghTest ? {
-        enabled: true,
-        model: 'xlabs-ai/flux-dev-controlnet',
-        lora: 'openfree/van-gogh',
-        strength: 0.8
-      } : { enabled: false }
+      selection_details: selectionDetails
     });
     
   } catch (error) {
