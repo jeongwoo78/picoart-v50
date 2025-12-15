@@ -1295,47 +1295,61 @@ const ResultScreen = ({
     // 작품명 매핑 - 거장 전체 작품: 한글명(영문명) 형식
     const workMap = {
       // 반 고흐
-      'The Starry Night': '별이 빛나는 밤(The Starry Night)',
-      'Starry Night': '별이 빛나는 밤(Starry Night)',
-      'Sunflowers': '해바라기(Sunflowers)',
-      'Self-Portrait': '자화상(Self-Portrait)',
+      'the starry night': '별이 빛나는 밤(The Starry Night)',
+      'starry night': '별이 빛나는 밤(Starry Night)',
+      'sunflowers': '해바라기(Sunflowers)',
+      'self-portrait': '자화상(Self-Portrait)',
+      "l'arlesienne": '아를의 여인(L\'Arlésienne)',
+      'larlesienne': '아를의 여인(L\'Arlésienne)',
+      'arlesienne': '아를의 여인(L\'Arlésienne)',
       
       // 클림트
-      'The Kiss': '키스(The Kiss)',
-      'The Tree of Life': '생명의 나무(The Tree of Life)',
-      'Judith I': '유디트(Judith)',
-      'Judith': '유디트(Judith)',
+      'the kiss': '키스(The Kiss)',
+      'the tree of life': '생명의 나무(The Tree of Life)',
+      'tree of life': '생명의 나무(Tree of Life)',
+      'judith i': '유디트(Judith)',
+      'judith': '유디트(Judith)',
       
       // 뭉크
-      'The Scream': '절규(The Scream)',
-      'Madonna': '마돈나(Madonna)',
+      'the scream': '절규(The Scream)',
+      'scream': '절규(The Scream)',
+      'madonna': '마돈나(Madonna)',
+      'jealousy': '질투(Jealousy)',
       
       // 마티스
-      'The Dance': '춤(The Dance)',
-      'The Red Room': '붉은 방(The Red Room)',
-      'Woman with a Hat': '모자를 쓴 여인(Woman with a Hat)',
+      'the dance': '춤(The Dance)',
+      'dance': '춤(The Dance)',
+      'the red room': '붉은 방(The Red Room)',
+      'red room': '붉은 방(The Red Room)',
+      'woman with a hat': '모자를 쓴 여인(Woman with a Hat)',
       
       // 피카소
-      'Guernica': '게르니카(Guernica)',
-      'Weeping Woman': '우는 여인(Weeping Woman)',
-      "Les Demoiselles d'Avignon": '아비뇽의 처녀들(Les Demoiselles d\'Avignon)',
+      'guernica': '게르니카(Guernica)',
+      'weeping woman': '우는 여인(Weeping Woman)',
+      'the weeping woman': '우는 여인(Weeping Woman)',
+      "les demoiselles d'avignon": '아비뇽의 처녀들(Les Demoiselles d\'Avignon)',
+      'demoiselles': '아비뇽의 처녀들(Les Demoiselles d\'Avignon)',
       
       // 프리다 칼로
-      'Me and My Parrots': '나와 앵무새(Me and My Parrots)',
-      'Self-Portrait with Parrots': '앵무새와 자화상(Self-Portrait with Parrots)',
-      'The Broken Column': '부러진 기둥(The Broken Column)',
-      'Self-Portrait with Thorn Necklace': '가시 목걸이 자화상(Self-Portrait with Thorn Necklace)',
-      'Self-Portrait with Monkeys': '원숭이와 자화상(Self-Portrait with Monkeys)',
-      'The Two Fridas': '두 명의 프리다(The Two Fridas)',
+      'me and my parrots': '나와 앵무새(Me and My Parrots)',
+      'self-portrait with parrots': '앵무새와 자화상(Self-Portrait with Parrots)',
+      'the broken column': '부러진 기둥(The Broken Column)',
+      'broken column': '부러진 기둥(The Broken Column)',
+      'self-portrait with thorn necklace': '가시 목걸이 자화상(Self-Portrait with Thorn Necklace)',
+      'self-portrait with monkeys': '원숭이와 자화상(Self-Portrait with Monkeys)',
+      'the two fridas': '두 명의 프리다(The Two Fridas)',
       
       // 워홀
-      'Marilyn Monroe': '마릴린 먼로(Marilyn Monroe)',
-      'Marilyn': '마릴린(Marilyn)',
-      "Campbell's Soup Cans": '캠벨 수프 캔(Campbell\'s Soup Cans)'
+      'marilyn monroe': '마릴린 먼로(Marilyn Monroe)',
+      'marilyn': '마릴린(Marilyn)',
+      "campbell's soup cans": '캠벨 수프 캔(Campbell\'s Soup Cans)',
+      'elvis': '엘비스(Elvis)'
     };
     
-    if (workMap[workName]) {
-      return workMap[workName];
+    // 소문자로 변환해서 매칭
+    const normalizedWork = workName.toLowerCase().trim();
+    if (workMap[normalizedWork]) {
+      return workMap[normalizedWork];
     }
     
     // 매핑에 없으면 원본 반환

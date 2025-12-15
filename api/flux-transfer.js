@@ -2337,7 +2337,7 @@ GUSTAV KLIMT - SELECT ONE:
 
         'munch': `
 EDVARD MUNCH - SELECT ONE:
-1. "The Scream" (절규) → ANY gender, emotional, anxious | Style: WAVY DISTORTED lines, BLOOD RED sky, agonized figure, existential terror
+1. "The Scream" (절규) → SINGLE person ONLY (NOT for couples/groups), emotional, anxious | Style: WAVY DISTORTED lines, BLOOD RED sky, agonized figure, existential terror
 2. "Madonna" (마돈나) → FEMALE portrait, sensual, mysterious | Style: FLOWING DARK HAIR like halo, closed eyes, red lips
 3. "Jealousy" (질투) → MALE portrait, psychological | Style: PALE GREEN face, intense stare, swirling background, emotional tension`,
 

@@ -583,14 +583,14 @@ export const masterworkEnhancements = {
   'picasso-demoiselles': {
     name: '아비뇽의 처녀들',
     artist: 'picasso',
-    prompt: ', Les Demoiselles dAvignon by Pablo Picasso, Picasso Cubism art style: angular FRAGMENTED bodies into sharp geometric planes, African mask influence on faces, mask-like geometric facial features, multiple simultaneous perspectives, bold black outlines, apricot/brown/earth tones, primitive revolutionary energy, rough visible oil brushwork, CRITICAL: face must be geometrically divided NOT realistic',
+    prompt: ', Les Demoiselles dAvignon by Pablo Picasso, Picasso Cubism art style: CRITICAL CUBIST FACE - face MUST be geometrically FRAGMENTED into angular planes showing MULTIPLE ANGLES simultaneously (one eye frontal + one eye profile, nose from side), African mask influence with sharp angular features, bold BLACK OUTLINES dividing face into geometric sections, apricot/brown/earth tones, primitive revolutionary energy, rough visible oil brushwork, NOT realistic face, NOT smooth skin',
     controlStrength: 0.50
   },
   
   'picasso-guernica': {
     name: '게르니카',
     artist: 'picasso',
-    prompt: ', Guernica by Pablo Picasso, Picasso Cubism art style: BLACK WHITE AND GREY ONLY no other colors, fragmented bodies in agony, screaming open mouths, torn limbs, war horror and chaos, jagged torn forms, multiple simultaneous perspectives, rough visible oil brushwork, expression of PAIN and TERROR allowed (attractive rendering exception)',
+    prompt: ', Guernica by Pablo Picasso, Picasso Cubism art style: BLACK WHITE AND GREY ONLY no other colors, CRITICAL CUBIST FACE - face fragmented into angular geometric planes, screaming open mouths distorted, eyes displaced showing multiple angles, torn jagged forms, war horror and chaos, bold black outlines dividing face sections, rough visible oil brushwork, expression of PAIN and TERROR allowed (attractive rendering exception), NOT realistic face',
     controlStrength: 0.50,
     attractiveException: true
   },
@@ -598,7 +598,7 @@ export const masterworkEnhancements = {
   'picasso-weepingwoman': {
     name: '우는 여인',
     artist: 'picasso',
-    prompt: ', Weeping Woman by Pablo Picasso, Picasso Cubism art style: ANGULAR GEOMETRIC TEARS like shattered glass, face fragmented into colored planes, YELLOW-GREEN-PURPLE bold color contrast, bold black outlines separating color blocks, handkerchief pressed to face, multiple viewpoints on single face (nose from side + eyes from front), fractured Cubist portrait, rough visible oil brushwork, expression of GRIEF allowed (attractive rendering exception)',
+    prompt: ', Weeping Woman by Pablo Picasso, Picasso Cubism art style: CRITICAL CUBIST FACE - face MUST be fragmented into sharp angular colored planes, ANGULAR GEOMETRIC TEARS like shattered glass on cheeks, YELLOW-GREEN-PURPLE bold colors filling face sections, bold BLACK OUTLINES separating each color block on face, eyes/nose/mouth shown from MULTIPLE ANGLES simultaneously, handkerchief pressed to face, fractured Cubist portrait, rough visible oil brushwork, expression of GRIEF allowed, NOT realistic face NOT smooth',
     controlStrength: 0.50,
     attractiveException: true
   },
