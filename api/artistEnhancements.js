@@ -32,7 +32,6 @@ export const CORE_RULES = {
   attractiveExceptions: [
     'munch-scream',           // 절규 - 공포/불안
     'picasso-guernica',       // 게르니카 - 전쟁 참상
-    'picasso-weepingwoman',   // 우는 여인 - 슬픔
     'frida-brokencolumn'      // 부러진 기둥 - 고통
   ],
   
@@ -152,12 +151,6 @@ export const movementEnhancements = {
   'rembrandt': {
     name: '렘브란트',
     prompt: ', Baroque oil painting by Rembrandt, Rembrandt art style: GOLDEN LUMINOUS LIGHT emerging from darkness, thick impasto highlights with heavy palette knife marks, deep psychological introspection, warm amber glow, masterful chiaroscuro light gradations, intimate soul-revealing atmosphere, visible thick textured brushwork',
-    controlStrength: 0.60
-  },
-  
-  'vermeer': {
-    name: '베르메르',
-    prompt: ', Baroque oil painting by Johannes Vermeer, Vermeer art style: soft diffused daylight from window, pearl-like luminous quality, cool blue and warm yellow harmony, precise delicate brushwork, intimate domestic tranquility, Girl with Pearl Earring atmosphere, subtle side lighting, visible oil paint texture',
     controlStrength: 0.60
   },
   
@@ -490,13 +483,6 @@ export const masterworkEnhancements = {
     controlStrength: 0.55
   },
   
-  'vangogh-arlesienne': {
-    name: '아를의 여인',
-    artist: 'vangogh',
-    prompt: ', LArlesienne by Vincent van Gogh, Van Gogh Post-Impressionist art style: BRIGHT YELLOW background, subject in BLACK clothing creating strong contrast, simplified bold forms with thick outlines, directional visible brushstrokes, intense psychological gaze, thick impasto texture, palette knife marks, Gauguin collaboration period style',
-    controlStrength: 0.55
-  },
-  
   // ========================================
   // 2. 클림트 (Klimt) - 3개 대표작
   // ========================================
@@ -591,14 +577,6 @@ export const masterworkEnhancements = {
     name: '게르니카',
     artist: 'picasso',
     prompt: ', Guernica by Pablo Picasso, Picasso Cubism art style: BLACK WHITE AND GREY ONLY no other colors, CRITICAL CUBIST FACE - face fragmented into angular geometric planes, screaming open mouths distorted, eyes displaced showing multiple angles, torn jagged forms, war horror and chaos, bold black outlines dividing face sections, rough visible oil brushwork, expression of PAIN and TERROR allowed (attractive rendering exception), NOT realistic face',
-    controlStrength: 0.50,
-    attractiveException: true
-  },
-  
-  'picasso-weepingwoman': {
-    name: '우는 여인',
-    artist: 'picasso',
-    prompt: ', Weeping Woman by Pablo Picasso, Picasso Cubism art style: CRITICAL CUBIST FACE - face MUST be fragmented into sharp angular colored planes, ANGULAR GEOMETRIC TEARS like shattered glass on cheeks, YELLOW-GREEN-PURPLE bold colors filling face sections, bold BLACK OUTLINES separating each color block on face, eyes/nose/mouth shown from MULTIPLE ANGLES simultaneously, handkerchief pressed to face, fractured Cubist portrait, rough visible oil brushwork, expression of GRIEF allowed, NOT realistic face NOT smooth',
     controlStrength: 0.50,
     attractiveException: true
   },

@@ -107,8 +107,6 @@ function convertToWorkKey(artistName, workTitle) {
     '아비뇽의 처녀들': 'demoiselles',
     'guernica': 'guernica',
     '게르니카': 'guernica',
-    'weeping woman': 'weepingwoman',
-    '우는 여인': 'weepingwoman',
     // 프리다
     'me and my parrots': 'parrots',
     '나와 앵무새들': 'parrots',
@@ -575,10 +573,10 @@ const ARTIST_WEIGHTS = {
   // 후기인상주의 (4명)
   postImpressionism: {
     portrait: [
-      { name: 'VAN GOGH', weight: 40 },
-      { name: 'GAUGUIN', weight: 30 },
-      { name: 'CÉZANNE', weight: 20 },
-      { name: 'SIGNAC', weight: 10 }
+      { name: 'VAN GOGH', weight: 50 },
+      { name: 'GAUGUIN', weight: 35 },
+      { name: 'SIGNAC', weight: 15 }
+      // CÉZANNE 제외 - 정물/풍경 전문
     ],
     landscape: [
       { name: 'VAN GOGH', weight: 35 },
@@ -587,15 +585,15 @@ const ARTIST_WEIGHTS = {
       { name: 'SIGNAC', weight: 15 }
     ],
     stillLife: [
-      { name: 'CÉZANNE', weight: 50 },
-      { name: 'VAN GOGH', weight: 30 },
-      { name: 'GAUGUIN', weight: 15 },
+      { name: 'CÉZANNE', weight: 60 },
+      { name: 'VAN GOGH', weight: 25 },
+      { name: 'GAUGUIN', weight: 10 },
       { name: 'SIGNAC', weight: 5 }
     ],
     default: [
-      { name: 'VAN GOGH', weight: 35 },
+      { name: 'VAN GOGH', weight: 40 },
       { name: 'GAUGUIN', weight: 30 },
-      { name: 'CÉZANNE', weight: 20 },
+      { name: 'CÉZANNE', weight: 15 },
       { name: 'SIGNAC', weight: 15 }
     ]
   },
@@ -754,6 +752,25 @@ function selectArtistByWeight(category, photoAnalysis) {
     // 추상적 → 칸딘스키
     if (subject.includes('abstract') || subject.includes('spiritual')) {
       return weightedRandomSelect(weights.abstract);
+    }
+  }
+  
+  // 후기인상주의 특수 처리 - 세잔은 정물/풍경 전문
+  if (category === 'postImpressionism') {
+    const subject = (photoAnalysis.subject || '').toLowerCase();
+    
+    // 정물 → 세잔 강력 추천 (60%)
+    if (subject.includes('still') || subject.includes('object') || subject.includes('fruit') || 
+        subject.includes('flower') || subject.includes('food') || subject.includes('bottle')) {
+      return weightedRandomSelect(weights.stillLife);
+    }
+    // 풍경 → 세잔 포함
+    if (subject.includes('landscape') || subject === 'landscape') {
+      return weightedRandomSelect(weights.landscape);
+    }
+    // 인물 → 세잔 제외 (반 고흐 50%, 고갱 35%, 시냑 15%)
+    if (subject.includes('person') || subject.includes('portrait') || subject === 'person') {
+      return weightedRandomSelect(weights.portrait);
     }
   }
   
@@ -1513,28 +1530,76 @@ Warm sunlit people, festive scenes.
 `;
 }
 
-// 후기인상주의 (5명) - v48 간소화
+// 후기인상주의 (4명) - v48 간소화
 function getPostImpressionismGuidelines() {
   return `
 Available Post-Impressionism Artists (4명):
 
-1. VAN GOGH (35%) - Swirling impasto brushstrokes, intense emotional colors, turbulent energy (Starry Night, Self-Portraits, Bedroom in Arles)
-2. GAUGUIN (30%) - Flat bold colors, primitive exotic Tahitian style, decorative patterns (Where Do We Come From?, Tahitian Women)
-3. CÉZANNE (20%) - Geometric structured forms, analytical approach, solid volumes (Still Life with Apples, Mont Sainte-Victoire)
-4. SIGNAC (15%) - POINTILLIST tiny dots, bright Mediterranean sunlight, vibrant colors (The Port of Saint-Tropez, Portrait of Félix Fénéon)
+1. VAN GOGH (반 고흐) - Swirling impasto brushstrokes, intense emotional colors, turbulent energy
+   ⭐ BEST FOR: Portraits, emotional scenes, night scenes, self-portraits
+   
+2. GAUGUIN (고갱) - Flat bold colors, primitive exotic Tahitian style, decorative patterns
+   ⭐ BEST FOR: Portraits (especially exotic/warm mood), tropical scenes, figures
+   
+3. CÉZANNE (세잔) - Geometric structured forms, analytical approach, solid volumes
+   ⭐ BEST FOR: Still life, landscapes, geometric compositions
+   ⚠️ NOT FOR PORTRAITS - still life/landscape specialist only!
+   
+4. SIGNAC (시냑) - POINTILLIST tiny dots, bright Mediterranean sunlight, vibrant colors
+   ⭐ BEST FOR: Seascapes, harbors, sunny outdoor scenes
 
-Choose the BEST artist based on photo analysis.
-Respect approximate percentages for variety.
+🎯 CRITICAL RULE:
+- PORTRAITS/PEOPLE → VAN GOGH or GAUGUIN (NEVER Cézanne!)
+- STILL LIFE → CÉZANNE (strong priority)
+- LANDSCAPES → CÉZANNE or VAN GOGH
+- POINTILLIST variety → SIGNAC
 `;
 }
 
 function getPostImpressionismHints(photoAnalysis) {
+  const subject = (photoAnalysis?.subject || '').toLowerCase();
+  
+  // 인물 사진 → 세잔 절대 금지
+  if (subject.includes('person') || subject.includes('portrait') || subject === 'person') {
+    return `
+🎯 PORTRAIT DETECTED - CRITICAL RULES:
+⚠️ DO NOT SELECT CÉZANNE - he is a still life/landscape specialist!
+✅ VAN GOGH (50%) - Emotional swirling portraits with intense colors
+✅ GAUGUIN (35%) - Exotic bold colors, decorative flat style  
+✅ SIGNAC (15%) - Pointillist dots for variety
+`;
+  }
+  
+  // 정물 → 세잔 강력 추천
+  if (subject.includes('still') || subject.includes('object') || subject.includes('fruit') ||
+      subject.includes('flower') || subject.includes('food')) {
+    return `
+🎯 STILL LIFE DETECTED:
+✅ CÉZANNE (60%) - Geometric forms, analytical structure - PERFECT for still life!
+✅ VAN GOGH (25%) - Expressive emotional still life
+✅ GAUGUIN (10%) - Decorative exotic style
+✅ SIGNAC (5%) - Pointillist approach
+`;
+  }
+  
+  // 풍경 → 세잔 포함
+  if (subject.includes('landscape') || subject === 'landscape') {
+    return `
+🎯 LANDSCAPE DETECTED:
+✅ VAN GOGH (35%) - Swirling emotional landscapes
+✅ CÉZANNE (30%) - Geometric structured landscapes (Mont Sainte-Victoire)
+✅ GAUGUIN (20%) - Exotic tropical landscapes
+✅ SIGNAC (15%) - Pointillist Mediterranean light
+`;
+  }
+  
+  // 기본값 - 인물 우선 가정
   return `
-Use the guidelines above. Consider:
-- Photo type (portrait, landscape, still life)
-- Mood and atmosphere
-- Respect approximate percentages for variety
-AI decides freely based on overall photo analysis.
+🎯 SELECTION GUIDE:
+- Portraits → VAN GOGH or GAUGUIN (avoid Cézanne!)
+- Still life → CÉZANNE (priority)
+- Landscapes → Any artist works
+- Pointillist variety → SIGNAC
 `;
 }
 
@@ -1944,7 +2009,7 @@ function getRenaissanceArtistPrompt(artistName, subjectType = 'person') {
   const genderRule = 'ABSOLUTE GENDER AND ETHNICITY REQUIREMENT: If photo shows MALE - MUST have MASCULINE face with STRONG JAW, male bone structure, NO feminine features, DO NOT feminize, DO NOT soften, DO NOT make delicate, KEEP AS MAN. If photo shows FEMALE - MUST have FEMININE face with SOFT features, female bone structure, NO masculine features, DO NOT masculinize, DO NOT make rough, KEEP AS WOMAN. PRESERVE ORIGINAL ETHNICITY AND SKIN COLOR EXACTLY - DO NOT change race, DO NOT lighten or darken skin, Asian must stay Asian, Caucasian must stay Caucasian, African must stay African. ';
   const paintTexture = ' MUST look like HAND-PAINTED oil painting with VISIBLE BRUSHSTROKES, NOT photograph, NOT digital, NOT photorealistic, NOT smooth, NOT AI-generated photo.';
   const prompts = {
-    'LEONARDO DA VINCI': genderRule + 'painting by Leonardo da Vinci: EXTREME SFUMATO technique with ALL EDGES completely SOFT AND BLURRED like smoke or fog, ZERO SHARP LINES anywhere, every boundary DISSOLVED into hazy atmospheric mist, faces emerging from smoky darkness, Mona Lisa and Virgin of the Rocks style MYSTERIOUS HAZE, warm golden-brown Renaissance palette, SOFT FOCUS throughout like looking through gauze, oil painting with subtle glazing layers and visible brushwork in background, NOT sharp NOT digital, sfumato masterpiece quality' + paintTexture,
+    'LEONARDO DA VINCI': genderRule + 'painting by Leonardo da Vinci: EXTREME SFUMATO technique with ALL EDGES completely SOFT AND BLURRED like smoke or fog, ZERO SHARP LINES anywhere, every boundary DISSOLVED into hazy atmospheric mist, faces emerging from smoky darkness, Mona Lisa PAINTING TECHNIQUE ONLY (sfumato mysterious haze) - PRESERVE ORIGINAL FACE STRUCTURE do NOT transform into Mona Lisa face apply Leonardo sfumato STYLE not Mona Lisa LIKENESS, Virgin of the Rocks atmospheric depth, warm golden-brown Renaissance palette, SOFT FOCUS throughout like looking through gauze, oil painting with subtle glazing layers and visible brushwork in background, NOT sharp NOT digital, sfumato masterpiece quality' + paintTexture,
     
     'TITIAN': genderRule + 'painting by Titian Venetian Renaissance: RICH WARM COLORS with glowing golden flesh tones, loose expressive brushwork visible especially in fabrics, dramatic atmospheric backgrounds, sensuous rendering of silk velvet and skin textures, Venetian colorito tradition with color over line, Portrait of a Man style dignified poses, deep reds golds and earth tones, luminous glazing technique, Titian masterpiece quality' + paintTexture,
     
@@ -2138,7 +2203,7 @@ const fallbackPrompts = {
   
   renaissance: {
     name: '르네상스',
-    prompt: 'Renaissance painting by Leonardo da Vinci EXTREME sfumato technique: PRESERVE original person\'s face and features, DO NOT paint actual Mona Lisa, only apply Leonardo\'s painting technique, apply very strong soft atmospheric haze throughout, all edges must be completely blurred, no sharp outlines anywhere in entire painting, mysterious smoky depth with sfumato technique, every boundary softly dissolved into atmosphere, warm golden Renaissance colors, harmonious balanced composition, unified composition all figures together NOT separated, NOT photographic preserve facial identity, Renaissance masterpiece quality, VISIBLE BRUSHSTROKES, NOT photograph, NOT digital'
+    prompt: 'Renaissance painting by Leonardo da Vinci EXTREME sfumato technique: PRESERVE original person\'s face and features exactly, apply Mona Lisa PAINTING TECHNIQUE ONLY (sfumato haze) - do NOT transform face into Mona Lisa apply Leonardo STYLE not LIKENESS, apply very strong soft atmospheric haze throughout, all edges must be completely blurred, no sharp outlines anywhere in entire painting, mysterious smoky depth with sfumato technique, every boundary softly dissolved into atmosphere, warm golden Renaissance colors, harmonious balanced composition, unified composition all figures together NOT separated, NOT photographic preserve facial identity, Renaissance masterpiece quality, VISIBLE BRUSHSTROKES, NOT photograph, NOT digital'
   },
   
   baroque: {
@@ -2313,10 +2378,9 @@ async function selectArtistWithAI(imageBase64, selectedStyle, timeoutMs = 15000)
       const masterWorksDB = {
         'vangogh': `
 VINCENT VAN GOGH - SELECT ONE:
-1. "The Starry Night" (별이 빛나는 밤) → night scene, sky, landscape, evening | Style: SWIRLING SPIRAL brushstrokes, COBALT BLUE and YELLOW, cypress trees
+1. "The Starry Night" (별이 빛나는 밤) → night scene, sky, landscape, evening, OR FEMALE portrait (PREFERRED for women!) | Style: SWIRLING SPIRAL brushstrokes, COBALT BLUE and YELLOW, cypress trees
 2. "Sunflowers" (해바라기) → flowers, still life, bouquet | Style: THICK IMPASTO, CHROME YELLOW dominates, expressive petal strokes
-3. "Self-Portrait" (자화상, 1889 Saint-Rémy) → MALE portrait, face, upper body | Style: TURQUOISE SWIRLING BACKGROUND, intense gaze, directional brushstrokes
-4. "L'Arlésienne" (아를의 여인) → FEMALE portrait | Style: YELLOW BACKGROUND, black clothing, bold outlines, simplified forms`,
+3. "Self-Portrait" (자화상, 1889 Saint-Rémy) → MALE portrait ONLY | Style: TURQUOISE SWIRLING BACKGROUND, intense gaze, directional brushstrokes, CRITICAL: PRESERVE SUBJECT GENDER - apply Van Gogh BRUSHSTROKE TECHNIQUE only, do NOT add Van Gogh's beard or male features to subject`,
 
         'klimt': `
 GUSTAV KLIMT - SELECT ONE:
@@ -2338,9 +2402,8 @@ HENRI MATISSE - SELECT ONE:
 
         'picasso': `
 PABLO PICASSO - SELECT ONE:
-1. "Les Demoiselles d'Avignon" (아비뇽의 처녀들) → ANY gender (use CUBIST STYLE), group | Style: ANGULAR FRAGMENTED faces, African mask influence, geometric planes
-2. "Guernica" (게르니카) → dramatic scene, chaos, ANY subject | Style: BLACK WHITE GREY only, anguished figures, fragmented bodies
-3. "Weeping Woman" (우는 여인) → FEMALE portrait, emotional | Style: SHARP ANGULAR tears, fractured face, yellow-green-purple`,
+1. "Les Demoiselles d'Avignon" (아비뇽의 처녀들) → ANY gender portrait or group, PREFERRED for FEMALE subjects | Style: ANGULAR FRAGMENTED faces, African mask influence, geometric planes
+2. "Guernica" (게르니카) → dramatic scene, chaos, ANY subject | Style: BLACK WHITE GREY only, anguished figures, fragmented bodies`,
 
         'frida': `
 FRIDA KAHLO - SELECT ONE:
@@ -3429,7 +3492,7 @@ export default async function handler(req, res) {
           '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
           '2. ATTRACTIVE: Render people beautifully (unless expressive distortion work). ' +
           '3. NO HALLUCINATION: Do NOT add people or elements not in original photo. ' +
-          '4. BRUSHWORK: Visible thick brush marks on FACE, SKIN, CLOTHING - impasto texture throughout. ' +
+          '4. BRUSHWORK ON SUBJECT: Visible thick brush marks on SUBJECT (face, skin, hair, clothing) - NOT just background, impasto texture on person. ' +
           '5. NO TEXT: No signatures, letters, writing, watermarks. ' +
           '6. ANATOMY: Correct proportions - no missing or extra limbs. ' +
           '7. NO PAINTER APPEARANCE: Never apply painter physical features to subject - NO Van Gogh red beard, NO Frida unibrow, NO Marilyn/Elvis face. Apply painting TECHNIQUE only. ' +
@@ -3597,7 +3660,7 @@ export default async function handler(req, res) {
         if (selectedArtist.toUpperCase().trim().includes('LEONARDO') || selectedArtist.toUpperCase().trim().includes('DA VINCI')) {
           console.log('🎯 Leonardo da Vinci detected');
           if (!finalPrompt.includes('Mona Lisa-style')) {
-            finalPrompt = finalPrompt + ', painting by Leonardo da Vinci: EXTREME SFUMATO with ALL EDGES SOFT AND BLURRED like smoke, faces emerging from smoky darkness, Mona Lisa mysterious haze, warm golden-brown palette, PRESERVE original subject identity exactly';
+            finalPrompt = finalPrompt + ', painting by Leonardo da Vinci: EXTREME SFUMATO with ALL EDGES SOFT AND BLURRED like smoke, faces emerging from smoky darkness, Mona Lisa PAINTING TECHNIQUE ONLY (sfumato haze) - PRESERVE ORIGINAL FACE STRUCTURE do NOT transform face into Mona Lisa, warm golden-brown palette, PRESERVE original subject identity exactly';
             controlStrength = 0.55;
             console.log('✅ Enhanced Leonardo sfumato (control_strength 0.55)');
           } else {
@@ -4410,9 +4473,9 @@ export default async function handler(req, res) {
     // v62: 붓터치 규칙 - 공통 제외 조건 적용
     // ========================================
     if (!skipBrushstrokeRules) {
-      const brushworkRule = ', CRITICAL PAINTING QUALITY: visible brushstrokes and paint texture throughout, brush marks clearly visible on skin and clothing, canvas/paper texture feel, VISIBLE BRUSHSTROKES, NOT photograph, NOT digital, NOT smooth, NOT airbrushed, NOT photo-like skin';
+      const brushworkRule = ', CRITICAL: VISIBLE BRUSHSTROKES ON SUBJECT (face, skin, hair, clothing) - impasto paint texture, brush marks clearly visible on person NOT just background, canvas texture feel, NOT smooth digital, NOT airbrushed, NOT photo-like skin';
       finalPrompt = finalPrompt + brushworkRule;
-      console.log('🖌️ Applied BRUSHWORK rule');
+      console.log('🖌️ Applied BRUSHWORK rule (피사체 강조)');
     } else {
       console.log('🎨 Skipped BRUSHWORK rule (제외 대상)');
     }
@@ -4422,9 +4485,9 @@ export default async function handler(req, res) {
     // FLUX가 프롬프트 시작과 끝에서 핵심 규칙을 2번 인식
     // ========================================
     if (!skipBrushstrokeRules) {
-      const sandwichCore = 'PRESERVE FACE IDENTITY AGE GENDER ETHNICITY, render ATTRACTIVELY, VISIBLE BRUSHSTROKES, NOT photograph, NOT digital. ';
+      const sandwichCore = 'PRESERVE FACE IDENTITY AGE GENDER ETHNICITY, render ATTRACTIVELY, VISIBLE BRUSHSTROKES ON SUBJECT (face skin clothing), NOT photograph, NOT digital. ';
       finalPrompt = sandwichCore + finalPrompt + ', ' + sandwichCore.trim();
-      console.log('🥪 Applied SANDWICH rule (대전제 핵심 앞뒤 배치)');
+      console.log('🥪 Applied SANDWICH rule (피사체 붓터치 강조)');
     } else {
       console.log('🥪 Skipped SANDWICH rule (제외 대상)');
     }

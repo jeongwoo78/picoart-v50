@@ -288,10 +288,6 @@ const ResultScreen = ({
         '해바라기': 'vangogh-sunflowers',
         'Self-Portrait': 'vangogh-selfportrait',
         '자화상': 'vangogh-selfportrait',
-        "L'Arlésienne": 'vangogh-arlesienne',
-        'LArlesienne': 'vangogh-arlesienne',
-        'Arlesienne': 'vangogh-arlesienne',
-        '아를의 여인': 'vangogh-arlesienne',
         
         // 클림트
         'The Kiss': 'klimt-kiss',
@@ -328,8 +324,6 @@ const ResultScreen = ({
         'Demoiselles': 'picasso-demoiselles',
         'Guernica': 'picasso-guernica',
         '게르니카': 'picasso-guernica',
-        'Weeping Woman': 'picasso-weepingwoman',
-        '우는 여인': 'picasso-weepingwoman',
         
         // 프리다 칼로
         'Me and My Parrots': 'frida-parrots',
@@ -414,8 +408,6 @@ const ResultScreen = ({
         'CARAVAGGIO': 'caravaggio',
         'Rembrandt': 'rembrandt',
         'REMBRANDT': 'rembrandt',
-        'Vermeer': 'vermeer',
-        'VERMEER': 'vermeer',
         'Velázquez': 'velazquez',
         'VELÁZQUEZ': 'velazquez',
         'Velazquez': 'velazquez',
@@ -801,10 +793,6 @@ const ResultScreen = ({
         '감자 먹는 사람들': 'vangogh-potatoeaters',
         'Self-Portrait': 'vangogh-selfportrait',
         '자화상': 'vangogh-selfportrait',
-        'L\'Arlésienne': 'vangogh-arlesienne',
-        'LArlesienne': 'vangogh-arlesienne',
-        '아를의 여인': 'vangogh-arlesienne',
-        'Arlesienne': 'vangogh-arlesienne',
         
         // 클림트
         'The Kiss': 'klimt-kiss',
@@ -859,8 +847,6 @@ const ResultScreen = ({
         'Demoiselles': 'picasso-demoiselles',
         'Guernica': 'picasso-guernica',
         '게르니카': 'picasso-guernica',
-        'Weeping Woman': 'picasso-weepingwoman',
-        '우는 여인': 'picasso-weepingwoman',
         'Bull\'s Head': 'picasso-bullhead',
         '황소 머리': 'picasso-bullhead',
         
@@ -1113,9 +1099,6 @@ const ResultScreen = ({
         'sunflowers': '해바라기',
         'the bedroom': '침실',
         'cafe terrace at night': '밤의 카페 테라스',
-        'l\'arlesienne': '아를의 여인',
-        'arlesienne': '아를의 여인',
-        'larlesienne': '아를의 여인',
         // 마티스
         'woman with a hat': '모자를 쓴 여인',
         'the dance': '춤',
@@ -1127,8 +1110,6 @@ const ResultScreen = ({
         // 피카소
         'les demoiselles d\'avignon': '아비뇽의 처녀들',
         'guernica': '게르니카',
-        'the weeping woman': '우는 여인',
-        'weeping woman': '우는 여인',
         'girl before a mirror': '거울 앞의 소녀',
         // 워홀
         'marilyn monroe': '마릴린 먼로',
@@ -1145,8 +1126,13 @@ const ResultScreen = ({
       
       let workShort = '대표작';
       if (workName) {
-        const workNorm = workName.toLowerCase().trim();
-        workShort = workMap[workNorm] || workName;
+        // 괄호 포함된 경우 영문만 추출: "Woman with a Hat (모자를 쓴 여인)" → "Woman with a Hat"
+        let workToCheck = workName;
+        if (workName.includes('(')) {
+          workToCheck = workName.split('(')[0].trim();
+        }
+        const workNorm = workToCheck.toLowerCase().trim();
+        workShort = workMap[workNorm] || workToCheck;
       }
       
       return `<${artistShort}> ${workShort}`;
@@ -1175,7 +1161,6 @@ const ResultScreen = ({
         // 바로크
         'caravaggio': { movement: '바로크', artist: '카라바조' },
         'rembrandt': { movement: '바로크', artist: '렘브란트' },
-        'vermeer': { movement: '바로크', artist: '베르메르' },
         'velazquez': { movement: '바로크', artist: '벨라스케스' },
         'velázquez': { movement: '바로크', artist: '벨라스케스' },
         'rubens': { movement: '바로크', artist: '루벤스' },
@@ -1307,10 +1292,6 @@ const ResultScreen = ({
       'starry night': '별이 빛나는 밤(Starry Night)',
       'sunflowers': '해바라기(Sunflowers)',
       'self-portrait': '자화상(Self-Portrait)',
-      "l'arlesienne": '아를의 여인(L\'Arlésienne)',
-      'larlesienne': '아를의 여인(L\'Arlésienne)',
-      'arlesienne': '아를의 여인(L\'Arlésienne)',
-      
       // 클림트
       'the kiss': '키스(The Kiss)',
       'the tree of life': '생명의 나무(The Tree of Life)',
@@ -1333,8 +1314,6 @@ const ResultScreen = ({
       
       // 피카소
       'guernica': '게르니카(Guernica)',
-      'weeping woman': '우는 여인(Weeping Woman)',
-      'the weeping woman': '우는 여인(Weeping Woman)',
       "les demoiselles d'avignon": '아비뇽의 처녀들(Les Demoiselles d\'Avignon)',
       'demoiselles': '아비뇽의 처녀들(Les Demoiselles d\'Avignon)',
       
@@ -1458,7 +1437,6 @@ const ResultScreen = ({
       'caravaggio': '미켈란젤로 메리시 다 카라바조(Caravaggio)',
       'michelangelo merisi da caravaggio': '미켈란젤로 메리시 다 카라바조(Caravaggio)',
       'rembrandt': '렘브란트 판 레인(Rembrandt van Rijn)',
-      'vermeer': '요하네스 베르메르(Johannes Vermeer)',
       'velazquez': '디에고 벨라스케스(Diego Velázquez)',
       'rubens': '피터 파울 루벤스(Peter Paul Rubens)',
       'peter paul rubens': '피터 파울 루벤스(Peter Paul Rubens)',
