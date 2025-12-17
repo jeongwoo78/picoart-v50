@@ -188,17 +188,28 @@ const GalleryScreen = ({ onBack, onHome }) => {
     }
   };
 
-  // 이미지 다운로드 (fetch + Blob 방식)
+  // 이미지 다운로드 (직접 base64 → Blob 변환)
   const handleDownload = async (item) => {
     try {
-      // base64 → Blob 변환
-      const response = await fetch(item.imageData);
-      const blob = await response.blob();
+      // base64 데이터에서 직접 Blob 생성 (fetch 사용 안 함)
+      const base64Data = item.imageData;
+      const base64 = base64Data.split(',')[1] || base64Data;
+      const mimeType = base64Data.match(/data:([^;]+);/)?.[1] || 'image/png';
+      
+      const byteCharacters = atob(base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mimeType });
+      
       const url = URL.createObjectURL(blob);
+      const fileName = `picoart_${item.styleName.replace(/\s+/g, '_')}_${Date.now()}.png`;
       
       const a = document.createElement('a');
       a.href = url;
-      a.download = `picoart_${item.styleName.replace(/\s+/g, '_')}_${Date.now()}.png`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
