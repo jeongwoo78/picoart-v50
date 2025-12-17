@@ -278,7 +278,7 @@ const ResultScreen = ({
     console.log('   - category:', category);
     
     // ========== 거장: workKeyMap으로 매칭 ==========
-    if (category === 'masters' && workName) {
+    if (category === 'masters') {
       const mastersWorkKeyMap = {
         // 반 고흐 (vangogh- 로 통일)
         'The Starry Night': 'vangogh-starrynight',
@@ -349,30 +349,68 @@ const ResultScreen = ({
         'Soup Cans': 'warhol-soup',
       };
       
-      // 1. 직접 매칭 시도
-      let key = mastersWorkKeyMap[workName];
-      if (key) {
-        console.log('✅ Masters workKeyMap matched (direct):', key);
-        return key;
+      // 1. workName이 있으면 직접 매칭 시도
+      if (workName) {
+        let key = mastersWorkKeyMap[workName];
+        if (key) {
+          console.log('✅ Masters workKeyMap matched (direct):', key);
+          return key;
+        }
+        
+        // 2. 괄호 포함된 경우: "Woman with a Hat (모자를 쓴 여인)" → "Woman with a Hat" 추출
+        const englishPart = workName.split('(')[0].trim();
+        const koreanMatch = workName.match(/\(([^)]+)\)/);
+        const koreanPart = koreanMatch ? koreanMatch[1].trim() : '';
+        
+        // 영문으로 시도
+        if (englishPart && mastersWorkKeyMap[englishPart]) {
+          key = mastersWorkKeyMap[englishPart];
+          console.log('✅ Masters workKeyMap matched (english part):', key);
+          return key;
+        }
+        
+        // 한글로 시도
+        if (koreanPart && mastersWorkKeyMap[koreanPart]) {
+          key = mastersWorkKeyMap[koreanPart];
+          console.log('✅ Masters workKeyMap matched (korean part):', key);
+          return key;
+        }
       }
       
-      // 2. 괄호 포함된 경우: "Woman with a Hat (모자를 쓴 여인)" → "Woman with a Hat" 추출
-      const englishPart = workName.split('(')[0].trim();
-      const koreanMatch = workName.match(/\(([^)]+)\)/);
-      const koreanPart = koreanMatch ? koreanMatch[1].trim() : '';
-      
-      // 영문으로 시도
-      if (englishPart && mastersWorkKeyMap[englishPart]) {
-        key = mastersWorkKeyMap[englishPart];
-        console.log('✅ Masters workKeyMap matched (english part):', key);
-        return key;
-      }
-      
-      // 한글로 시도
-      if (koreanPart && mastersWorkKeyMap[koreanPart]) {
-        key = mastersWorkKeyMap[koreanPart];
-        console.log('✅ Masters workKeyMap matched (korean part):', key);
-        return key;
+      // 3. workName 없으면 artistName으로 기본 작품 fallback (변환 중)
+      if (artistName) {
+        const artistFallbackMap = {
+          '반 고흐': 'vangogh-starrynight',
+          'Van Gogh': 'vangogh-starrynight',
+          '빈센트 반 고흐': 'vangogh-starrynight',
+          'Vincent van Gogh': 'vangogh-starrynight',
+          '클림트': 'klimt-kiss',
+          'Klimt': 'klimt-kiss',
+          'Gustav Klimt': 'klimt-kiss',
+          '뭉크': 'munch-scream',
+          'Munch': 'munch-scream',
+          'Edvard Munch': 'munch-scream',
+          '마티스': 'matisse-dance',
+          'Matisse': 'matisse-dance',
+          'Henri Matisse': 'matisse-dance',
+          '피카소': 'picasso-demoiselles',
+          'Picasso': 'picasso-demoiselles',
+          'Pablo Picasso': 'picasso-demoiselles',
+          '프리다': 'frida-parrots',
+          'Frida': 'frida-parrots',
+          'Frida Kahlo': 'frida-parrots',
+          '프리다 칼로': 'frida-parrots',
+          '워홀': 'warhol-marilyn',
+          'Warhol': 'warhol-marilyn',
+          'Andy Warhol': 'warhol-marilyn',
+          '앤디 워홀': 'warhol-marilyn',
+        };
+        
+        const fallbackKey = artistFallbackMap[artistName];
+        if (fallbackKey) {
+          console.log('✅ Masters artistName fallback:', fallbackKey);
+          return fallbackKey;
+        }
       }
     }
     
@@ -1333,8 +1371,12 @@ const ResultScreen = ({
       'elvis': '엘비스(Elvis)'
     };
     
-    // 소문자로 변환해서 매칭
-    const normalizedWork = workName.toLowerCase().trim();
+    // 영문(한글) 형식이면 영문 부분만 추출해서 매핑
+    let normalizedWork = workName.toLowerCase().trim();
+    if (workName.includes('(') && /^[A-Za-z]/.test(workName)) {
+      normalizedWork = workName.split('(')[0].trim().toLowerCase();
+    }
+    
     if (workMap[normalizedWork]) {
       return workMap[normalizedWork];
     }
@@ -2116,8 +2158,8 @@ const ResultScreen = ({
           </div>
         )}
 
-        {/* 다시 시도 버튼 (실패한 결과가 있고 현재 보고 있는 결과가 실패한 경우 표시) */}
-        {isFullTransform && ((currentResult && !currentResult.success) || isRetrying) && (
+        {/* 다시 시도 버튼 (현재 보고 있는 결과가 실패한 경우에만 표시) */}
+        {isFullTransform && currentResult && !currentResult.success && (
           <div className="retry-section">
             {isRetrying ? (
               <div className="retry-in-progress">

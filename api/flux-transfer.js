@@ -708,6 +708,32 @@ function selectArtistByWeight(category, photoAnalysis) {
       return weightedRandomSelect(weights.movement);
     }
     
+    // 인물 사진 + 배경 체크 → 카유보트 조건부 제외
+    if (subject.includes('person') || subject.includes('portrait') || subject === 'person') {
+      // 단색/단순 배경이면 카유보트 제외 (르누아르/모네/드가만)
+      const isSimpleBackground = background.includes('plain') || background.includes('solid') || 
+                                  background.includes('studio') || background.includes('simple') ||
+                                  background.includes('white') || background.includes('gray') ||
+                                  background.includes('neutral') || background === '' ||
+                                  !background || background.includes('indoor');
+      
+      // 도시/거리/건물 배경이면 카유보트 포함
+      const isUrbanBackground = background.includes('city') || background.includes('urban') || 
+                                 background.includes('street') || background.includes('building') ||
+                                 background.includes('paris') || background.includes('cafe');
+      
+      if (isSimpleBackground && !isUrbanBackground) {
+        // 단순 배경: 카유보트 제외 (르누아르 60%, 모네 35%, 드가 5%)
+        console.log('🎨 Impressionism portrait: Simple background → Caillebotte excluded');
+        return weightedRandomSelect([
+          { name: 'RENOIR', weight: 60 },
+          { name: 'MONET', weight: 35 },
+          { name: 'DEGAS', weight: 5 }
+        ]);
+      }
+      // 도시/복잡한 배경이면 기존 portrait 비중 사용 (카유보트 포함)
+    }
+    
     // 풍경 분기: 자연 vs 도시
     // 'landscape' 또는 ('object'인데 outdoor 배경)이면 풍경으로 처리
     const isOutdoorBackground = background.includes('outdoor') || background.includes('nature') || 
@@ -3644,9 +3670,9 @@ export default async function handler(req, res) {
             selectedArtist.includes('고딕')) {
           console.log('🎯 Gothic detected');
           if (!finalPrompt.includes('STAINED GLASS')) {
-            finalPrompt = finalPrompt + ', Gothic cathedral STAINED GLASS window style: CRITICAL - THICK BLACK LEAD LINES (cames) dividing image into segments like actual stained glass, JEWEL-TONE TRANSLUCENT COLORS (ruby red, sapphire blue, emerald green, amber gold) as if light shining through colored glass, FLAT TWO-DIMENSIONAL medieval aesthetic NOT realistic, elongated vertical figures with elegant poses, Gothic pointed arch frame, divine holy light streaming through, PRESERVE subject face identity and age, sacred cathedral masterpiece quality';
-            controlStrength = 0.55;
-            console.log('✅ Enhanced Gothic STAINED GLASS effect (control_strength 0.55)');
+            finalPrompt = finalPrompt + ', Gothic cathedral STAINED GLASS window style: CRITICAL - THICK BLACK LEAD LINES (cames) must divide ENTIRE image INCLUDING FACE AND SKIN into colored glass segments, face must have BLACK LINES crossing through like real stained glass NOT smooth realistic face, JEWEL-TONE TRANSLUCENT COLORS (ruby red, sapphire blue, emerald green, amber gold) on ALL areas including face, FLAT TWO-DIMENSIONAL medieval aesthetic, stylized simplified facial features, elongated vertical figure, Gothic pointed arch frame, divine holy light streaming through, NOT realistic portrait NOT smooth skin, sacred stained glass masterpiece quality';
+            controlStrength = 0.50;
+            console.log('✅ Enhanced Gothic STAINED GLASS effect (control_strength 0.50, face lines emphasized)');
           } else {
             console.log('ℹ️ Gothic stained glass already in prompt');
           }
@@ -3656,13 +3682,13 @@ export default async function handler(req, res) {
         // 르네상스 ~ 바로크 강화 프롬프트
         // ========================================
         
-        // 레오나르도 다 빈치 선택시 스푸마토 초강화 + control_strength 0.55
+        // 레오나르도 다 빈치 선택시 스푸마토 초강화 + 어두운 배경
         if (selectedArtist.toUpperCase().trim().includes('LEONARDO') || selectedArtist.toUpperCase().trim().includes('DA VINCI')) {
           console.log('🎯 Leonardo da Vinci detected');
           if (!finalPrompt.includes('Mona Lisa-style')) {
-            finalPrompt = finalPrompt + ', painting by Leonardo da Vinci: EXTREME SFUMATO with ALL EDGES SOFT AND BLURRED like smoke, faces emerging from smoky darkness, Mona Lisa PAINTING TECHNIQUE ONLY (sfumato haze) - PRESERVE ORIGINAL FACE STRUCTURE do NOT transform face into Mona Lisa, warm golden-brown palette, PRESERVE original subject identity exactly';
-            controlStrength = 0.55;
-            console.log('✅ Enhanced Leonardo sfumato (control_strength 0.55)');
+            finalPrompt = finalPrompt + ', painting by Leonardo da Vinci: DARK MYSTERIOUS BACKGROUND with deep shadows, EXTREME SFUMATO technique - ALL EDGES SOFT AND BLURRED like smoke dissolving into darkness, faces emerging from smoky dark atmosphere, NO SHARP EDGES anywhere, warm golden-brown palette against dark background, Mona Lisa PAINTING TECHNIQUE ONLY (sfumato haze) - PRESERVE ORIGINAL FACE STRUCTURE do NOT transform face into Mona Lisa, PRESERVE original subject identity exactly';
+            controlStrength = 0.50;
+            console.log('✅ Enhanced Leonardo sfumato + dark background (control_strength 0.50)');
           } else {
             console.log('ℹ️ Leonardo sfumato already in prompt');
           }
@@ -3967,14 +3993,14 @@ export default async function handler(req, res) {
           }
         }
         
-        // 르누아르 선택시 따뜻한 인물화 강화
+        // 르누아르 선택시 따뜻한 인물화 + 나뭇잎 햇살 필수!
         if (selectedArtist.toUpperCase().trim().includes('RENOIR') || 
             selectedArtist.toUpperCase().trim().includes('PIERRE-AUGUSTE')) {
           console.log('🎯 Renoir detected');
           if (!finalPrompt.includes('Renoir')) {
-            finalPrompt = finalPrompt + ', painting by Pierre-Auguste Renoir: SOFT FEATHERY BRUSHSTROKES with VISIBLE oil paint texture, warm glowing skin tones with rosy pink cheeks, DAPPLED SUNLIGHT filtering through creating luminous atmosphere, warm harmonious colors (peach pink golden coral), loose impressionist brushwork NOT smooth NOT digital, figures bathed in soft radiant light, VISIBLE CANVAS WEAVE through paint layers, joyful warm intimate mood, CRITICAL IDENTITY: PRESERVE original subject face identity age and ethnicity exactly - Asian features must remain Asian, child must remain child, DO NOT change hair color or skin tone to Western appearance, keep original clothing, Renoir masterpiece quality';
-            controlStrength = 0.60;
-            console.log('✅ Enhanced Renoir + identity preserve (control_strength 0.60)');
+            finalPrompt = finalPrompt + ', painting by Pierre-Auguste Renoir: MANDATORY DAPPLED SUNLIGHT ON FACE AND SUBJECT - golden light SPOTS and PATCHES filtering THROUGH LEAVES MUST appear on FACE (forehead cheeks) AND SUBJECT (skin hair clothing), this sunlight effect on face and subject is REQUIRED and NON-NEGOTIABLE for Renoir style, shimmering luminous atmosphere with dancing light, SOFT FEATHERY BRUSHSTROKES with VISIBLE oil paint texture, warm glowing skin tones with rosy pink cheeks, warm harmonious colors (peach pink golden coral), loose impressionist brushwork NOT smooth NOT digital, joyful warm intimate mood, PRESERVE original subject face identity, Renoir masterpiece quality';
+            controlStrength = 0.50;
+            console.log('✅ Enhanced Renoir MANDATORY DAPPLED SUNLIGHT FACE+SUBJECT (control_strength 0.50)');
           } else {
             console.log('ℹ️ Renoir warmth already in prompt (AI included it)');
           }
@@ -4038,9 +4064,9 @@ export default async function handler(req, res) {
             selectedArtist.includes('빈센트')) {
           console.log('🎯 Van Gogh detected');
           if (!finalPrompt.includes('SWIRLING') && !finalPrompt.includes('IMPASTO')) {
-            finalPrompt = finalPrompt + ', painting by Vincent van Gogh: CRITICAL - EXTREMELY THICK IMPASTO brushstrokes with HEAVY 3D PAINT TEXTURE like squeezed directly from tube, VISIBLE RIDGES AND GROOVES of thick oil paint creating sculptural surface, SWIRLING TURBULENT brushwork in EVERY area including face skin clothes background, CHUNKY BOLD brush marks 5-10mm wide NOT smooth NOT blended, face must show VISIBLE BRUSHSTROKES not smooth skin, intense saturated colors (cobalt blue cadmium yellow chrome orange), Self-Portrait style ENERGETIC EXPRESSIVE strokes, painterly NOT illustrative NOT digital, canvas weave texture visible through thick paint, CRITICAL IDENTITY: PRESERVE original person FACE IDENTITY and AGE exactly - child must remain child adult must remain adult, keep original ethnicity and facial features, render subject ATTRACTIVELY and BEAUTIFULLY';
-            controlStrength = 0.60;
-            console.log('✅ Enhanced Van Gogh THICK IMPASTO + identity preserve (control_strength 0.60)');
+            finalPrompt = finalPrompt + ', painting by Vincent van Gogh: MANDATORY BRUSHSTROKES ON FACE AND SUBJECT - THICK IMPASTO brush marks MUST cover ENTIRE FACE (forehead cheeks nose chin) AND ENTIRE SUBJECT (skin hair clothing) with VISIBLE directional strokes, this texture on face and subject is REQUIRED and NON-NEGOTIABLE for Van Gogh style, face and body must NOT be smooth or realistic, EXTREMELY THICK 3D PAINT TEXTURE, VISIBLE RIDGES AND GROOVES, SWIRLING TURBULENT brushwork everywhere, CHUNKY BOLD brush marks NOT smooth NOT blended, intense saturated colors (cobalt blue cadmium yellow chrome orange), painterly NOT illustrative NOT digital, PRESERVE original person FACE IDENTITY, render subject ATTRACTIVELY';
+            controlStrength = 0.50;
+            console.log('✅ Enhanced Van Gogh MANDATORY FACE+SUBJECT BRUSHSTROKES (control_strength 0.50)');
           } else {
             console.log('ℹ️ Van Gogh swirls already in prompt (AI included it)');
           }
@@ -4155,9 +4181,9 @@ export default async function handler(req, res) {
             selectedArtist.includes('파블로')) {
           console.log('🎯 Picasso detected');
           if (!finalPrompt.includes('Cubist')) {
-            finalPrompt = finalPrompt + ', Cubist painting by Pablo Picasso: CRITICAL - SINGLE UNIFIED IMAGE not divided into panels NOT 4-panel grid NOT multiple frames, MULTI-PERSPECTIVE FACE showing NOSE from SIDE PROFILE angle while BOTH EYES visible from FRONT VIEW in same face, GEOMETRIC PLANES dividing face into angular flat colored sections, VISIBLE BRUSHSTROKES with thick oil paint texture throughout, earth tone palette (ochre sienna brown olive grey), face broken into overlapping angular planes like faceted crystal, Analytical Cubism style with intersecting geometric shapes, painterly NOT illustrative NOT smooth, Les Demoiselles d\'Avignon and Portrait of Dora Maar style, PRESERVE subject age and identity while applying Cubist fragmentation, render subject ATTRACTIVELY';
+            finalPrompt = finalPrompt + ', Cubist painting by Pablo Picasso: MANDATORY CUBIST FRAGMENTATION ON FACE AND SUBJECT - face AND body/clothing MUST be broken into GEOMETRIC ANGULAR PLANES, this fragmentation on face and subject is REQUIRED and NON-NEGOTIABLE for Picasso style, MULTI-PERSPECTIVE showing NOSE from SIDE while BOTH EYES from FRONT in same face, face and clothing divided into flat colored angular sections like faceted crystal, SINGLE UNIFIED IMAGE not panels, VISIBLE BRUSHSTROKES with thick oil paint, earth tone palette (ochre sienna brown olive grey), Analytical Cubism intersecting shapes, painterly NOT smooth NOT realistic, PRESERVE subject identity while applying Cubist fragmentation, render subject ATTRACTIVELY';
             controlStrength = 0.45;
-            console.log('✅ Enhanced Picasso Cubism (control_strength 0.45 for balanced fragmentation)');
+            console.log('✅ Enhanced Picasso MANDATORY CUBIST FACE+SUBJECT (control_strength 0.45)');
           } else {
             console.log('ℹ️ Picasso Cubism already in prompt (AI included it)');
           }
