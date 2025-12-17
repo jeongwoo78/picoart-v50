@@ -188,52 +188,24 @@ const GalleryScreen = ({ onBack, onHome }) => {
     }
   };
 
-  // 이미지 다운로드 (모바일 대응)
+  // 이미지 다운로드 (fetch + Blob 방식)
   const handleDownload = async (item) => {
     try {
-      const fileName = `picoart_${item.styleName.replace(/\s+/g, '_')}_${Date.now()}.png`;
+      // base64 → Blob 변환
+      const response = await fetch(item.imageData);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
       
-      // 모바일 감지
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
-      if (isMobile) {
-        // 모바일: 새 탭에서 이미지 열기 (길게 눌러 저장 유도)
-        const newTab = window.open();
-        if (newTab) {
-          newTab.document.write(`
-            <html>
-              <head>
-                <title>${fileName}</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                  body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000; flex-direction: column; }
-                  img { max-width: 100%; max-height: 80vh; object-fit: contain; }
-                  p { color: white; text-align: center; padding: 20px; font-family: sans-serif; }
-                </style>
-              </head>
-              <body>
-                <img src="${item.imageData}" alt="${item.styleName}"/>
-                <p>📱 이미지를 길게 눌러 저장하세요</p>
-              </body>
-            </html>
-          `);
-          newTab.document.close();
-        } else {
-          // 팝업 차단된 경우 직접 이동
-          window.location.href = item.imageData;
-        }
-      } else {
-        // PC: 기존 방식
-        const a = document.createElement('a');
-        a.href = item.imageData;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `picoart_${item.styleName.replace(/\s+/g, '_')}_${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('다운로드 실패:', error);
-      alert('다운로드에 실패했습니다. 이미지를 길게 눌러 저장해 주세요.');
+      alert('다운로드에 실패했습니다.');
     }
   };
 

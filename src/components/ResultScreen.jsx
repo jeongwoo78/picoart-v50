@@ -379,195 +379,227 @@ const ResultScreen = ({
       
       // 3. workName 없으면 artistName으로 기본 작품 fallback (변환 중)
       if (artistName) {
-        const artistFallbackMap = {
-          '반 고흐': 'vangogh-starrynight',
-          'Van Gogh': 'vangogh-starrynight',
-          '빈센트 반 고흐': 'vangogh-starrynight',
-          'Vincent van Gogh': 'vangogh-starrynight',
-          '클림트': 'klimt-kiss',
-          'Klimt': 'klimt-kiss',
-          'Gustav Klimt': 'klimt-kiss',
-          '뭉크': 'munch-scream',
-          'Munch': 'munch-scream',
-          'Edvard Munch': 'munch-scream',
-          '마티스': 'matisse-dance',
-          'Matisse': 'matisse-dance',
-          'Henri Matisse': 'matisse-dance',
-          '피카소': 'picasso-demoiselles',
-          'Picasso': 'picasso-demoiselles',
-          'Pablo Picasso': 'picasso-demoiselles',
-          '프리다': 'frida-parrots',
-          'Frida': 'frida-parrots',
-          'Frida Kahlo': 'frida-parrots',
-          '프리다 칼로': 'frida-parrots',
-          '워홀': 'warhol-marilyn',
-          'Warhol': 'warhol-marilyn',
-          'Andy Warhol': 'warhol-marilyn',
-          '앤디 워홀': 'warhol-marilyn',
-        };
+        const artistNorm = artistName.toLowerCase();
         
-        const fallbackKey = artistFallbackMap[artistName];
-        if (fallbackKey) {
-          console.log('✅ Masters artistName fallback:', fallbackKey);
-          return fallbackKey;
+        // 반 고흐
+        if (artistNorm.includes('고흐') || artistNorm.includes('gogh') || artistNorm.includes('vincent')) {
+          console.log('✅ Masters fallback: Van Gogh detected');
+          return 'vangogh-starrynight';
         }
+        // 클림트
+        if (artistNorm.includes('클림트') || artistNorm.includes('klimt') || artistNorm.includes('gustav')) {
+          console.log('✅ Masters fallback: Klimt detected');
+          return 'klimt-kiss';
+        }
+        // 뭉크
+        if (artistNorm.includes('뭉크') || artistNorm.includes('munch') || artistNorm.includes('edvard')) {
+          console.log('✅ Masters fallback: Munch detected');
+          return 'munch-scream';
+        }
+        // 마티스
+        if (artistNorm.includes('마티스') || artistNorm.includes('matisse') || artistNorm.includes('henri')) {
+          console.log('✅ Masters fallback: Matisse detected');
+          return 'matisse-dance';
+        }
+        // 피카소
+        if (artistNorm.includes('피카소') || artistNorm.includes('picasso') || artistNorm.includes('pablo')) {
+          console.log('✅ Masters fallback: Picasso detected');
+          return 'picasso-demoiselles';
+        }
+        // 프리다
+        if (artistNorm.includes('프리다') || artistNorm.includes('frida') || artistNorm.includes('kahlo')) {
+          console.log('✅ Masters fallback: Frida detected');
+          return 'frida-parrots';
+        }
+        // 워홀
+        if (artistNorm.includes('워홀') || artistNorm.includes('warhol') || artistNorm.includes('andy')) {
+          console.log('✅ Masters fallback: Warhol detected');
+          return 'warhol-marilyn';
+        }
+        
+        console.log('❌ Masters fallback: No artist matched for:', artistName);
       }
     }
     
     // ========== 미술사조: artistName으로 매칭 ==========
     if (category === 'movements' && artistName) {
-      const movementsArtistKeyMap = {
-        // 고대
-        'Greek Sculpture': 'ancient-greek-sculpture',
-        'Ancient Greek Sculpture': 'ancient-greek-sculpture',
-        'Classical Sculpture': 'ancient-greek-sculpture',
-        'Roman Mosaic': 'roman-mosaic',
-        // 중세
-        'Byzantine': 'byzantine',
-        'Byzantine Mosaic': 'byzantine',
-        'Gothic': 'gothic',
-        'Gothic Stained Glass': 'gothic',  // API 반환값
-        'Islamic Miniature': 'islamic-miniature',
-        'Islamic Geometry': 'islamic-miniature',
-        // 르네상스
-        'Leonardo da Vinci': 'leonardo',
-        'LEONARDO': 'leonardo',
-        'LEONARDO DA VINCI': 'leonardo',
-        'Michelangelo': 'michelangelo',
-        'MICHELANGELO': 'michelangelo',
-        'Raphael': 'raphael',
-        'RAPHAEL': 'raphael',
-        'Botticelli': 'botticelli',
-        'BOTTICELLI': 'botticelli',
-        'Titian': 'titian',
-        'TITIAN': 'titian',
-        // 바로크
-        'Caravaggio': 'caravaggio',
-        'CARAVAGGIO': 'caravaggio',
-        'Rembrandt': 'rembrandt',
-        'REMBRANDT': 'rembrandt',
-        'Velázquez': 'velazquez',
-        'VELÁZQUEZ': 'velazquez',
-        'Velazquez': 'velazquez',
-        'VELAZQUEZ': 'velazquez',
-        // 로코코
-        'Watteau': 'watteau',
-        'WATTEAU': 'watteau',
-        'Boucher': 'boucher',
-        'BOUCHER': 'boucher',
-        // 19세기
-        'Jacques-Louis David': 'jacques-louis-david',
-        'DAVID': 'jacques-louis-david',
-        'Ingres': 'ingres',
-        'INGRES': 'ingres',
-        'Jean-Auguste-Dominique Ingres': 'ingres',
-        'Turner': 'turner',
-        'TURNER': 'turner',
-        'Goya': 'goya',
-        'GOYA': 'goya',
-        'Delacroix': 'delacroix',
-        'DELACROIX': 'delacroix',
-        'Millet': 'millet',
-        'MILLET': 'millet',
-        'Manet': 'manet',
-        'MANET': 'manet',
-        // 인상주의
-        'Monet': 'monet',
-        'MONET': 'monet',
-        'Claude Monet': 'monet',
-        'Renoir': 'renoir',
-        'RENOIR': 'renoir',
-        'Pierre-Auguste Renoir': 'renoir',
-        'Degas': 'degas',
-        'DEGAS': 'degas',
-        'Edgar Degas': 'degas',
-        'Caillebotte': 'caillebotte',
-        'CAILLEBOTTE': 'caillebotte',
-        'Gustave Caillebotte': 'caillebotte',
-        // 후기인상주의
-        'Van Gogh': 'gogh',
-        'GOGH': 'gogh',
-        'Vincent van Gogh': 'gogh',
-        'Cézanne': 'cezanne',
-        'CÉZANNE': 'cezanne',  // 악센트 버전
-        'CEZANNE': 'cezanne',
-        'Paul Cézanne': 'cezanne',
-        'Gauguin': 'gauguin',
-        'GAUGUIN': 'gauguin',
-        'Paul Gauguin': 'gauguin',
-        'Signac': 'signac',
-        'SIGNAC': 'signac',
-        'Paul Signac': 'signac',
-        // 야수파
-        'Matisse': 'matisse',
-        'MATISSE': 'matisse',
-        'Henri Matisse': 'matisse',
-        'Derain': 'derain',
-        'DERAIN': 'derain',
-        'André Derain': 'derain',
-        'Vlaminck': 'vlaminck',
-        'VLAMINCK': 'vlaminck',
-        'Maurice de Vlaminck': 'vlaminck',
-        // 표현주의
-        'Munch': 'munch',
-        'MUNCH': 'munch',
-        'Edvard Munch': 'munch',
-        'Kokoschka': 'kokoschka',
-        'KOKOSCHKA': 'kokoschka',
-        'Oskar Kokoschka': 'kokoschka',
-        'Kirchner': 'kirchner',
-        'KIRCHNER': 'kirchner',
-        'Ernst Ludwig Kirchner': 'kirchner',
-        'Kandinsky': 'kandinsky',
-        'KANDINSKY': 'kandinsky',
-        'Wassily Kandinsky': 'kandinsky',
-        // 모더니즘
-        'Picasso': 'picasso',
-        'PICASSO': 'picasso',
-        'Pablo Picasso': 'picasso',
-        'Magritte': 'magritte',
-        'MAGRITTE': 'magritte',
-        'René Magritte': 'magritte',
-        'Miró': 'miro',
-        'MIRO': 'miro',
-        'Joan Miró': 'miro',
-        'Chagall': 'chagall',
-        'CHAGALL': 'chagall',
-        'Marc Chagall': 'chagall',
-        'Warhol': 'warhol',
-        'WARHOL': 'warhol',
-        'Andy Warhol': 'warhol',
-        'Lichtenstein': 'lichtenstein',
-        'LICHTENSTEIN': 'lichtenstein',
-        'Roy Lichtenstein': 'lichtenstein',
-        'Keith Haring': 'keith-haring',
-        'KEITH HARING': 'keith-haring',
-        // 한글 fallback (AI 타임아웃 시)
-        '르네상스': 'leonardo',
-        '바로크': 'caravaggio',
-        '로코코': 'watteau',
-        '신고전주의': 'jacques-louis-david',
-        '낭만주의': 'delacroix',
-        '사실주의': 'millet',
-        '인상주의': 'monet',
-        '후기인상주의': 'gogh',
-        '야수파': 'matisse',
-        '표현주의': 'munch',
-        '모더니즘': 'picasso',
-      };
+      const artistNorm = artistName.toLowerCase();
       
-      const key = movementsArtistKeyMap[artistName];
-      if (key) {
-        console.log('✅ Movements artistKeyMap matched:', key);
-        return key;
+      // 고대
+      if (artistNorm.includes('greek') || artistNorm.includes('sculpture') || artistNorm.includes('그리스')) {
+        return 'ancient-greek-sculpture';
+      }
+      if (artistNorm.includes('roman') || artistNorm.includes('mosaic') || artistNorm.includes('로마')) {
+        return 'roman-mosaic';
+      }
+      // 중세
+      if (artistNorm.includes('byzantine') || artistNorm.includes('비잔틴')) {
+        return 'byzantine';
+      }
+      if (artistNorm.includes('gothic') || artistNorm.includes('고딕')) {
+        return 'gothic';
+      }
+      if (artistNorm.includes('islamic') || artistNorm.includes('이슬람')) {
+        return 'islamic-miniature';
+      }
+      // 르네상스
+      if (artistNorm.includes('leonardo') || artistNorm.includes('vinci') || artistNorm.includes('다빈치') || artistNorm.includes('레오나르도')) {
+        return 'leonardo';
+      }
+      if (artistNorm.includes('michelangelo') || artistNorm.includes('미켈란젤로')) {
+        return 'michelangelo';
+      }
+      if (artistNorm.includes('raphael') || artistNorm.includes('라파엘')) {
+        return 'raphael';
+      }
+      if (artistNorm.includes('botticelli') || artistNorm.includes('보티첼리')) {
+        return 'botticelli';
+      }
+      if (artistNorm.includes('titian') || artistNorm.includes('티치아노')) {
+        return 'titian';
+      }
+      // 바로크
+      if (artistNorm.includes('caravaggio') || artistNorm.includes('카라바조')) {
+        return 'caravaggio';
+      }
+      if (artistNorm.includes('rembrandt') || artistNorm.includes('렘브란트')) {
+        return 'rembrandt';
+      }
+      if (artistNorm.includes('vel') && artistNorm.includes('zquez') || artistNorm.includes('벨라스케스')) {
+        return 'velazquez';
+      }
+      if (artistNorm.includes('rubens') || artistNorm.includes('루벤스')) {
+        return 'rubens';
+      }
+      // 로코코
+      if (artistNorm.includes('watteau') || artistNorm.includes('와토')) {
+        return 'watteau';
+      }
+      if (artistNorm.includes('boucher') || artistNorm.includes('부셰')) {
+        return 'boucher';
+      }
+      if (artistNorm.includes('fragonard') || artistNorm.includes('프라고나르')) {
+        return 'fragonard';
+      }
+      // 신고전주의
+      if (artistNorm.includes('david') || artistNorm.includes('다비드')) {
+        return 'jacques-louis-david';
+      }
+      if (artistNorm.includes('ingres') || artistNorm.includes('앵그르')) {
+        return 'ingres';
+      }
+      // 낭만주의
+      if (artistNorm.includes('turner') || artistNorm.includes('터너')) {
+        return 'turner';
+      }
+      if (artistNorm.includes('goya') || artistNorm.includes('고야')) {
+        return 'goya';
+      }
+      if (artistNorm.includes('delacroix') || artistNorm.includes('들라크루아')) {
+        return 'delacroix';
+      }
+      if (artistNorm.includes('friedrich') || artistNorm.includes('프리드리히')) {
+        return 'friedrich';
+      }
+      // 사실주의
+      if (artistNorm.includes('millet') || artistNorm.includes('밀레')) {
+        return 'millet';
+      }
+      if (artistNorm.includes('courbet') || artistNorm.includes('쿠르베')) {
+        return 'courbet';
+      }
+      if (artistNorm.includes('manet') || artistNorm.includes('마네')) {
+        return 'manet';
+      }
+      // 인상주의
+      if (artistNorm.includes('monet') || artistNorm.includes('모네')) {
+        return 'monet';
+      }
+      if (artistNorm.includes('renoir') || artistNorm.includes('르누아르')) {
+        return 'renoir';
+      }
+      if (artistNorm.includes('degas') || artistNorm.includes('드가')) {
+        return 'degas';
+      }
+      if (artistNorm.includes('caillebotte') || artistNorm.includes('카유보트')) {
+        return 'caillebotte';
+      }
+      // 후기인상주의
+      if (artistNorm.includes('gogh') || artistNorm.includes('고흐')) {
+        return 'gogh';
+      }
+      if (artistNorm.includes('zanne') || artistNorm.includes('세잔')) {
+        return 'cezanne';
+      }
+      if (artistNorm.includes('gauguin') || artistNorm.includes('고갱')) {
+        return 'gauguin';
+      }
+      if (artistNorm.includes('signac') || artistNorm.includes('시냑')) {
+        return 'signac';
+      }
+      // 야수파
+      if (artistNorm.includes('matisse') || artistNorm.includes('마티스')) {
+        return 'matisse';
+      }
+      if (artistNorm.includes('derain') || artistNorm.includes('드랭')) {
+        return 'derain';
+      }
+      if (artistNorm.includes('vlaminck') || artistNorm.includes('블라맹크')) {
+        return 'vlaminck';
+      }
+      // 표현주의
+      if (artistNorm.includes('munch') || artistNorm.includes('뭉크')) {
+        return 'munch';
+      }
+      if (artistNorm.includes('kokoschka') || artistNorm.includes('코코슈카')) {
+        return 'kokoschka';
+      }
+      if (artistNorm.includes('kirchner') || artistNorm.includes('키르히너')) {
+        return 'kirchner';
+      }
+      if (artistNorm.includes('kandinsky') || artistNorm.includes('칸딘스키')) {
+        return 'kandinsky';
+      }
+      // 모더니즘
+      if (artistNorm.includes('picasso') || artistNorm.includes('피카소')) {
+        return 'picasso';
+      }
+      if (artistNorm.includes('magritte') || artistNorm.includes('마그리트')) {
+        return 'magritte';
+      }
+      if (artistNorm.includes('mir') || artistNorm.includes('미로')) {
+        return 'miro';
+      }
+      if (artistNorm.includes('chagall') || artistNorm.includes('샤갈')) {
+        return 'chagall';
+      }
+      if (artistNorm.includes('warhol') || artistNorm.includes('워홀')) {
+        return 'warhol';
+      }
+      if (artistNorm.includes('lichtenstein') || artistNorm.includes('리히텐슈타인')) {
+        return 'lichtenstein';
+      }
+      if (artistNorm.includes('haring') || artistNorm.includes('해링')) {
+        return 'keith-haring';
+      }
+      if (artistNorm.includes('man ray') || artistNorm.includes('만 레이')) {
+        return 'man-ray';
       }
       
-      // 부분 매칭 시도 (성만으로)
-      const lastName = artistName.split(/[\s-]+/).pop()?.toLowerCase();
-      if (lastName && oneclickMovementsSecondary[lastName]) {
-        console.log('✅ Movements lastName matched:', lastName);
-        return lastName;
-      }
+      // 카테고리명 fallback
+      if (artistNorm.includes('르네상스')) return 'leonardo';
+      if (artistNorm.includes('바로크')) return 'caravaggio';
+      if (artistNorm.includes('로코코')) return 'watteau';
+      if (artistNorm.includes('신고전')) return 'jacques-louis-david';
+      if (artistNorm.includes('낭만')) return 'delacroix';
+      if (artistNorm.includes('사실')) return 'millet';
+      if (artistNorm.includes('인상주의') && !artistNorm.includes('후기')) return 'monet';
+      if (artistNorm.includes('후기인상')) return 'gogh';
+      if (artistNorm.includes('야수')) return 'matisse';
+      if (artistNorm.includes('표현')) return 'munch';
+      if (artistNorm.includes('모더니즘')) return 'picasso';
+      
+      console.log('❌ Movements: No artist matched for:', artistName);
     }
     
     // ========== 동양화: artistName으로 매칭 ==========
