@@ -1856,7 +1856,7 @@ const ResultScreen = ({
   const getFallbackMessage = () => {
     // 원클릭 모드에서 현재 결과가 실패인 경우
     if (isFullTransform && currentResult && !currentResult.success) {
-      return '변환에 실패하였습니다. 아래 재시도 버튼을 눌러주세요.';
+      return '변환에 실패하였습니다. 아래 다시 시도 버튼을 눌러주세요.';
     }
     
     // 원클릭인 경우 currentResult에서 정보 가져오기
