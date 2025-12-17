@@ -66,7 +66,7 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
     } else {
       // 단일 변환
       setShowEducation(true);
-      const eduContent = getEducationContent(selectedStyle);
+      const eduContent = getSingleEducationContent(selectedStyle);
       if (eduContent) {
         setStatusText(`${eduContent.title} 스타일 분석 중...`);
       }
@@ -124,8 +124,8 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
 
   // ========== 교육자료 ==========
   
-  // 단일 변환용 1차 교육
-  const getEducationContent = (style) => {
+  // 단일 변환용 1차 교육 (로컬 함수 - import된 getEducationContent와 구분)
+  const getSingleEducationContent = (style) => {
     const cat = style.category;
     if (cat === 'movements') return educationContent.movements[style.id];
     if (cat === 'masters') return educationContent.masters[style.id];
@@ -636,10 +636,10 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
         )}
 
         {/* ===== 단일 변환 모드 ===== */}
-        {!isFullTransform && showEducation && getEducationContent(selectedStyle) && (
+        {!isFullTransform && showEducation && getSingleEducationContent(selectedStyle) && (
           <div className="edu-card primary">
-            <h3>{getEducationContent(selectedStyle).title}</h3>
-            <p>{getEducationContent(selectedStyle).desc}</p>
+            <h3>{getSingleEducationContent(selectedStyle).title}</h3>
+            <p>{getSingleEducationContent(selectedStyle).desc}</p>
           </div>
         )}
       </div>
