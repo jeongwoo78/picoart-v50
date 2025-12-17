@@ -455,7 +455,17 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
         oriental: oneclickOrientalSecondary
       };
       
+      console.log('📦 educationData constructed:');
+      console.log('   - masters keys:', Object.keys(oneclickMastersSecondary || {}).slice(0, 5));
+      console.log('   - checking key:', key, 'in category:', resultCategory);
+      
+      // 직접 확인
+      if (resultCategory === 'masters') {
+        console.log('   - direct check:', oneclickMastersSecondary?.[key] ? 'EXISTS' : 'NOT FOUND');
+      }
+      
       const content = getEducationContent(resultCategory, key, educationData);
+      console.log('   - getEducationContent returned:', content ? 'HAS CONTENT' : 'NULL');
       
       if (content) {
         console.log('✅ Found education content for:', key);
