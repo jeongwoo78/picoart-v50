@@ -1,7 +1,6 @@
-// PicoArt v80 - ResultScreen
-// 원클릭 교육자료 매칭: 단일변환과 동일한 workKeyMap 로직 사용
-// 교육자료 파일만 분리된 원클릭 전용 파일 사용
-// 2025-12-11 업데이트: 재시도 기능 추가
+// PicoArt v51 - ResultScreen
+// 원클릭 교육자료 매칭: educationMatcher.js로 분리 (v51 새로 작성)
+// 2025-12-18 업데이트: 교육자료 매칭 로직 전면 재작성
 
 import React, { useState, useEffect, useRef } from 'react';
 import BeforeAfter from './BeforeAfter';
@@ -14,6 +13,8 @@ import { oneclickMastersSecondary } from '../data/oneclickMastersEducation';
 import { oneclickOrientalSecondary } from '../data/oneclickOrientalEducation';
 import { saveToGallery } from './GalleryScreen';
 import { processStyleTransfer } from '../utils/styleTransferAPI';
+// v51: 새로운 교육자료 매칭 유틸리티
+import { getEducationKey, getEducationContent } from '../utils/educationMatcher';
 
 
 const ResultScreen = ({ 
@@ -270,414 +271,55 @@ const ResultScreen = ({
   }, [currentIndex, isFullTransform, currentResult, results.length]);
 
 
-  // ========== 원클릭용 키 매칭 (단일변환과 동일한 workKeyMap 사용) ==========
-  const getOneclickEducationKey = (workName, artistName, category) => {
-    console.log('🔍 getOneclickEducationKey called:');
-    console.log('   - workName:', workName);
-    console.log('   - artistName:', artistName);
-    console.log('   - category:', category);
-    
-    // ========== 거장: workKeyMap으로 매칭 ==========
-    if (category === 'masters') {
-      const mastersWorkKeyMap = {
-        // 반 고흐 (vangogh- 로 통일)
-        'The Starry Night': 'vangogh-starrynight',
-        '별이 빛나는 밤': 'vangogh-starrynight',
-        'Starry Night': 'vangogh-starrynight',
-        'Sunflowers': 'vangogh-sunflowers',
-        '해바라기': 'vangogh-sunflowers',
-        'Self-Portrait': 'vangogh-selfportrait',
-        '자화상': 'vangogh-selfportrait',
-        
-        // 클림트
-        'The Kiss': 'klimt-kiss',
-        '키스': 'klimt-kiss',
-        'The Tree of Life': 'klimt-treeoflife',
-        '생명의 나무': 'klimt-treeoflife',
-        'Tree of Life': 'klimt-treeoflife',
-        'Judith I': 'klimt-judith',
-        'Judith': 'klimt-judith',
-        '유디트': 'klimt-judith',
-        
-        // 뭉크
-        'The Scream': 'munch-scream',
-        '절규': 'munch-scream',
-        'Scream': 'munch-scream',
-        'Madonna': 'munch-madonna',
-        '마돈나': 'munch-madonna',
-        'Jealousy': 'munch-jealousy',
-        '질투': 'munch-jealousy',
-        
-        // 마티스
-        'The Dance': 'matisse-dance',
-        '춤': 'matisse-dance',
-        'Dance': 'matisse-dance',
-        'The Red Room': 'matisse-redroom',
-        '붉은 방': 'matisse-redroom',
-        'Red Room': 'matisse-redroom',
-        'Woman with a Hat': 'matisse-womanhat',
-        '모자를 쓴 여인': 'matisse-womanhat',
-        
-        // 피카소
-        'Les Demoiselles d\'Avignon': 'picasso-demoiselles',
-        '아비뇽의 처녀들': 'picasso-demoiselles',
-        'Demoiselles': 'picasso-demoiselles',
-        'Guernica': 'picasso-guernica',
-        '게르니카': 'picasso-guernica',
-        
-        // 프리다 칼로
-        'Me and My Parrots': 'frida-parrots',
-        '나와 앵무새들': 'frida-parrots',
-        'The Broken Column': 'frida-brokencolumn',
-        '부러진 기둥': 'frida-brokencolumn',
-        'Broken Column': 'frida-brokencolumn',
-        'Self-Portrait with Thorn Necklace': 'frida-thornnecklace',
-        '가시 목걸이와 벌새': 'frida-thornnecklace',
-        'Thorn Necklace': 'frida-thornnecklace',
-        'Self-Portrait with Monkeys': 'frida-monkeys',
-        '원숭이와 자화상': 'frida-monkeys',
-        
-        // 워홀
-        'Marilyn Monroe': 'warhol-marilyn',
-        'Marilyn Monroe (마릴린 먼로)': 'warhol-marilyn',
-        '마릴린 먼로': 'warhol-marilyn',
-        'Marilyn': 'warhol-marilyn',
-        'Elvis': 'warhol-elvis',
-        '엘비스': 'warhol-elvis',
-        'Campbell\'s Soup Cans': 'warhol-soup',
-        '캠벨 수프 캔': 'warhol-soup',
-        'Soup Cans': 'warhol-soup',
-      };
-      
-      // 1. workName이 있으면 직접 매칭 시도
-      if (workName) {
-        let key = mastersWorkKeyMap[workName];
-        if (key) {
-          console.log('✅ Masters workKeyMap matched (direct):', key);
-          return key;
-        }
-        
-        // 2. 괄호 포함된 경우: "Woman with a Hat (모자를 쓴 여인)" → "Woman with a Hat" 추출
-        const englishPart = workName.split('(')[0].trim();
-        const koreanMatch = workName.match(/\(([^)]+)\)/);
-        const koreanPart = koreanMatch ? koreanMatch[1].trim() : '';
-        
-        // 영문으로 시도
-        if (englishPart && mastersWorkKeyMap[englishPart]) {
-          key = mastersWorkKeyMap[englishPart];
-          console.log('✅ Masters workKeyMap matched (english part):', key);
-          return key;
-        }
-        
-        // 한글로 시도
-        if (koreanPart && mastersWorkKeyMap[koreanPart]) {
-          key = mastersWorkKeyMap[koreanPart];
-          console.log('✅ Masters workKeyMap matched (korean part):', key);
-          return key;
-        }
-      }
-      
-      // 3. workName 없으면 artistName으로 기본 작품 fallback (변환 중)
-      if (artistName) {
-        const artistNorm = artistName.toLowerCase();
-        
-        // 반 고흐
-        if (artistNorm.includes('고흐') || artistNorm.includes('gogh') || artistNorm.includes('vincent')) {
-          console.log('✅ Masters fallback: Van Gogh detected');
-          return 'vangogh-starrynight';
-        }
-        // 클림트
-        if (artistNorm.includes('클림트') || artistNorm.includes('klimt') || artistNorm.includes('gustav')) {
-          console.log('✅ Masters fallback: Klimt detected');
-          return 'klimt-kiss';
-        }
-        // 뭉크
-        if (artistNorm.includes('뭉크') || artistNorm.includes('munch') || artistNorm.includes('edvard')) {
-          console.log('✅ Masters fallback: Munch detected');
-          return 'munch-scream';
-        }
-        // 마티스
-        if (artistNorm.includes('마티스') || artistNorm.includes('matisse') || artistNorm.includes('henri')) {
-          console.log('✅ Masters fallback: Matisse detected');
-          return 'matisse-dance';
-        }
-        // 피카소
-        if (artistNorm.includes('피카소') || artistNorm.includes('picasso') || artistNorm.includes('pablo')) {
-          console.log('✅ Masters fallback: Picasso detected');
-          return 'picasso-demoiselles';
-        }
-        // 프리다
-        if (artistNorm.includes('프리다') || artistNorm.includes('frida') || artistNorm.includes('kahlo')) {
-          console.log('✅ Masters fallback: Frida detected');
-          return 'frida-parrots';
-        }
-        // 워홀
-        if (artistNorm.includes('워홀') || artistNorm.includes('warhol') || artistNorm.includes('andy')) {
-          console.log('✅ Masters fallback: Warhol detected');
-          return 'warhol-marilyn';
-        }
-        
-        console.log('❌ Masters fallback: No artist matched for:', artistName);
-      }
-    }
-    
-    // ========== 미술사조: artistName으로 매칭 ==========
-    if (category === 'movements' && artistName) {
-      const artistNorm = artistName.toLowerCase();
-      
-      // 고대
-      if (artistNorm.includes('greek') || artistNorm.includes('sculpture') || artistNorm.includes('그리스')) {
-        return 'ancient-greek-sculpture';
-      }
-      if (artistNorm.includes('roman') || artistNorm.includes('mosaic') || artistNorm.includes('로마')) {
-        return 'roman-mosaic';
-      }
-      // 중세
-      if (artistNorm.includes('byzantine') || artistNorm.includes('비잔틴')) {
-        return 'byzantine';
-      }
-      if (artistNorm.includes('gothic') || artistNorm.includes('고딕')) {
-        return 'gothic';
-      }
-      if (artistNorm.includes('islamic') || artistNorm.includes('이슬람')) {
-        return 'islamic-miniature';
-      }
-      // 르네상스
-      if (artistNorm.includes('leonardo') || artistNorm.includes('vinci') || artistNorm.includes('다빈치') || artistNorm.includes('레오나르도')) {
-        return 'leonardo';
-      }
-      if (artistNorm.includes('michelangelo') || artistNorm.includes('미켈란젤로')) {
-        return 'michelangelo';
-      }
-      if (artistNorm.includes('raphael') || artistNorm.includes('라파엘')) {
-        return 'raphael';
-      }
-      if (artistNorm.includes('botticelli') || artistNorm.includes('보티첼리')) {
-        return 'botticelli';
-      }
-      if (artistNorm.includes('titian') || artistNorm.includes('티치아노')) {
-        return 'titian';
-      }
-      // 바로크
-      if (artistNorm.includes('caravaggio') || artistNorm.includes('카라바조')) {
-        return 'caravaggio';
-      }
-      if (artistNorm.includes('rembrandt') || artistNorm.includes('렘브란트')) {
-        return 'rembrandt';
-      }
-      if (artistNorm.includes('vel') && artistNorm.includes('zquez') || artistNorm.includes('벨라스케스')) {
-        return 'velazquez';
-      }
-      if (artistNorm.includes('rubens') || artistNorm.includes('루벤스')) {
-        return 'rubens';
-      }
-      // 로코코
-      if (artistNorm.includes('watteau') || artistNorm.includes('와토')) {
-        return 'watteau';
-      }
-      if (artistNorm.includes('boucher') || artistNorm.includes('부셰')) {
-        return 'boucher';
-      }
-      if (artistNorm.includes('fragonard') || artistNorm.includes('프라고나르')) {
-        return 'fragonard';
-      }
-      // 신고전주의
-      if (artistNorm.includes('david') || artistNorm.includes('다비드')) {
-        return 'jacques-louis-david';
-      }
-      if (artistNorm.includes('ingres') || artistNorm.includes('앵그르')) {
-        return 'ingres';
-      }
-      // 낭만주의
-      if (artistNorm.includes('turner') || artistNorm.includes('터너')) {
-        return 'turner';
-      }
-      if (artistNorm.includes('goya') || artistNorm.includes('고야')) {
-        return 'goya';
-      }
-      if (artistNorm.includes('delacroix') || artistNorm.includes('들라크루아')) {
-        return 'delacroix';
-      }
-      if (artistNorm.includes('friedrich') || artistNorm.includes('프리드리히')) {
-        return 'friedrich';
-      }
-      // 사실주의
-      if (artistNorm.includes('millet') || artistNorm.includes('밀레')) {
-        return 'millet';
-      }
-      if (artistNorm.includes('courbet') || artistNorm.includes('쿠르베')) {
-        return 'courbet';
-      }
-      if (artistNorm.includes('manet') || artistNorm.includes('마네')) {
-        return 'manet';
-      }
-      // 인상주의
-      if (artistNorm.includes('monet') || artistNorm.includes('모네')) {
-        return 'monet';
-      }
-      if (artistNorm.includes('renoir') || artistNorm.includes('르누아르')) {
-        return 'renoir';
-      }
-      if (artistNorm.includes('degas') || artistNorm.includes('드가')) {
-        return 'degas';
-      }
-      if (artistNorm.includes('caillebotte') || artistNorm.includes('카유보트')) {
-        return 'caillebotte';
-      }
-      // 후기인상주의
-      if (artistNorm.includes('gogh') || artistNorm.includes('고흐')) {
-        return 'gogh';
-      }
-      if (artistNorm.includes('zanne') || artistNorm.includes('세잔')) {
-        return 'cezanne';
-      }
-      if (artistNorm.includes('gauguin') || artistNorm.includes('고갱')) {
-        return 'gauguin';
-      }
-      if (artistNorm.includes('signac') || artistNorm.includes('시냑')) {
-        return 'signac';
-      }
-      // 야수파
-      if (artistNorm.includes('matisse') || artistNorm.includes('마티스')) {
-        return 'matisse';
-      }
-      if (artistNorm.includes('derain') || artistNorm.includes('드랭')) {
-        return 'derain';
-      }
-      if (artistNorm.includes('vlaminck') || artistNorm.includes('블라맹크')) {
-        return 'vlaminck';
-      }
-      // 표현주의
-      if (artistNorm.includes('munch') || artistNorm.includes('뭉크')) {
-        return 'munch';
-      }
-      if (artistNorm.includes('kokoschka') || artistNorm.includes('코코슈카')) {
-        return 'kokoschka';
-      }
-      if (artistNorm.includes('kirchner') || artistNorm.includes('키르히너')) {
-        return 'kirchner';
-      }
-      if (artistNorm.includes('kandinsky') || artistNorm.includes('칸딘스키')) {
-        return 'kandinsky';
-      }
-      // 모더니즘
-      if (artistNorm.includes('picasso') || artistNorm.includes('피카소')) {
-        return 'picasso';
-      }
-      if (artistNorm.includes('magritte') || artistNorm.includes('마그리트')) {
-        return 'magritte';
-      }
-      if (artistNorm.includes('mir') || artistNorm.includes('미로')) {
-        return 'miro';
-      }
-      if (artistNorm.includes('chagall') || artistNorm.includes('샤갈')) {
-        return 'chagall';
-      }
-      if (artistNorm.includes('warhol') || artistNorm.includes('워홀')) {
-        return 'warhol';
-      }
-      if (artistNorm.includes('lichtenstein') || artistNorm.includes('리히텐슈타인')) {
-        return 'lichtenstein';
-      }
-      if (artistNorm.includes('haring') || artistNorm.includes('해링')) {
-        return 'keith-haring';
-      }
-      if (artistNorm.includes('man ray') || artistNorm.includes('만 레이')) {
-        return 'man-ray';
-      }
-      
-      // 카테고리명 fallback
-      if (artistNorm.includes('르네상스')) return 'leonardo';
-      if (artistNorm.includes('바로크')) return 'caravaggio';
-      if (artistNorm.includes('로코코')) return 'watteau';
-      if (artistNorm.includes('신고전')) return 'jacques-louis-david';
-      if (artistNorm.includes('낭만')) return 'delacroix';
-      if (artistNorm.includes('사실')) return 'millet';
-      if (artistNorm.includes('인상주의') && !artistNorm.includes('후기')) return 'monet';
-      if (artistNorm.includes('후기인상')) return 'gogh';
-      if (artistNorm.includes('야수')) return 'matisse';
-      if (artistNorm.includes('표현')) return 'munch';
-      if (artistNorm.includes('모더니즘')) return 'picasso';
-      
-      console.log('❌ Movements: No artist matched for:', artistName);
-    }
-    
-    // ========== 동양화: artistName으로 매칭 ==========
-    if (category === 'oriental' && artistName) {
-      const orientalKeyMap = {
-        '한국 전통화': 'korean-genre',  // fallback 기본값
-        'Korean Minhwa': 'korean-minhwa',
-        '민화': 'korean-minhwa',
-        'Korean Pungsokdo': 'korean-genre',
-        '풍속화': 'korean-genre',
-        'Korean Jingyeong': 'korean-jingyeong',
-        '진경산수': 'korean-jingyeong',
-        'Chinese Ink Wash': 'chinese-ink',
-        '수묵산수': 'chinese-ink',
-        'Chinese Gongbi': 'chinese-gongbi',
-        '공필화': 'chinese-gongbi',
-        'Japanese Ukiyo-e': 'japanese-ukiyoe',
-        '우키요에': 'japanese-ukiyoe',
-      };
-      
-      const key = orientalKeyMap[artistName];
-      if (key) {
-        console.log('✅ Oriental keyMap matched:', key);
-        return key;
-      }
-      
-      // styleId 기반 fallback
-      const styleId = currentResult?.style?.id;
-      if (styleId === 'korean') return 'korean-minhwa';
-      if (styleId === 'chinese') return 'chinese-ink';
-      if (styleId === 'japanese') return 'japanese-ukiyoe';
-    }
-    
-    console.log('❌ No key found');
-    return null;
-  };
+  // ========== 원클릭용 키 매칭 (v51: educationMatcher.js 사용) ==========
+  // 기존 복잡한 로직을 educationMatcher.js로 분리함
 
 
-  // ========== 2차 교육 로드 ==========
+  // ========== 2차 교육 로드 (v51: 새로운 매칭 로직) ==========
   const generate2ndEducation = () => {
     console.log('');
-    console.log('🔥🔥🔥 LOAD EDUCATION START 🔥🔥🔥');
-    console.log('   - category:', selectedStyle.category);
+    console.log('🔥🔥🔥 LOAD EDUCATION START (v51) 🔥🔥🔥');
+    console.log('   - category:', selectedStyle?.category);
     console.log('   - isFullTransform:', isFullTransform);
     console.log('   - displayArtist:', displayArtist);
-    console.log('   - aiSelectedArtist:', aiSelectedArtist);
+    console.log('   - displayWork:', displayWork);
     console.log('');
     
     setIsLoadingEducation(true);
     
     let content = null;
     
-    // ========== 원클릭: 분리된 원클릭 교육자료 파일 사용 ==========
+    // ========== 원클릭: 새로운 매칭 로직 사용 ==========
     if (isFullTransform) {
-      console.log('📜 ONECLICK MODE - using separated education files');
-      console.log('   - displayWork:', displayWork);
-      console.log('   - displayArtist:', displayArtist);
-      console.log('   - displayCategory:', displayCategory);
+      console.log('📜 ONECLICK MODE - using educationMatcher.js');
       
-      const key = getOneclickEducationKey(displayWork, displayArtist, displayCategory);
+      // currentResult에서 정보 추출
+      const category = currentResult?.style?.category || displayCategory;
+      const artist = currentResult?.aiSelectedArtist || displayArtist;
+      const work = currentResult?.selected_work || displayWork;
+      
+      console.log('   - category:', category);
+      console.log('   - artist:', artist);
+      console.log('   - work:', work);
+      
+      // 새로운 매칭 함수 사용
+      const key = getEducationKey(category, artist, work);
       console.log('   - matched key:', key);
       
       if (key) {
-        // 카테고리별 분리된 파일에서 교육자료 가져오기
-        let educationData = null;
+        // 교육자료 데이터 객체 구성
+        const educationData = {
+          masters: oneclickMastersSecondary,
+          movements: oneclickMovementsSecondary,
+          oriental: oneclickOrientalSecondary
+        };
         
-        if (displayCategory === 'masters') {
-          educationData = oneclickMastersSecondary[key];
-        } else if (displayCategory === 'movements') {
-          educationData = oneclickMovementsSecondary[key];
-        } else if (displayCategory === 'oriental') {
-          educationData = oneclickOrientalSecondary[key];
-        }
+        // 새로운 콘텐츠 가져오기 함수 사용
+        content = getEducationContent(category, key, educationData);
         
-        if (educationData) {
-          content = educationData.content;
+        if (content) {
           console.log('✅ Found oneclick education for:', key);
-          console.log('   - content preview:', content?.substring(0, 50));
+          console.log('   - content preview:', content.substring(0, 50) + '...');
         } else {
           console.log('❌ No education data found for key:', key);
         }
