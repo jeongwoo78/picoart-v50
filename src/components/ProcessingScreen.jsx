@@ -1,5 +1,6 @@
-// PicoArt v76 - ProcessingScreen (단일변환 반복 = 원클릭)
+// PicoArt v51 - ProcessingScreen (단일변환 반복 = 원클릭)
 // 원칙: 단일 변환 로직만 있고, 원클릭은 그걸 N번 반복
+// v51: educationMatcher.js 사용 (ResultScreen과 동일한 매칭 로직)
 import React, { useEffect, useState } from 'react';
 import { processStyleTransfer } from '../utils/styleTransferAPI';
 import { educationContent } from '../data/educationContent';
@@ -7,6 +8,8 @@ import { educationContent } from '../data/educationContent';
 import { oneclickMovementsPrimary, oneclickMovementsSecondary } from '../data/oneclickMovementsEducation';
 import { oneclickMastersPrimary, oneclickMastersSecondary } from '../data/oneclickMastersEducation';
 import { oneclickOrientalPrimary, oneclickOrientalSecondary } from '../data/oneclickOrientalEducation';
+// v51: 새로운 교육자료 매칭 유틸리티 (ResultScreen과 동일)
+import { getEducationKey, getEducationContent } from '../utils/educationMatcher';
 
 const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
   const [statusText, setStatusText] = useState('준비 중...');
@@ -427,316 +430,60 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
     return result?.style?.name || '';
   };
 
-  // 원클릭 2차 교육 (결과별) - 카테고리에 따라 분리된 파일 사용
+  // 원클릭 2차 교육 (결과별) - v51: educationMatcher.js 사용
   const getSecondaryEducation = (result) => {
     if (!result) return null;
     
     const artistName = result.aiSelectedArtist || '';
     const workName = result.selected_work || '';
     const resultCategory = result.style?.category;
-    const styleId = result.style?.id;
     
-    // 카테고리별 교육자료 선택
-    let educationData = null;
-    if (resultCategory === 'masters') {
-      educationData = oneclickMastersSecondary;
-    } else if (resultCategory === 'movements') {
-      educationData = oneclickMovementsSecondary;
-    } else if (resultCategory === 'oriental') {
-      educationData = oneclickOrientalSecondary;
+    console.log('🎓 getSecondaryEducation (ProcessingScreen v51):');
+    console.log('   - artistName:', artistName);
+    console.log('   - workName:', workName);
+    console.log('   - category:', resultCategory);
+    
+    // v51: educationMatcher.js 사용 (ResultScreen과 동일)
+    const key = getEducationKey(resultCategory, artistName, workName);
+    console.log('   - matched key:', key);
+    
+    if (key) {
+      // 교육자료 데이터 객체 구성
+      const educationData = {
+        masters: oneclickMastersSecondary,
+        movements: oneclickMovementsSecondary,
+        oriental: oneclickOrientalSecondary
+      };
+      
+      const content = getEducationContent(resultCategory, key, educationData);
+      
+      if (content) {
+        console.log('✅ Found education content for:', key);
+        // 교육자료 파일에서 name 가져오기
+        let eduName = artistName;
+        if (resultCategory === 'masters' && oneclickMastersSecondary[key]) {
+          eduName = oneclickMastersSecondary[key].name || artistName;
+        } else if (resultCategory === 'movements' && oneclickMovementsSecondary[key]) {
+          eduName = oneclickMovementsSecondary[key].name || artistName;
+        } else if (resultCategory === 'oriental' && oneclickOrientalSecondary[key]) {
+          eduName = oneclickOrientalSecondary[key].name || artistName;
+        }
+        return { name: eduName, content: content };
+      }
     }
     
-    if (!educationData) return null;
-    
-    // 1. 화가명/작품명으로 찾기
-    const key = artistNameToKey(artistName, workName, resultCategory, educationData);
-    if (key && educationData[key]) {
-      const edu = educationData[key];
-      return { name: edu.name || artistName, content: edu.content };
-    }
-    
-    // 2. styleId로 찾기
-    if (styleId && educationData[styleId]) {
-      const edu = educationData[styleId];
-      return { name: edu.name || result.style.name, content: edu.content };
-    }
-    
+    console.log('❌ No education found');
     return null;
   };
 
-  // 화가명/작품명 → 교육자료 키 변환
+  // v51: artistNameToKey 함수는 더 이상 사용하지 않음
+  // educationMatcher.js의 getEducationKey로 대체됨
+  // (하위 호환성을 위해 주석으로 보존)
+  /*
   const artistNameToKey = (artistName, workName, resultCategory, educationData) => {
-    if (!artistName && !workName) return null;
-    
-    // 거장: 작품명 기반 매칭
-    if (resultCategory === 'masters' && workName) {
-      const mastersWorkKeyMap = {
-        // 영문
-        'The Starry Night': 'gogh-starrynight',
-        'Starry Night': 'gogh-starrynight',
-        'Sunflowers': 'gogh-sunflowers',
-        'Self-Portrait': 'gogh-selfportrait',
-        'The Kiss': 'klimt-kiss',
-        'The Tree of Life': 'klimt-treeoflife',
-        'Judith': 'klimt-judith',
-        'Judith I': 'klimt-judith',
-        'The Scream': 'munch-scream',
-        'Madonna': 'munch-madonna',
-        'The Dance': 'matisse-dance',
-        'The Red Room': 'matisse-redroom',
-        'Woman with a Hat': 'matisse-womanwithhat',
-        'Guernica': 'picasso-guernica',
-        'Weeping Woman': 'picasso-weepingwoman',
-        'Les Demoiselles d\'Avignon': 'picasso-demoiselles',
-        'Me and My Parrots': 'frida-parrots',
-        'The Broken Column': 'frida-brokencolumn',
-        'Self-Portrait with Thorn Necklace': 'frida-thornnecklace',
-        'Self-Portrait with Monkeys': 'frida-monkeys',
-        'Marilyn Monroe': 'warhol-marilyn',
-        'Marilyn Monroe (마릴린 먼로)': 'warhol-marilyn',
-        'Marilyn': 'warhol-marilyn',
-        'Campbell\'s Soup Cans': 'warhol-soup',
-        // 한글
-        '별이 빛나는 밤': 'gogh-starrynight',
-        '해바라기': 'gogh-sunflowers',
-        '자화상': 'gogh-selfportrait',
-        '키스': 'klimt-kiss',
-        '생명의 나무': 'klimt-treeoflife',
-        '유디트': 'klimt-judith',
-        '절규': 'munch-scream',
-        '마돈나': 'munch-madonna',
-        '춤': 'matisse-dance',
-        '붉은 방': 'matisse-redroom',
-        '모자를 쓴 여인': 'matisse-womanwithhat',
-        '게르니카': 'picasso-guernica',
-        '우는 여인': 'picasso-weepingwoman',
-        '아비뇽의 처녀들': 'picasso-demoiselles',
-        '나와 앵무새': 'frida-parrots',
-        '부러진 기둥': 'frida-brokencolumn',
-        '가시 목걸이와 벌새가 있는 자화상': 'frida-thornnecklace',
-        '원숭이와 함께 있는 자화상': 'frida-monkeys',
-        '마릴린 먼로': 'warhol-marilyn',
-        '캠벨 수프 캔': 'warhol-soup',
-      };
-      
-      // 1. 직접 매칭 시도
-      if (mastersWorkKeyMap[workName]) {
-        return mastersWorkKeyMap[workName];
-      }
-      
-      // 2. 괄호 포함된 경우: "Woman with a Hat (모자를 쓴 여인)" → "Woman with a Hat" 추출
-      const englishPart = workName.split('(')[0].trim();
-      const koreanMatch = workName.match(/\(([^)]+)\)/);
-      const koreanPart = koreanMatch ? koreanMatch[1].trim() : '';
-      
-      // 영문으로 시도
-      if (englishPart && mastersWorkKeyMap[englishPart]) {
-        return mastersWorkKeyMap[englishPart];
-      }
-      
-      // 한글로 시도
-      if (koreanPart && mastersWorkKeyMap[koreanPart]) {
-        return mastersWorkKeyMap[koreanPart];
-      }
-    }
-    
-    // 동양화: API 반환값 → 교육자료 키 매핑
-    if (resultCategory === 'oriental' && artistName) {
-      const orientalKeyMap = {
-        // 한국
-        '한국 전통화': 'korean-genre',  // fallback 기본값
-        'Korean Minhwa': 'korean-minhwa',
-        'Korean Pungsokdo': 'korean-genre',
-        'Korean Jingyeong Landscape': 'korean-jingyeong',
-        'Korean Jingyeong': 'korean-jingyeong',
-        '한국 민화': 'korean-minhwa',
-        '한국 풍속화': 'korean-genre',
-        '한국 진경산수': 'korean-jingyeong',
-        // 중국
-        'Chinese Ink Wash': 'chinese-ink',
-        'Chinese Gongbi': 'chinese-gongbi',
-        'Chinese Huaniao': 'chinese-gongbi',
-        '중국 수묵산수': 'chinese-ink',
-        '중국 공필화': 'chinese-gongbi',
-        // 일본
-        '일본 우키요에': 'japanese-ukiyoe',
-        'Japanese Ukiyo-e': 'japanese-ukiyoe',
-        'Ukiyo-e': 'japanese-ukiyoe',
-      };
-      if (orientalKeyMap[artistName]) {
-        return orientalKeyMap[artistName];
-      }
-    }
-    
-    // 미술사조: API 반환값 → 교육자료 키 매핑
-    if (resultCategory === 'movements' && artistName) {
-      const movementsKeyMap = {
-        // 고대 (대소문자 모두)
-        'Classical Sculpture': 'ancient-greek-sculpture',
-        'CLASSICAL SCULPTURE': 'ancient-greek-sculpture',
-        'Greek Sculpture': 'ancient-greek-sculpture',
-        'GREEK SCULPTURE': 'ancient-greek-sculpture',
-        'Roman Mosaic': 'roman-mosaic',
-        'ROMAN MOSAIC': 'roman-mosaic',
-        // 중세 (대소문자 모두)
-        'Byzantine': 'byzantine',
-        'BYZANTINE': 'byzantine',
-        'Byzantine Mosaic': 'byzantine',
-        'BYZANTINE MOSAIC': 'byzantine',
-        'Gothic': 'gothic',
-        'GOTHIC': 'gothic',
-        'Gothic Stained Glass': 'gothic',
-        'GOTHIC STAINED GLASS': 'gothic',
-        'Islamic Miniature': 'islamic-miniature',
-        'ISLAMIC MINIATURE': 'islamic-miniature',
-        'Islamic Geometry': 'islamic-miniature',
-        'ISLAMIC GEOMETRY': 'islamic-miniature',
-        // 르네상스
-        'Leonardo da Vinci': 'leonardo',
-        'LEONARDO': 'leonardo',
-        'LEONARDO DA VINCI': 'leonardo',
-        'Michelangelo': 'michelangelo',
-        'MICHELANGELO': 'michelangelo',
-        'Raphael': 'raphael',
-        'RAPHAEL': 'raphael',
-        'Botticelli': 'botticelli',
-        'BOTTICELLI': 'botticelli',
-        'Titian': 'titian',
-        'TITIAN': 'titian',
-        // 바로크
-        'Caravaggio': 'caravaggio',
-        'CARAVAGGIO': 'caravaggio',
-        'Rembrandt': 'rembrandt',
-        'REMBRANDT': 'rembrandt',
-        'Vermeer': 'vermeer',
-        'VERMEER': 'vermeer',
-        'Velázquez': 'velazquez',
-        'VELÁZQUEZ': 'velazquez',
-        'Velazquez': 'velazquez',
-        'VELAZQUEZ': 'velazquez',
-        'Rubens': 'rubens',
-        'RUBENS': 'rubens',
-        // 로코코
-        'Watteau': 'watteau',
-        'WATTEAU': 'watteau',
-        'Boucher': 'boucher',
-        'BOUCHER': 'boucher',
-        // 19세기
-        'Jacques-Louis David': 'jacques-louis-david',
-        'DAVID': 'jacques-louis-david',
-        'Ingres': 'ingres',
-        'INGRES': 'ingres',
-        'Jean-Auguste-Dominique Ingres': 'ingres',
-        'Turner': 'turner',
-        'TURNER': 'turner',
-        'Goya': 'goya',
-        'GOYA': 'goya',
-        'Delacroix': 'delacroix',
-        'DELACROIX': 'delacroix',
-        'Millet': 'millet',
-        'MILLET': 'millet',
-        'Manet': 'manet',
-        'MANET': 'manet',
-        // 인상주의
-        'Monet': 'monet',
-        'MONET': 'monet',
-        'Claude Monet': 'monet',
-        'Renoir': 'renoir',
-        'RENOIR': 'renoir',
-        'Pierre-Auguste Renoir': 'renoir',
-        'Degas': 'degas',
-        'DEGAS': 'degas',
-        'Edgar Degas': 'degas',
-        'Caillebotte': 'caillebotte',
-        'CAILLEBOTTE': 'caillebotte',
-        'Gustave Caillebotte': 'caillebotte',
-        // 후기인상주의
-        'Van Gogh': 'gogh',
-        'GOGH': 'gogh',
-        'Vincent van Gogh': 'gogh',
-        'Cézanne': 'cezanne',
-        'CÉZANNE': 'cezanne',  // 악센트 버전
-        'CEZANNE': 'cezanne',
-        'Paul Cézanne': 'cezanne',
-        'Gauguin': 'gauguin',
-        'GAUGUIN': 'gauguin',
-        'Paul Gauguin': 'gauguin',
-        'Signac': 'signac',
-        'SIGNAC': 'signac',
-        'Paul Signac': 'signac',
-        // 야수파
-        'Matisse': 'matisse',
-        'MATISSE': 'matisse',
-        'Henri Matisse': 'matisse',
-        'Derain': 'derain',
-        'DERAIN': 'derain',
-        'André Derain': 'derain',
-        'Vlaminck': 'vlaminck',
-        'VLAMINCK': 'vlaminck',
-        'Maurice de Vlaminck': 'vlaminck',
-        // 표현주의
-        'Munch': 'munch',
-        'MUNCH': 'munch',
-        'Edvard Munch': 'munch',
-        'Kokoschka': 'kokoschka',
-        'KOKOSCHKA': 'kokoschka',
-        'Oskar Kokoschka': 'kokoschka',
-        'Kirchner': 'kirchner',
-        'KIRCHNER': 'kirchner',
-        'Ernst Ludwig Kirchner': 'kirchner',
-        'Kandinsky': 'kandinsky',
-        'KANDINSKY': 'kandinsky',
-        'Wassily Kandinsky': 'kandinsky',
-        // 모더니즘
-        'Picasso': 'picasso',
-        'PICASSO': 'picasso',
-        'Pablo Picasso': 'picasso',
-        'Magritte': 'magritte',
-        'MAGRITTE': 'magritte',
-        'René Magritte': 'magritte',
-        'Miró': 'miro',
-        'MIRO': 'miro',
-        'Joan Miró': 'miro',
-        'Chagall': 'chagall',
-        'CHAGALL': 'chagall',
-        'Marc Chagall': 'chagall',
-        'Warhol': 'warhol',
-        'WARHOL': 'warhol',
-        'Andy Warhol': 'warhol',
-        'Lichtenstein': 'lichtenstein',
-        'LICHTENSTEIN': 'lichtenstein',
-        'Roy Lichtenstein': 'lichtenstein',
-        'Keith Haring': 'keith-haring',
-        'KEITH HARING': 'keith-haring',
-        // 한글 fallback (AI 타임아웃 시)
-        '르네상스': 'leonardo',
-        '바로크': 'caravaggio',
-        '로코코': 'watteau',
-        '신고전주의': 'jacques-louis-david',
-        '낭만주의': 'delacroix',
-        '사실주의': 'millet',
-        '인상주의': 'monet',
-        '후기인상주의': 'gogh',
-        '야수파': 'matisse',
-        '표현주의': 'munch',
-        '모더니즘': 'picasso',
-      };
-      if (movementsKeyMap[artistName]) {
-        return movementsKeyMap[artistName];
-      }
-    }
-    
-    // Fallback: 성(lastName)으로 매칭
-    if (artistName) {
-      const words = artistName.split(/[\s-]+/);
-      const lastName = words[words.length - 1]?.toLowerCase();
-      if (lastName && educationData[lastName]) {
-        return lastName;
-      }
-    }
-    
-    return null;
+    // ... 기존 코드 생략 ...
   };
+  */
 
   // ========== UI 핸들러 ==========
   const handleDotClick = (idx) => {
