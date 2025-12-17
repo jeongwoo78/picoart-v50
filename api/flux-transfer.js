@@ -3518,7 +3518,7 @@ export default async function handler(req, res) {
           '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
           '2. ATTRACTIVE: Render people beautifully (unless expressive distortion work). ' +
           '3. NO HALLUCINATION: Do NOT add people or elements not in original photo. ' +
-          '4. BRUSHWORK ON SUBJECT: Visible thick brush marks on SUBJECT (face, skin, hair, clothing) - NOT just background, impasto texture on person. ' +
+          '4. MANDATORY VERY THICK BOLD BRUSHSTROKES ON SUBJECT: VERY THICK CHUNKY WIDE brush marks (5-10mm) MUST be clearly visible on SUBJECT (face, skin, hair, clothing) even WITHOUT zooming in - NOT fine lines, NOT subtle texture, NOT just background, this is REQUIRED and NON-NEGOTIABLE for subject. ' +
           '5. NO TEXT: No signatures, letters, writing, watermarks. ' +
           '6. ANATOMY: Correct proportions - no missing or extra limbs. ' +
           '7. NO PAINTER APPEARANCE: Never apply painter physical features to subject - NO Van Gogh red beard, NO Frida unibrow, NO Marilyn/Elvis face. Apply painting TECHNIQUE only. ' +
@@ -4064,9 +4064,9 @@ export default async function handler(req, res) {
             selectedArtist.includes('빈센트')) {
           console.log('🎯 Van Gogh detected');
           if (!finalPrompt.includes('SWIRLING') && !finalPrompt.includes('IMPASTO')) {
-            finalPrompt = finalPrompt + ', painting by Vincent van Gogh: MANDATORY BRUSHSTROKES ON FACE AND SUBJECT - THICK IMPASTO brush marks MUST cover ENTIRE FACE (forehead cheeks nose chin) AND ENTIRE SUBJECT (skin hair clothing) with VISIBLE directional strokes, this texture on face and subject is REQUIRED and NON-NEGOTIABLE for Van Gogh style, face and body must NOT be smooth or realistic, EXTREMELY THICK 3D PAINT TEXTURE, VISIBLE RIDGES AND GROOVES, SWIRLING TURBULENT brushwork everywhere, CHUNKY BOLD brush marks NOT smooth NOT blended, intense saturated colors (cobalt blue cadmium yellow chrome orange), painterly NOT illustrative NOT digital, PRESERVE original person FACE IDENTITY, render subject ATTRACTIVELY';
+            finalPrompt = finalPrompt + ', painting by Vincent van Gogh: MANDATORY THICK BOLD BRUSHSTROKES ON FACE AND SUBJECT - CHUNKY WIDE BRUSH MARKS (5-10mm) MUST cover ENTIRE FACE (forehead cheeks nose chin) AND ENTIRE SUBJECT (skin hair clothing), this THICK BOLD brushstroke texture on face and subject is REQUIRED and NON-NEGOTIABLE for Van Gogh style, face and body must NOT be smooth or realistic, EXTREMELY THICK IMPASTO 3D PAINT TEXTURE, VISIBLE RIDGES AND GROOVES, SWIRLING TURBULENT directional strokes everywhere, NOT fine lines NOT smooth NOT blended, intense saturated colors (cobalt blue cadmium yellow chrome orange), painterly NOT illustrative NOT digital, PRESERVE original person FACE IDENTITY, render subject ATTRACTIVELY';
             controlStrength = 0.50;
-            console.log('✅ Enhanced Van Gogh MANDATORY FACE+SUBJECT BRUSHSTROKES (control_strength 0.50)');
+            console.log('✅ Enhanced Van Gogh MANDATORY THICK BOLD BRUSHSTROKES FACE+SUBJECT (control_strength 0.50)');
           } else {
             console.log('ℹ️ Van Gogh swirls already in prompt (AI included it)');
           }
@@ -4499,9 +4499,9 @@ export default async function handler(req, res) {
     // v62: 붓터치 규칙 - 공통 제외 조건 적용
     // ========================================
     if (!skipBrushstrokeRules) {
-      const brushworkRule = ', CRITICAL: VISIBLE BRUSHSTROKES ON SUBJECT (face, skin, hair, clothing) - impasto paint texture, brush marks clearly visible on person NOT just background, canvas texture feel, NOT smooth digital, NOT airbrushed, NOT photo-like skin';
+      const brushworkRule = ', CRITICAL: VERY THICK BOLD BRUSHSTROKES ON SUBJECT - CHUNKY WIDE brush marks (5-10mm) clearly visible on SUBJECT (face, skin, hair, clothing) even WITHOUT zooming in, impasto paint texture, NOT fine lines, NOT subtle, NOT just background, NOT smooth digital, NOT airbrushed, NOT photo-like skin, this is REQUIRED';
       finalPrompt = finalPrompt + brushworkRule;
-      console.log('🖌️ Applied BRUSHWORK rule (피사체 강조)');
+      console.log('🖌️ Applied VERY THICK BRUSHWORK rule (피사체 굵은 붓터치 강제)');
     } else {
       console.log('🎨 Skipped BRUSHWORK rule (제외 대상)');
     }
@@ -4511,9 +4511,9 @@ export default async function handler(req, res) {
     // FLUX가 프롬프트 시작과 끝에서 핵심 규칙을 2번 인식
     // ========================================
     if (!skipBrushstrokeRules) {
-      const sandwichCore = 'PRESERVE FACE IDENTITY AGE GENDER ETHNICITY, render ATTRACTIVELY, VISIBLE BRUSHSTROKES ON SUBJECT (face skin clothing), NOT photograph, NOT digital. ';
+      const sandwichCore = 'PRESERVE FACE IDENTITY AGE GENDER ETHNICITY, render ATTRACTIVELY, VERY THICK BOLD BRUSHSTROKES ON SUBJECT (face skin clothing) visible WITHOUT zooming, NOT photograph, NOT digital. ';
       finalPrompt = sandwichCore + finalPrompt + ', ' + sandwichCore.trim();
-      console.log('🥪 Applied SANDWICH rule (피사체 붓터치 강조)');
+      console.log('🥪 Applied SANDWICH rule (피사체 굵은 붓터치 강제)');
     } else {
       console.log('🥪 Skipped SANDWICH rule (제외 대상)');
     }
