@@ -577,21 +577,20 @@ const ResultScreen = ({
         '원숭이와 자화상': 'frida-monkeys',
 
         
-        // 워홀
-        'Marilyn Monroe': 'warhol-marilyn',
-        '마릴린 먼로': 'warhol-marilyn',
-        'Marilyn': 'warhol-marilyn',
-        'Elvis': 'warhol-elvis',
-        '엘비스': 'warhol-elvis',
-        'Campbell\'s Soup Cans': 'warhol-soup',
-        '캠벨 수프 캔': 'warhol-soup',
-        'Soup Cans': 'warhol-soup',
-        'Banana': 'warhol-banana',
-        '바나나': 'warhol-banana',
-        'Endangered Species': 'warhol-endangered',
-        '멸종 위기 종': 'warhol-endangered',
-        'Elvis': 'warhol-elvis',
-        '엘비스': 'warhol-elvis'
+        // 바스키아
+        'Untitled': 'basquiat-skull',
+        'Untitled (Skull)': 'basquiat-skull',
+        '무제': 'basquiat-skull',
+        '무제 (해골)': 'basquiat-skull',
+        'Skull': 'basquiat-skull',
+        'Warrior': 'basquiat-warrior',
+        '전사': 'basquiat-warrior',
+        'Boy and Dog in a Johnnypump': 'basquiat-boy',
+        '소년과 개': 'basquiat-boy',
+        'Boy and Dog': 'basquiat-boy',
+        'Hollywood Africans': 'basquiat-hollywood',
+        '할리우드 아프리칸스': 'basquiat-hollywood',
+        'Hollywood': 'basquiat-hollywood'
       };
       
       // 직접 매칭 시도
@@ -648,10 +647,10 @@ const ResultScreen = ({
       '프리다': 'frida-master',
       'frida': 'frida-master',
       'frida kahlo': 'frida-master',
-      '앤디 워홀': 'warhol-master',
-      '워홀': 'warhol-master',
-      'warhol': 'warhol-master',
-      'andy warhol': 'warhol-master'
+      '장 미셸 바스키아': 'basquiat-master',
+      '바스키아': 'basquiat-master',
+      'basquiat': 'basquiat-master',
+      'jean-michel basquiat': 'basquiat-master'
     };
     
     // 키 매칭 시도
