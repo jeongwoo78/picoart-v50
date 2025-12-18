@@ -412,9 +412,25 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
       const masterInfo = getMasterInfo(artist);
       const movement = masterInfo.movement || '거장';
       if (work) {
-        const workFormatted = formatWorkName(work);
-        const workShort = workFormatted.split('(')[0].trim();
-        return `${movement}, <${workShort}>`;
+        // API에서 "영문 (한글)" 형태로 올 수 있음 - 한글 우선 추출
+        let workDisplay = work;
+        
+        // 1. 괄호 안에 한글이 있으면 한글만 추출
+        const koreanMatch = work.match(/\(([가-힣\s]+)\)/);
+        if (koreanMatch) {
+          workDisplay = koreanMatch[1].trim();
+        } else {
+          // 2. formatWorkName으로 한글 변환 시도
+          const workFormatted = formatWorkName(work);
+          // 한글명(영문명) 형태면 한글만 추출
+          if (workFormatted.includes('(')) {
+            workDisplay = workFormatted.split('(')[0].trim();
+          } else {
+            workDisplay = workFormatted;
+          }
+        }
+        
+        return `${movement}, 〈${workDisplay}〉`;
       }
       return movement;
     } else if (cat === 'oriental') {
