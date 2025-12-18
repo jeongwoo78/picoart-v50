@@ -3131,6 +3131,9 @@ export default async function handler(req, res) {
 
   try {
     const { image, selectedStyle } = req.body;
+    
+    // 🎯 v64: visionAnalysis를 함수 상단에서 선언 (스코프 문제 해결)
+    let visionAnalysis = null;
 
     // 디버깅 로그
     console.log('=== FLUX Transfer v33 Debug ===');
@@ -3253,7 +3256,7 @@ export default async function handler(req, res) {
       );
       
       // Vision 분석 결과 추출 (통합됨)
-      let visionAnalysis = null;
+      // visionAnalysis는 함수 상단에서 선언됨 (v64)
       let identityPrompt = '';
       
       if (aiResult.success && aiResult.visionData) {
