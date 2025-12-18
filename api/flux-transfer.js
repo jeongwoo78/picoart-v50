@@ -66,6 +66,10 @@ function convertToWorkKey(artistName, workTitle) {
     'frida kahlo': 'frida',
     '프리다': 'frida',
     '프리다 칼로': 'frida',
+    'warhol': 'warhol',
+    'andy warhol': 'warhol',
+    '워홀': 'warhol',
+    '앤디 워홀': 'warhol',
     'basquiat': 'basquiat',
     'jean-michel basquiat': 'basquiat',
     '바스키아': 'basquiat',
@@ -117,16 +121,23 @@ function convertToWorkKey(artistName, workTitle) {
     '가시 목걸이 자화상': 'thornnecklace',
     'self-portrait with monkeys': 'monkeys',
     '원숭이와 자화상': 'monkeys',
+    // 워홀
+    'marilyn monroe': 'marilyn',
+    '마릴린 먼로': 'marilyn',
+    'campbell\'s soup cans': 'soup',
+    '캠벨 수프 캔': 'soup',
     // 바스키아
-    'untitled (skull)': 'skull',
+    'untitled': 'skull',
+    'untitled skull': 'skull',
+    '무제': 'skull',
     '무제 (해골)': 'skull',
-    'skull': 'skull',
-    'head': 'head',
-    '왕관을 쓴 머리': 'head',
-    'crowned head': 'head',
     'warrior': 'warrior',
     '전사': 'warrior',
-    'boxer': 'warrior'
+    'boy and dog in a johnnypump': 'boy',
+    'boy and dog': 'boy',
+    '소년과 개': 'boy',
+    'hollywood africans': 'hollywood',
+    '할리우드 아프리칸스': 'hollywood'
   };
   
   const normalizedArtist = artistMap[artistName.toLowerCase().trim()] || artistName.toLowerCase().trim();
@@ -319,21 +330,21 @@ function detectPhotoType(photoAnalysis) {
 // ========================================
 
 const ARTIST_WEIGHTS = {
-  // 모더니즘 (7명) - v52: 워홀 비중 축소
+  // 모더니즘 (7명)
   modernism: {
     portrait: [
       { name: 'PICASSO', weight: 35 },
-      { name: 'MAGRITTE', weight: 30 },
-      { name: 'LICHTENSTEIN', weight: 15 },
-      { name: 'WARHOL', weight: 10 },
-      { name: 'KEITH HARING', weight: 10 }
+      { name: 'MAGRITTE', weight: 25 },
+      { name: 'WARHOL', weight: 25 },
+      { name: 'LICHTENSTEIN', weight: 10 },
+      { name: 'KEITH HARING', weight: 5 }
     ],
     couple: [
       { name: 'PICASSO', weight: 30 },
-      { name: 'CHAGALL', weight: 30 },
-      { name: 'MAGRITTE', weight: 25 },
-      { name: 'LICHTENSTEIN', weight: 10 },
-      { name: 'WARHOL', weight: 5 }
+      { name: 'CHAGALL', weight: 25 },
+      { name: 'MAGRITTE', weight: 20 },
+      { name: 'WARHOL', weight: 15 },
+      { name: 'LICHTENSTEIN', weight: 10 }
     ],
     group: [
       { name: 'PICASSO', weight: 35 },
@@ -349,17 +360,17 @@ const ARTIST_WEIGHTS = {
       { name: 'PICASSO', weight: 15 } // 나머지
     ],
     stillLife: [
-      { name: 'PICASSO', weight: 40 },
-      { name: 'MAGRITTE', weight: 30 },
-      { name: 'MIRÓ', weight: 20 },
-      { name: 'WARHOL', weight: 10 }
-    ],
-    default: [
       { name: 'PICASSO', weight: 35 },
       { name: 'MAGRITTE', weight: 25 },
+      { name: 'MIRÓ', weight: 20 },
+      { name: 'WARHOL', weight: 20 }
+    ],
+    default: [
+      { name: 'PICASSO', weight: 30 },
+      { name: 'MAGRITTE', weight: 20 },
+      { name: 'WARHOL', weight: 20 },
       { name: 'LICHTENSTEIN', weight: 15 },
       { name: 'CHAGALL', weight: 10 },
-      { name: 'WARHOL', weight: 10 },
       { name: 'KEITH HARING', weight: 5 }
     ]
   },
@@ -2333,12 +2344,12 @@ const fallbackPrompts = {
     prompt: 'painting by Frida Kahlo: INTENSE DIRECT GAZE portrait style, vibrant Mexican folk art colors, symbolic personal imagery (flowers, animals, vines, hearts), emotional raw vulnerability, Mexican traditional dress and floral headpiece, lush tropical green foliage background, autobiographical symbolic elements, rich saturated colors, detailed oil painting brushwork visible, NOT photographic preserve subject identity, Frida Kahlo masterpiece quality, VISIBLE BRUSHSTROKES, NOT photograph, NOT digital'
   },
   
-  basquiat: {
-    name: '장 미셸 바스키아',
-    artist: 'Jean-Michel Basquiat (1960-1988)',
-    movement: '네오표현주의 (Neo-Expressionism)',
-    defaultWork: 'Untitled (Skull)',
-    prompt: 'painting by Jean-Michel Basquiat: neo-expressionist street art style, RAW ENERGETIC BRUSHSTROKES on canvas, BOLD PRIMARY COLORS (red/yellow/blue/black), crown motif and skull imagery, scribbled graffiti text and symbols mixed with expressive figures, thick BLACK OUTLINES with dripping paint effect, childlike primitive energy combined with sophisticated art references, anatomical diagram elements, exposed canvas texture, celebrating Black heroes and culture, Basquiat masterpiece quality, VISIBLE BRUSHSTROKES, NOT photograph, NOT digital'
+  warhol: {
+    name: '앤디 워홀',
+    artist: 'Andy Warhol (1928-1987)',
+    movement: '팝아트 (Pop Art)',
+    defaultWork: 'Marilyn Monroe',
+    prompt: 'Andy Warhol Pop Art: CRITICAL LAYOUT - divide canvas into 2x2 GRID with 4 EQUAL QUADRANTS separated by visible lines. Place the SAME PORTRAIT in each of the 4 squares. TOP-LEFT: hot pink and yellow, TOP-RIGHT: cyan and orange, BOTTOM-LEFT: lime green and purple, BOTTOM-RIGHT: red and blue. Each quadrant shows IDENTICAL face but with DIFFERENT BOLD FLAT COLORS. Silkscreen printing effect with HIGH CONTRAST, NO gradients, visible halftone dots. The face in all 4 panels must be the SAME PERSON from input photo with correct body proportions. Warhol Pop Art masterpiece'
   },
   
   // ========================================
@@ -4166,16 +4177,17 @@ export default async function handler(req, res) {
           }
         }
         
-        // 바스키아 선택시 그래피티 스타일 강화 (거장)
-        if (selectedArtist.toUpperCase().trim().includes('BASQUIAT') || 
-            selectedArtist.toUpperCase().trim().includes('JEAN-MICHEL') ||
-            selectedArtist.includes('바스키아') ||
-            selectedArtist.includes('장 미셸')) {
-          console.log('🎯 Basquiat detected');
-          const basquiatEnhancement = 'Jean-Michel Basquiat neo-expressionist style: RAW ENERGETIC BRUSHSTROKES, BOLD PRIMARY COLORS (red/yellow/blue/black), THREE-POINTED CROWN motif, skull and anatomical imagery, graffiti text and symbols, thick BLACK OUTLINES with dripping paint, childlike primitive energy, street art meets fine art, ';
-          finalPrompt = basquiatEnhancement + finalPrompt;
-          controlStrength = 0.50;
-          console.log('✅ Enhanced Basquiat graffiti style (control_strength 0.50)');
+        // 워홀 선택시 팝아트 그리드 강화 (거장 + 모더니즘)
+        if (selectedArtist.toUpperCase().trim().includes('WARHOL') || 
+            selectedArtist.toUpperCase().trim().includes('ANDY') ||
+            selectedArtist.includes('워홀') ||
+            selectedArtist.includes('앤디')) {
+          console.log('🎯 Warhol detected');
+          // 항상 강화 프롬프트로 교체 (4분할 보장)
+          const warholEnhancement = 'ABSOLUTE REQUIREMENT: CREATE EXACTLY 4 SEPARATE IMAGES arranged in 2x2 GRID with VISIBLE DIVIDING LINES between panels, TOP-LEFT panel + TOP-RIGHT panel + BOTTOM-LEFT panel + BOTTOM-RIGHT panel, the EXACT SAME FACE from the ORIGINAL PHOTO must appear in ALL 4 panels, EACH panel must have COMPLETELY DIFFERENT bold color scheme (panel 1: hot pink, panel 2: cyan blue, panel 3: yellow, panel 4: orange), Andy Warhol silkscreen style, FLAT graphic colors NO gradients, DO NOT draw Marilyn Monroe, MUST be 4 SEPARATE PANELS not single image, ';
+          finalPrompt = warholEnhancement + finalPrompt;
+          controlStrength = 0.30;
+          console.log('✅ Enhanced Warhol 4-panel grid (FRONT position, control_strength 0.30)');
         }
         
         // 피카소 선택시 입체주의 강화 (거장 + 모더니즘)

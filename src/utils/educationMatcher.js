@@ -87,19 +87,23 @@ const MASTERS_WORK_MAP = {
   '원숭이와 자화상': 'frida-monkeys',
   'Monkeys': 'frida-monkeys',
   
-  // 바스키아 (3작품)
+  // 바스키아 (4작품)
   'Untitled (Skull)': 'basquiat-skull',
   '무제 (해골)': 'basquiat-skull',
+  '무제': 'basquiat-skull',
   'Skull': 'basquiat-skull',
   'Untitled Skull': 'basquiat-skull',
-  'Head': 'basquiat-head',
-  '왕관을 쓴 머리': 'basquiat-head',
-  'Crowned Head': 'basquiat-head',
-  'Self Portrait': 'basquiat-head',
   'Warrior': 'basquiat-warrior',
   '전사': 'basquiat-warrior',
   'Untitled (Warrior)': 'basquiat-warrior',
   'Boxer': 'basquiat-warrior',
+  'Boy and Dog in a Johnnypump': 'basquiat-boy',
+  '소년과 개': 'basquiat-boy',
+  'Boy and Dog': 'basquiat-boy',
+  'Johnnypump': 'basquiat-boy',
+  'Hollywood Africans': 'basquiat-hollywood',
+  '할리우드 아프리칸스': 'basquiat-hollywood',
+  'Hollywood': 'basquiat-hollywood',
 };
 
 // 화가 이름으로 기본 작품 fallback (작품명 매칭 실패 시)
