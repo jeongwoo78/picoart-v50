@@ -3523,24 +3523,69 @@ export default async function handler(req, res) {
         // v63: 대전제 v2 - 스타일 우선 + 사진 제외어 강화
         // 검색 결과 기반: FLUX는 앞부분 더 잘 인식, 구체적 기법 명시 필요
         // ========================================
-        const coreRulesPrefix = 
-          'PAINTING STYLE FIRST (CRITICAL): ' +
-          'This must look like a REAL TRADITIONAL OIL PAINTING with thick impasto technique, ' +
-          'visible palette knife marks, heavy textured brushstrokes on canvas. ' +
-          'NOT photograph, NOT photorealistic, NOT smooth, NOT digital render, NOT airbrushed, ' +
-          'NOT cinematic, NOT award-winning photo, NOT 3D. ' +
-          
-          'RULES: ' +
-          '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
-          '2. ATTRACTIVE: Render people beautifully (unless expressive distortion work). ' +
-          '3. NO HALLUCINATION: Do NOT add people or elements not in original photo. ' +
-          '4. MANDATORY VERY THICK BOLD BRUSHSTROKES ON SUBJECT: VERY THICK CHUNKY WIDE brush marks (20mm or thicker) MUST be clearly visible on SUBJECT (face, skin, hair, clothing) even WITHOUT zooming in - NOT fine lines, NOT subtle texture, NOT just background, this is REQUIRED and NON-NEGOTIABLE for subject. ' +
-          '5. NO TEXT: No signatures, letters, writing, watermarks. ' +
-          '6. ANATOMY: Correct proportions - no missing or extra limbs. ' +
-          '7. NO PAINTER APPEARANCE: Never apply painter physical features to subject - NO Van Gogh red beard, NO Frida unibrow, NO Marilyn/Elvis face. Apply painting TECHNIQUE only. ' +
-          'END RULES. ';
+        
+        // 스타일별 체크
+        const isBasquiat = finalPrompt.toLowerCase().includes('basquiat');
+        const isPicassoCubist = finalPrompt.toLowerCase().includes('picasso') || finalPrompt.toLowerCase().includes('cubist');
+        
+        let coreRulesPrefix;
+        
+        if (isPicassoCubist) {
+          // 피카소/입체주의용: 붓터치 대신 기하학적 분해 강제
+          coreRulesPrefix = 
+            'CUBIST STYLE FIRST (CRITICAL): ' +
+            'This must look like a CUBIST PAINTING with geometric fragmentation. ' +
+            'NOT photograph, NOT photorealistic, NOT smooth, NOT digital render, NOT airbrushed, ' +
+            'NOT cinematic, NOT award-winning photo, NOT 3D. ' +
+            
+            'RULES: ' +
+            '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
+            '2. ATTRACTIVE: Render people beautifully (unless expressive distortion work). ' +
+            '3. NO HALLUCINATION: Do NOT add people or elements not in original photo. ' +
+            '4. MANDATORY CUBIST FRAGMENTATION: FACE must be GEOMETRICALLY FRAGMENTED into angular planes, NOSE from SIDE PROFILE while BOTH EYES visible from FRONT VIEW simultaneously, JAW and CHIN broken into geometric segments - this is REQUIRED and NON-NEGOTIABLE. ' +
+            '5. NO TEXT: No signatures, letters, writing, watermarks. ' +
+            '6. ANATOMY: Correct proportions - no missing or extra limbs. ' +
+            '7. NO PAINTER APPEARANCE: Never apply painter physical features to subject. Apply painting TECHNIQUE only. ' +
+            'END RULES. ';
+        } else if (isBasquiat) {
+          // 바스키아용: 텍스트 금지 규칙 제외
+          coreRulesPrefix = 
+            'PAINTING STYLE FIRST (CRITICAL): ' +
+            'This must look like a REAL TRADITIONAL OIL PAINTING with thick impasto technique, ' +
+            'visible palette knife marks, heavy textured brushstrokes on canvas. ' +
+            'NOT photograph, NOT photorealistic, NOT smooth, NOT digital render, NOT airbrushed, ' +
+            'NOT cinematic, NOT award-winning photo, NOT 3D. ' +
+            
+            'RULES: ' +
+            '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
+            '2. ATTRACTIVE: Render people beautifully (unless expressive distortion work). ' +
+            '3. NO HALLUCINATION: Do NOT add people or elements not in original photo. ' +
+            '4. MANDATORY VERY THICK BOLD BRUSHSTROKES ON SUBJECT: VERY THICK CHUNKY WIDE brush marks (20mm or thicker) MUST be clearly visible on SUBJECT (face, skin, hair, clothing) even WITHOUT zooming in - NOT fine lines, NOT subtle texture, NOT just background, this is REQUIRED and NON-NEGOTIABLE for subject. ' +
+            '5. ANATOMY: Correct proportions - no missing or extra limbs. ' +
+            '6. NO PAINTER APPEARANCE: Never apply painter physical features to subject - NO Van Gogh red beard, NO Frida unibrow, NO Marilyn/Elvis face. Apply painting TECHNIQUE only. ' +
+            'END RULES. ';
+        } else {
+          // 일반: 텍스트 금지 + 붓터치 강제
+          coreRulesPrefix = 
+            'PAINTING STYLE FIRST (CRITICAL): ' +
+            'This must look like a REAL TRADITIONAL OIL PAINTING with thick impasto technique, ' +
+            'visible palette knife marks, heavy textured brushstrokes on canvas. ' +
+            'NOT photograph, NOT photorealistic, NOT smooth, NOT digital render, NOT airbrushed, ' +
+            'NOT cinematic, NOT award-winning photo, NOT 3D. ' +
+            
+            'RULES: ' +
+            '1. IDENTITY: Preserve face identity age gender ethnicity exactly. ' +
+            '2. ATTRACTIVE: Render people beautifully (unless expressive distortion work). ' +
+            '3. NO HALLUCINATION: Do NOT add people or elements not in original photo. ' +
+            '4. MANDATORY VERY THICK BOLD BRUSHSTROKES ON SUBJECT: VERY THICK CHUNKY WIDE brush marks (20mm or thicker) MUST be clearly visible on SUBJECT (face, skin, hair, clothing) even WITHOUT zooming in - NOT fine lines, NOT subtle texture, NOT just background, this is REQUIRED and NON-NEGOTIABLE for subject. ' +
+            '5. NO TEXT: No signatures, letters, writing, watermarks. ' +
+            '6. ANATOMY: Correct proportions - no missing or extra limbs. ' +
+            '7. NO PAINTER APPEARANCE: Never apply painter physical features to subject - NO Van Gogh red beard, NO Frida unibrow, NO Marilyn/Elvis face. Apply painting TECHNIQUE only. ' +
+            'END RULES. ';
+        }
+        
         finalPrompt = coreRulesPrefix + finalPrompt;
-        console.log('🎯 v62: Applied CORE RULES PREFIX (항상 적용)');
+        console.log(`🎯 v62: Applied CORE RULES PREFIX (${isPicassoCubist ? '피카소: 분해 강제' : isBasquiat ? '바스키아: 텍스트 허용' : '일반'})`);
         
         // ===== 디버그 시작 =====
         console.log('DEBUG: selectedArtist raw value:', selectedArtist);
@@ -4205,8 +4250,8 @@ export default async function handler(req, res) {
           }
           // 20세기 모더니즘에서 피카소 선택시
           if (categoryType === 'modernism') {
-            controlStrength = 0.40;
-            console.log('✅ Modernism Picasso: control_strength 0.40 (balanced Cubist effect)');
+            controlStrength = 0.35;
+            console.log('✅ Modernism Picasso: control_strength 0.35 (stronger Cubist fragmentation)');
           }
         }
         
@@ -4508,8 +4553,9 @@ export default async function handler(req, res) {
     const isSculpture = finalPrompt.toLowerCase().includes('sculpture') || finalPrompt.toLowerCase().includes('marble');
     const isByzantine = finalPrompt.toLowerCase().includes('byzantine');
     const isGothicGlass = finalPrompt.toLowerCase().includes('stained glass') || finalPrompt.toLowerCase().includes('gothic');
+    const isPicasso = finalPrompt.toLowerCase().includes('picasso') || finalPrompt.toLowerCase().includes('cubist');
     
-    const skipBrushstrokeRules = isWarhol || isMosaicStyle || isPointillismStyle || isSculpture || isByzantine || isGothicGlass;
+    const skipBrushstrokeRules = isWarhol || isMosaicStyle || isPointillismStyle || isSculpture || isByzantine || isGothicGlass || isPicasso;
     
     // ========================================
     // v62: 붓터치 규칙 - 공통 제외 조건 적용
