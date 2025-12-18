@@ -1,12 +1,5 @@
-// PicoArt v64 - PhotoMaker 전환 (FLUX Depth → PhotoMaker-Style)
-// v64: PhotoMaker-Style API로 전환
-//      - 모델: tencentarc/photomaker-style
-//      - 회화 품질 대폭 개선 (피카소 입체파 성공!)
-//      - 비용 52% 절감 ($0.025 → $0.012/장)
-//      - 프롬프트: "asian woman/man img" 트리거 워드 필수
-//      - 파라미터: style_strength_ratio=50, guidance_scale=10, num_steps=50
-//
-// v63: 대전제 v2 + 화가별 프롬프트 개선 (FLUX 버전)
+// PicoArt v63 - 프롬프트 대수술 (검색 결과 기반)
+// v63: 대전제 v2 + 화가별 프롬프트 개선
 //      - 대전제: 스타일 우선 + 사진 제외어 강화
 //      - 화가: "by XY, XY art style" 패턴 적용
 //      - 기법: 구체적 묘사 추가 (impasto, palette knife 등)
@@ -3131,9 +3124,6 @@ export default async function handler(req, res) {
 
   try {
     const { image, selectedStyle } = req.body;
-    
-    // 🎯 v64: visionAnalysis를 함수 상단에서 선언 (스코프 문제 해결)
-    let visionAnalysis = null;
 
     // 디버깅 로그
     console.log('=== FLUX Transfer v33 Debug ===');
@@ -3256,7 +3246,7 @@ export default async function handler(req, res) {
       );
       
       // Vision 분석 결과 추출 (통합됨)
-      // visionAnalysis는 함수 상단에서 선언됨 (v64)
+      let visionAnalysis = null;
       let identityPrompt = '';
       
       if (aiResult.success && aiResult.visionData) {
@@ -4589,28 +4579,22 @@ export default async function handler(req, res) {
     }
     
     // ========================================
-    // 🥪 샌드위치 방식: PhotoMaker용 프롬프트 구조
+    // 🥪 샌드위치 방식: 대전제 핵심을 앞뒤로 배치
+    // FLUX가 프롬프트 시작과 끝에서 핵심 규칙을 2번 인식
     // ========================================
+    if (!skipBrushstrokeRules) {
+      const sandwichCore = 'PRESERVE FACE IDENTITY AGE GENDER ETHNICITY, render ATTRACTIVELY, VERY THICK BOLD BRUSHSTROKES (20mm or thicker) ON SUBJECT (face skin clothing) visible WITHOUT zooming, NOT photograph, NOT digital. ';
+      finalPrompt = sandwichCore + finalPrompt + ', ' + sandwichCore.trim();
+      console.log('🥪 Applied SANDWICH rule (피사체 굵은 붓터치 강제)');
+    } else {
+      console.log('🥪 Skipped SANDWICH rule (제외 대상)');
+    }
     
-    // PhotoMaker 필수: gender prefix with img trigger
-    // visionAnalysis가 없으면 기본값 'female' 사용
-    const detectedGender = (visionAnalysis && visionAnalysis.gender) ? visionAnalysis.gender : 'female';
-    const genderPrefix = detectedGender === 'female' ? 'asian woman img' : 'asian man img';
-    console.log(`🎯 [v64] PhotoMaker gender: ${detectedGender}`);
+    // FLUX Depth Dev 변환 (v63: Pro 테스트 포기, Dev 유지)
+    console.log('📦 [v63] black-forest-labs/flux-depth-dev');
     
-    // PhotoMaker용 프롬프트 재구성
-    // 형식: [gender img] + [style prompt] + [technique]
-    const photoMakerPrompt = `${genderPrefix}, ${finalPrompt}, visible brushstrokes, thick paint texture, oil on canvas, NOT photograph, NOT smooth, NOT digital`;
-    
-    // PhotoMaker negative prompt
-    const negativePrompt = '3d, cartoon, anime, illustration, low quality, blurry, photorealistic, smooth skin, digital art, airbrushed, red beard, Van Gogh face, Frida unibrow';
-    
-    console.log('🎨 [v64] PhotoMaker-Style');
-    console.log('📝 Prompt:', photoMakerPrompt.substring(0, 200) + '...');
-    
-    // PhotoMaker-Style API 호출 (버전 ID 직접 지정)
     const response = await fetch(
-      'https://api.replicate.com/v1/predictions',
+      'https://api.replicate.com/v1/models/black-forest-labs/flux-depth-dev/predictions',
       {
         method: 'POST',
         headers: {
@@ -4619,15 +4603,14 @@ export default async function handler(req, res) {
           'Prefer': 'wait'
         },
         body: JSON.stringify({
-          version: '467d062309da518648ba89d226490e02b8ed09b5abc15026e54e31c5a8cd0769',
           input: {
-            input_image: image,
-            prompt: photoMakerPrompt,
-            negative_prompt: negativePrompt,
-            num_steps: 50,
-            style_strength_ratio: 50,
-            guidance_scale: 10,
-            num_outputs: 1
+            control_image: image,
+            prompt: finalPrompt,
+            num_inference_steps: 24,
+            guidance: 12,
+            control_strength: controlStrength,
+            output_format: 'jpg',
+            output_quality: 90
           }
         })
       }
@@ -4635,15 +4618,15 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('PhotoMaker error:', response.status, errorText);
+      console.error('FLUX Depth error:', response.status, errorText);
       return res.status(response.status).json({ 
-        error: `PhotoMaker API error: ${response.status}`,
+        error: `FLUX API error: ${response.status}`,
         details: errorText
       });
     }
 
     const data = await response.json();
-    console.log('✅ PhotoMaker-Style completed');
+    console.log('✅ FLUX Depth completed');
     
     // 결과에 선택 정보 포함
     res.status(200).json({
