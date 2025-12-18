@@ -4608,9 +4608,9 @@ export default async function handler(req, res) {
     console.log('🎨 [v64] PhotoMaker-Style');
     console.log('📝 Prompt:', photoMakerPrompt.substring(0, 200) + '...');
     
-    // PhotoMaker-Style API 호출
+    // PhotoMaker-Style API 호출 (버전 ID 직접 지정)
     const response = await fetch(
-      'https://api.replicate.com/v1/models/tencentarc/photomaker-style/predictions',
+      'https://api.replicate.com/v1/predictions',
       {
         method: 'POST',
         headers: {
@@ -4619,6 +4619,7 @@ export default async function handler(req, res) {
           'Prefer': 'wait'
         },
         body: JSON.stringify({
+          version: '467d062309da518648ba89d226490e02b8ed09b5abc15026e54e31c5a8cd0769',
           input: {
             input_image: image,
             prompt: photoMakerPrompt,
