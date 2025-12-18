@@ -53,7 +53,7 @@ const PhotoStyleScreen = ({ mainCategory, onBack, onSelect }) => {
         { id: 'matisse-master', name: '마티스', icon: '🎭', period: '1869-1954' },
         { id: 'picasso-master', name: '피카소', icon: '🎨', period: '1881-1973' },
         { id: 'frida-master', name: '프리다 칼로', icon: '🌺', period: '1907-1954' },
-        { id: 'warhol-master', name: '앤디 워홀', icon: '🥫', period: '1928-1987' }
+        { id: 'basquiat-master', name: '바스키아', icon: '👑', period: '1960-1988' }
       ]
     },
     oriental: {

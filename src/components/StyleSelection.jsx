@@ -43,7 +43,7 @@ const StyleSelection = ({ onSelect }) => {
     { id: 'expressionism', name: '표현주의', category: 'movements', icon: '😱', description: '내면의 불안과 고독' },
     { id: 'modernism', name: '20세기 모더니즘', category: 'movements', icon: '🔮', description: '입체·초현실·팝아트' },
     
-    // 거장 7명 (시간순: 출생연도)
+    // 거장 8명 (시간순: 출생연도)
     { id: 'vangogh-master', name: '빈센트 반 고흐', nameEn: 'Vincent van Gogh', category: 'masters', icon: '🌻', description: '1853-1890 | 후기인상주의' },
     { id: 'klimt-master', name: '구스타프 클림트', nameEn: 'Gustav Klimt', category: 'masters', icon: '✨', description: '1862-1918 | 아르누보' },
     { id: 'munch-master', name: '에드바르 뭉크', nameEn: 'Edvard Munch', category: 'masters', icon: '😱', description: '1863-1944 | 표현주의' },
