@@ -50,7 +50,7 @@ const StyleSelection = ({ onSelect }) => {
     { id: 'matisse-master', name: '앙리 마티스', nameEn: 'Henri Matisse', category: 'masters', icon: '🎭', description: '1869-1954 | 야수파' },
     { id: 'picasso-master', name: '파블로 피카소', nameEn: 'Pablo Picasso', category: 'masters', icon: '🎨', description: '1881-1973 | 입체주의' },
     { id: 'frida-master', name: '프리다 칼로', nameEn: 'Frida Kahlo', category: 'masters', icon: '🌺', description: '1907-1954 | 초현실주의' },
-    { id: 'warhol-master', name: '앤디 워홀', nameEn: 'Andy Warhol', category: 'masters', icon: '🥫', description: '1928-1987 | 팝아트' },
+    { id: 'basquiat-master', name: '장 미셸 바스키아', nameEn: 'Jean-Michel Basquiat', category: 'masters', icon: '👑', description: '1960-1988 | 네오표현주의' },
     
     // 동양화
     { id: 'korean', name: '한국 전통 회화', nameEn: 'Korean Art', category: 'oriental', icon: '🎎', description: '여백의 미와 절제미' },

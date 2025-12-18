@@ -364,6 +364,13 @@ export const movementEnhancements = {
     controlStrength: 0.55
   },
   
+  'basquiat': {
+    name: '바스키아',
+    prompt: ', Neo-expressionist artwork by Jean-Michel Basquiat, Basquiat graffiti art style: raw energetic brushstrokes on canvas, bold primary colors (red/yellow/blue/black), crown motif and skull imagery, scribbled text and symbols mixed with figures, street art meets fine art, childlike primitive energy with sophisticated references, thick black outlines, dripping paint effect',
+    controlStrength: 0.50,
+    specialRule: 'graffiti street art energy'
+  },
+  
   'warhol': {
     name: '워홀',
     prompt: ', Pop art artwork by Andy Warhol, Warhol pop art style: 2x2 FOUR-PANEL GRID mandatory with same person repeated 4 times, DIFFERENT BOLD NEON COLOR in each panel (hot pink/cyan/yellow/orange/electric blue/lime green), high contrast silkscreen print effect with ink imperfections and halftone, flat graphic pop art style, bold colors mass culture theme, comic book style outlines, DO NOT draw Marilyn Monroe herself',
@@ -615,28 +622,27 @@ export const masterworkEnhancements = {
   },
   
   // ========================================
-  // 7. 워홀 (Warhol) - 2개 대표작
+  // 7. 바스키아 (Basquiat) - 3개 대표작
   // ========================================
   
-  'warhol-marilyn': {
-    name: '마릴린 먼로',
-    artist: 'warhol',
-    prompt: ', Warhol pop art portrait style: Transform THE PERSON IN PHOTO into 2x2 FOUR-PANEL GRID with SAME PERSON repeated 4 times, DIFFERENT BOLD NEON COLOR each panel (hot pink/cyan/yellow/orange/turquoise/lime), high contrast silkscreen print effect with ink bleed imperfections and halftone, flat graphic high-contrast, glamorous iconic expression, background must be SOLID COLORS only, NO celebrity faces anywhere, NO Marilyn Monroe face, apply pop art style to SUBJECT ONLY',
-    controlStrength: 0.50,
-    specialRule: '4-panel mandatory, NO Marilyn Monroe anywhere'
-  },
-  
-  'warhol-soup': {
-    name: '캠벨 수프 캔',
-    artist: 'warhol',
-    prompt: ', Campbells Soup Cans style by Andy Warhol, Warhol pop art style: commercial product art aesthetic, clean graphic outlines, flat color areas, red/white/gold can label colors, supermarket display repetition, pop art commercial design, silkscreen print flatness, bold colors mass culture theme, for portrait photos recommend switching to Marilyn style',
+  'basquiat-skull': {
+    name: '무제 (해골)',
+    artist: 'basquiat',
+    prompt: ', Basquiat Untitled Skull style: raw primitive skull imagery, scratched and scraped paint texture, BOLD PRIMARY COLORS (red/yellow/blue/black), exposed canvas showing through, anatomical diagram meets street art, crown motif optional, scribbled marks and symbols, thick black outlines with dripping effect, neo-expressionist energy, childlike rawness with sophisticated depth',
     controlStrength: 0.50
   },
   
-  'warhol-elvis': {
-    name: '엘비스',
-    artist: 'warhol',
-    prompt: ', Warhol silver silkscreen portrait style: Transform THE PERSON IN PHOTO, SILVER METALLIC BACKGROUND mandatory, single figure or repeated 2-3 times slightly offset, silkscreen print effect with INK DENSITY VARIATIONS, high contrast black on silver, cowboy stance energy optional, mechanical reproduction aesthetic, ink bleed imperfections, NO 4-panel grid, NO colorful pop art, NO Marilyn Monroe style, NO celebrity faces in background, SILVER BACKGROUND ONLY',
+  'basquiat-head': {
+    name: '왕관을 쓴 머리',
+    artist: 'basquiat',
+    prompt: ', Basquiat crowned head style: THREE-POINTED CROWN above head mandatory, bold gestural strokes, PRIMARY COLORS (red/yellow/blue/black), raw expressive face, graffiti text and symbols scattered, street art meets fine art, thick black outlines, dripping paint effect, neo-expressionist portrait style, crown as symbol of heroic dignity',
+    controlStrength: 0.50
+  },
+  
+  'basquiat-warrior': {
+    name: '전사',
+    artist: 'basquiat',
+    prompt: ', Basquiat warrior/boxer style: powerful heroic figure, dynamic athletic pose, BOLD PRIMARY COLORS (red/yellow/blue/black), anatomical line drawings mixed with expressive paint, boxing or sports reference optional, thick black outlines, energetic brushstrokes, crown motif, celebrating Black heroes and athletes, raw street art energy',
     controlStrength: 0.50
   }
 };

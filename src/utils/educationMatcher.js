@@ -87,19 +87,19 @@ const MASTERS_WORK_MAP = {
   '원숭이와 자화상': 'frida-monkeys',
   'Monkeys': 'frida-monkeys',
   
-  // 워홀 (3작품)
-  'Marilyn Monroe': 'warhol-marilyn',
-  '마릴린 먼로': 'warhol-marilyn',
-  'Marilyn': 'warhol-marilyn',
-  'Marilyn Diptych': 'warhol-marilyn',
-  'Campbell\'s Soup Cans': 'warhol-soup',
-  '캠벨 수프 캔': 'warhol-soup',
-  'Soup Cans': 'warhol-soup',
-  'Campbell Soup': 'warhol-soup',
-  'Elvis': 'warhol-elvis',
-  '엘비스': 'warhol-elvis',
-  'Elvis Presley': 'warhol-elvis',
-  'Double Elvis': 'warhol-elvis',
+  // 바스키아 (3작품)
+  'Untitled (Skull)': 'basquiat-skull',
+  '무제 (해골)': 'basquiat-skull',
+  'Skull': 'basquiat-skull',
+  'Untitled Skull': 'basquiat-skull',
+  'Head': 'basquiat-head',
+  '왕관을 쓴 머리': 'basquiat-head',
+  'Crowned Head': 'basquiat-head',
+  'Self Portrait': 'basquiat-head',
+  'Warrior': 'basquiat-warrior',
+  '전사': 'basquiat-warrior',
+  'Untitled (Warrior)': 'basquiat-warrior',
+  'Boxer': 'basquiat-warrior',
 };
 
 // 화가 이름으로 기본 작품 fallback (작품명 매칭 실패 시)
@@ -137,11 +137,11 @@ const MASTERS_ARTIST_FALLBACK = {
   'frida kahlo': 'frida-parrots',
   '프리다 칼로': 'frida-parrots',
   
-  'warhol': 'warhol-marilyn',
-  '워홀': 'warhol-marilyn',
-  'andy': 'warhol-marilyn',
-  'andy warhol': 'warhol-marilyn',
-  '앤디 워홀': 'warhol-marilyn',
+  'basquiat': 'basquiat-skull',
+  '바스키아': 'basquiat-skull',
+  'jean-michel': 'basquiat-skull',
+  'jean-michel basquiat': 'basquiat-skull',
+  '장 미셸 바스키아': 'basquiat-skull',
 };
 
 
