@@ -647,29 +647,29 @@ export const masterworkEnhancements = {
   'basquiat-skull': {
     name: '무제',
     artist: 'basquiat',
-    prompt: ', Untitled Skull by Jean-Michel Basquiat, Basquiat neo-expressionist art style: SKULL-LIKE FACE with exposed anatomy, RAW AGGRESSIVE BRUSHSTROKES, PRIMARY COLORS (red/yellow/black/blue) in bold contrast, GRAFFITI SCRAWLED TEXT and symbols scattered around, thick oil stick and acrylic texture, urban street art energy, THREE-POINTED CROWN motif, chaotic layered composition, visible paint drips and scratches, intense staring eyes, NOT clean NOT polished',
-    controlStrength: 0.55
+    prompt: ', Untitled Skull by Jean-Michel Basquiat, Basquiat neo-expressionist art style: SKULL-LIKE FACE with exposed anatomy, RAW AGGRESSIVE BRUSHSTROKES (30mm or thicker), PRIMARY COLORS (red/yellow/black/blue) in bold contrast, GRAFFITI SCRAWLED TEXT and symbols scattered around, thick oil stick and acrylic texture, urban street art energy, THREE-POINTED CROWN motif, chaotic layered composition, visible paint drips and scratches, intense staring eyes, NOT clean NOT polished',
+    controlStrength: 0.50
   },
 
   'basquiat-warrior': {
     name: '전사',
     artist: 'basquiat',
-    prompt: ', Warrior by Jean-Michel Basquiat, Basquiat neo-expressionist art style: HEROIC BLACK FIGURE standing tall, BOLD ANATOMICAL LINES revealing skeletal structure, YELLOW AND BLUE contrasting background blocks, THREE-POINTED CROWN on head, RAW AGGRESSIVE BRUSHSTROKES, oil stick and acrylic on wood panel texture, graffiti elements and scrawled text, powerful warrior stance, visible paint drips, street art meets fine art energy',
-    controlStrength: 0.55
+    prompt: ', Warrior by Jean-Michel Basquiat, Basquiat neo-expressionist art style: HEROIC BLACK FIGURE standing tall, BOLD ANATOMICAL LINES revealing skeletal structure, YELLOW AND BLUE contrasting background blocks, THREE-POINTED CROWN on head, RAW AGGRESSIVE BRUSHSTROKES (30mm or thicker), oil stick and acrylic on wood panel texture, graffiti elements and scrawled text, powerful warrior stance, visible paint drips, street art meets fine art energy',
+    controlStrength: 0.50
   },
 
   'basquiat-boy': {
     name: '소년과 개',
     artist: 'basquiat',
-    prompt: ', Boy and Dog in a Johnnypump by Jean-Michel Basquiat, Basquiat neo-expressionist art style: SKELETAL FIGURE with exposed bones and anatomy, DOG COMPANION in similar raw style, HOT SUMMER COLORS (red/orange/yellow/green), fire hydrant water spray energy, CHAOTIC ENERGETIC BRUSHSTROKES, Brooklyn street life atmosphere, thick acrylic and oil stick texture, graffiti scrawls and symbols, childlike yet powerful, visible drips and scratches',
-    controlStrength: 0.55
+    prompt: ', Boy and Dog in a Johnnypump by Jean-Michel Basquiat, Basquiat neo-expressionist art style: SKELETAL FIGURE with exposed bones and anatomy, DOG COMPANION in similar raw style, HOT SUMMER COLORS (red/orange/yellow/green), fire hydrant water spray energy, CHAOTIC ENERGETIC BRUSHSTROKES (30mm or thicker), Brooklyn street life atmosphere, thick acrylic and oil stick texture, graffiti scrawls and symbols, childlike yet powerful, visible drips and scratches',
+    controlStrength: 0.50
   },
 
   'basquiat-hollywood': {
     name: '할리우드 아프리칸스',
     artist: 'basquiat',
     prompt: ', Hollywood Africans by Jean-Michel Basquiat, Basquiat neo-expressionist art style: MULTIPLE FIGURES in loose sketchy style, BRIGHT YELLOW BACKGROUND dominating, CROSSED-OUT TEXT and scrawled words throughout, social commentary imagery, THREE PORTRAIT HEADS with graffiti elements, thick oil stick lines, street art meets conceptual art, chaotic layered composition with symbols, raw urban energy, visible paint texture and drips',
-    controlStrength: 0.55
+    controlStrength: 0.50
   }
 };
 

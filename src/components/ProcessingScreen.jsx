@@ -303,6 +303,7 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
       // 뭉크
       'The Scream': '절규(The Scream)',
       'Madonna': '마돈나(Madonna)',
+      'Jealousy': '질투(Jealousy)',
       // 마티스
       'The Dance': '춤(The Dance)',
       'The Red Room': '붉은 방(The Red Room)',
@@ -318,10 +319,14 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
       'Self-Portrait with Thorn Necklace': '가시 목걸이 자화상(Self-Portrait with Thorn Necklace)',
       'Self-Portrait with Monkeys': '원숭이와 자화상(Self-Portrait with Monkeys)',
       'The Two Fridas': '두 명의 프리다(The Two Fridas)',
-      // 워홀
-      'Marilyn Monroe': '마릴린 먼로(Marilyn Monroe)',
-      'Marilyn': '마릴린(Marilyn)',
-      "Campbell's Soup Cans": "캠벨 수프 캔(Campbell's Soup Cans)"
+      // 바스키아
+      'Untitled': '무제(Untitled)',
+      'Untitled (Skull)': '무제(Untitled)',
+      'Skull': '무제(Skull)',
+      'Warrior': '전사(Warrior)',
+      'Boy and Dog in a Johnnypump': '소년과 개(Boy and Dog)',
+      'Boy and Dog': '소년과 개(Boy and Dog)',
+      'Hollywood Africans': '할리우드 아프리칸스(Hollywood Africans)'
     };
     
     return workMap[workName] || workName;

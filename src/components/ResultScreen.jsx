@@ -822,11 +822,15 @@ const ResultScreen = ({
         'les demoiselles d\'avignon': '아비뇽의 처녀들',
         'guernica': '게르니카',
         'girl before a mirror': '거울 앞의 소녀',
-        // 워홀
-        'marilyn monroe': '마릴린 먼로',
-        'marilyn': '마릴린 먼로',
-        'campbell\'s soup cans': '캠벨 수프 캔',
-        'elvis': '엘비스',
+        // 바스키아
+        'untitled': '무제',
+        'untitled (skull)': '무제',
+        'skull': '무제',
+        'warrior': '전사',
+        'boy and dog in a johnnypump': '소년과 개',
+        'boy and dog': '소년과 개',
+        'hollywood africans': '할리우드 아프리칸스',
+        'hollywood': '할리우드 아프리칸스',
         // 프리다
         'me and my parrots': '나와 앵무새',
         'self-portrait with monkeys': '원숭이와 자화상',
@@ -1037,11 +1041,15 @@ const ResultScreen = ({
       'self-portrait with monkeys': '원숭이와 자화상(Self-Portrait with Monkeys)',
       'the two fridas': '두 명의 프리다(The Two Fridas)',
       
-      // 워홀
-      'marilyn monroe': '마릴린 먼로(Marilyn Monroe)',
-      'marilyn': '마릴린(Marilyn)',
-      "campbell's soup cans": '캠벨 수프 캔(Campbell\'s Soup Cans)',
-      'elvis': '엘비스(Elvis)'
+      // 바스키아
+      'untitled': '무제(Untitled)',
+      'untitled (skull)': '무제(Untitled)',
+      'skull': '무제(Skull)',
+      'warrior': '전사(Warrior)',
+      'boy and dog in a johnnypump': '소년과 개(Boy and Dog)',
+      'boy and dog': '소년과 개(Boy and Dog)',
+      'hollywood africans': '할리우드 아프리칸스(Hollywood Africans)',
+      'hollywood': '할리우드 아프리칸스(Hollywood Africans)'
     };
     
     // 영문(한글) 형식이면 영문 부분만 추출해서 매핑
