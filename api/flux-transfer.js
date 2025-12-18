@@ -2352,6 +2352,14 @@ const fallbackPrompts = {
     prompt: 'Andy Warhol Pop Art: CRITICAL LAYOUT - divide canvas into 2x2 GRID with 4 EQUAL QUADRANTS separated by visible lines. Place the SAME PORTRAIT in each of the 4 squares. TOP-LEFT: hot pink and yellow, TOP-RIGHT: cyan and orange, BOTTOM-LEFT: lime green and purple, BOTTOM-RIGHT: red and blue. Each quadrant shows IDENTICAL face but with DIFFERENT BOLD FLAT COLORS. Silkscreen printing effect with HIGH CONTRAST, NO gradients, visible halftone dots. The face in all 4 panels must be the SAME PERSON from input photo with correct body proportions. Warhol Pop Art masterpiece'
   },
   
+  basquiat: {
+    name: '장 미셸 바스키아',
+    artist: 'Jean-Michel Basquiat (1960-1988)',
+    movement: '네오 표현주의 (Neo-Expressionism)',
+    defaultWork: 'Untitled (Skull)',
+    prompt: 'Jean-Michel Basquiat Neo-Expressionist painting style: RAW ENERGETIC BRUSHSTROKES, childlike primitive drawing quality, CROWN SYMBOL (three-pointed crown) as signature motif, skull imagery with exposed teeth and hollow eyes, BLACK THICK OUTLINES like graffiti, scratchy scribbled lines, handwritten TEXT ANNOTATIONS scattered across canvas (words like CROWN, KING, SAMO, anatomy terms), BOLD PRIMARY COLORS (red, yellow, blue, black), collage-like composition with overlapping elements, street art graffiti aesthetic mixed with fine art, African tribal mask influences, visible canvas texture, chaotic yet deliberate composition, Basquiat masterpiece quality'
+  },
+  
   // ========================================
   // 동양화 - AI가 스타일 자동 선택
   // v60: 텍스트는 A가 생성 → F가 그림 (텍스트 금지 규칙 제거)
@@ -2457,28 +2465,30 @@ FRIDA KAHLO - SELECT ONE:
         'warhol': `
 ANDY WARHOL - SELECT ONE:
 1. "Marilyn Monroe" (마릴린 먼로) → FEMALE portrait, glamorous | Style: 2x2 FOUR-PANEL GRID, DIFFERENT BOLD COLORS each panel, silkscreen
-2. "Elvis" (엘비스) → MALE portrait | Style: SILVER BACKGROUND, repeated image, silkscreen ink variations, cowboy stance`
+2. "Elvis" (엘비스) → MALE portrait | Style: SILVER BACKGROUND, repeated image, silkscreen ink variations, cowboy stance`,
+
+        'basquiat': `
+JEAN-MICHEL BASQUIAT - SELECT ONE:
+1. "Untitled (Skull)" (무제 - 해골) → ANY subject | Style: skull with exposed teeth on black background, raw scratchy lines, scribbled text, crown motif, RED YELLOW BLACK colors
+2. "Warrior" (전사) → MALE figure, strong pose | Style: standing figure with spear/weapon, tribal mask face, BLACK OUTLINED body, hieroglyphic symbols, raw brushstrokes
+3. "Boy and Dog in a Johnnypump" (소년과 개) → ANY subject, playful | Style: childlike figures, fire hydrant water spray, bright colors, crude anatomy, text annotations
+4. "Hollywood Africans" (헐리우드 아프리칸) → portraits, multiple subjects | Style: three figures, movie star references, crown symbols, graffiti text, BOLD PRIMARY COLORS`
       };
 
       const masterWorks = masterWorksDB[masterId] || '';
       
       promptText = `You are selecting the BEST masterwork from ${categoryName}'s collection for this photo.
 
+AVAILABLE MASTERWORKS (YOU MUST SELECT FROM THIS LIST ONLY):
+${masterWorks}
+
+⚠️ CRITICAL: You MUST select ONLY from the works listed above. Do NOT select any other works not in this list. If you select a work not listed above, the system will fail.
+
 CRITICAL MATCHING RULES:
 - If MALE subject → AVOID works with "Woman/여인/Madonna/Judith" in title, choose neutral or male-themed works
 - If FEMALE subject → CAN select any work, female-themed preferred
 - If SINGLE person (1) → NEVER select "The Kiss" (requires couple)
 - If COUPLE (2 people) → prefer "The Kiss"
-
-AVAILABLE MASTERWORKS:
-${masterWorks}
-
-CRITICAL MATCHING RULES (MUST FOLLOW):
-- If photo shows MALE → NEVER select works with female subjects ("Woman", "여인", "Madonna", "Judith", "Demoiselles", "Marilyn")
-- If photo shows FEMALE → CAN select any work, female-themed works preferred
-- If photo shows 1 PERSON → NEVER select "The Kiss" (requires couple)
-- If photo shows COUPLE → prefer "The Kiss" or romantic works
-- MATCH the subject's GENDER and COUNT to the artwork's theme
 
 STYLE APPLICATION RULE:
 - Apply the artwork's TECHNIQUE, COLOR, MOOD to the subject.
