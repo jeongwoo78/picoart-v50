@@ -277,8 +277,8 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
       '피카소': '파블로 피카소(Pablo Picasso)',
       '프리다 칼로': '프리다 칼로(Frida Kahlo)',
       '프리다': '프리다 칼로(Frida Kahlo)',
-      '앤디 워홀': '앤디 워홀(Andy Warhol)',
-      '워홀': '앤디 워홀(Andy Warhol)'
+      '바스키아': '장 미셸 바스키아(Jean-Michel Basquiat)',
+      '장 미셸 바스키아': '장 미셸 바스키아(Jean-Michel Basquiat)'
     };
     
     const normalized = artistName.toLowerCase().trim();
@@ -382,9 +382,10 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
       '프리다 칼로': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
       'frida': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
       'frida kahlo': { fullName: '프리다 칼로(Frida Kahlo)', movement: '초현실주의' },
-      '워홀': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' },
-      'warhol': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' },
-      'andy warhol': { fullName: '앤디 워홀(Andy Warhol)', movement: '팝아트' }
+      '바스키아': { fullName: '장 미셸 바스키아(Jean-Michel Basquiat)', movement: '네오표현주의' },
+      '장 미셸 바스키아': { fullName: '장 미셸 바스키아(Jean-Michel Basquiat)', movement: '네오표현주의' },
+      'basquiat': { fullName: '장 미셸 바스키아(Jean-Michel Basquiat)', movement: '네오표현주의' },
+      'jean-michel basquiat': { fullName: '장 미셸 바스키아(Jean-Michel Basquiat)', movement: '네오표현주의' }
     };
     
     if (!artistName) return { fullName: '거장', movement: '' };
