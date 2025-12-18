@@ -835,7 +835,6 @@ const ResultScreen = ({
         // 프리다
         'me and my parrots': '나와 앵무새',
         'self-portrait with monkeys': '원숭이와 자화상',
-        'the two fridas': '두 프리다',
         'the broken column': '부러진 기둥',
         'self-portrait with thorn necklace': '가시 목걸이 자화상',
       };
@@ -851,7 +850,11 @@ const ResultScreen = ({
         workShort = workMap[workNorm] || workToCheck;
       }
       
-      return `<${artistShort}> ${workShort}`;
+      // 연도 추가
+      const year = getWorkYear(workName) || getWorkYear(workShort);
+      const yearSuffix = year ? `, ${year}` : '';
+      
+      return `<${artistShort}> ${workShort}${yearSuffix}`;
     }
     
     // ========== 미술사조: <미술사조명> 화가명 ==========
@@ -1040,7 +1043,6 @@ const ResultScreen = ({
       'broken column': '부러진 기둥(The Broken Column)',
       'self-portrait with thorn necklace': '가시 목걸이 자화상(Self-Portrait with Thorn Necklace)',
       'self-portrait with monkeys': '원숭이와 자화상(Self-Portrait with Monkeys)',
-      'the two fridas': '두 명의 프리다(The Two Fridas)',
       
       // 바스키아
       'untitled': '무제(Untitled)',
@@ -1065,6 +1067,119 @@ const ResultScreen = ({
     
     // 매핑에 없으면 원본 반환
     return workName;
+  };
+
+  // 작품 제작연도 매핑
+  const workYearMap = {
+    // 반 고흐
+    'The Starry Night': 1889,
+    'Starry Night': 1889,
+    'the starry night': 1889,
+    'Sunflowers': 1888,
+    'sunflowers': 1888,
+    'Self-Portrait': 1889,
+    'self-portrait': 1889,
+    '별이 빛나는 밤': 1889,
+    '해바라기': 1888,
+    '자화상': 1889,
+    // 클림트
+    'The Kiss': 1908,
+    'the kiss': 1908,
+    'Judith I': 1901,
+    'judith i': 1901,
+    'Judith': 1901,
+    'judith': 1901,
+    'The Tree of Life': 1909,
+    'Tree of Life': 1909,
+    'the tree of life': 1909,
+    '키스': 1908,
+    '유디트': 1901,
+    '생명의 나무': 1909,
+    // 뭉크
+    'The Scream': 1893,
+    'the scream': 1893,
+    'Madonna': 1894,
+    'madonna': 1894,
+    'Jealousy': 1895,
+    'jealousy': 1895,
+    '절규': 1893,
+    '마돈나': 1894,
+    '질투': 1895,
+    // 마티스
+    'The Dance': 1910,
+    'the dance': 1910,
+    'The Red Room': 1908,
+    'the red room': 1908,
+    'Harmony in Red': 1908,
+    'harmony in red': 1908,
+    'Woman with a Hat': 1905,
+    'woman with a hat': 1905,
+    '춤': 1910,
+    '붉은 방': 1908,
+    '모자를 쓴 여인': 1905,
+    // 피카소
+    "Les Demoiselles d'Avignon": 1907,
+    "les demoiselles d'avignon": 1907,
+    'Guernica': 1937,
+    'guernica': 1937,
+    '아비뇽의 처녀들': 1907,
+    '게르니카': 1937,
+    // 프리다 칼로
+    'The Broken Column': 1944,
+    'the broken column': 1944,
+    'Self-Portrait with Monkeys': 1943,
+    'self-portrait with monkeys': 1943,
+    'Me and My Parrots': 1941,
+    'Self-Portrait with Parrots': 1941,
+    'Self-Portrait with Thorn Necklace': 1940,
+    'Self-Portrait with Thorn Necklace and Hummingbird': 1940,
+    '부러진 기둥': 1944,
+    '원숭이와 자화상': 1943,
+    '나와 앵무새': 1941,
+    '앵무새와 자화상': 1941,
+    '가시 목걸이 자화상': 1940,
+    '가시 목걸이와 벌새': 1940,
+    // 바스키아
+    'Untitled (Skull)': 1981,
+    'untitled (skull)': 1981,
+    'Untitled': 1982,
+    'untitled': 1982,
+    'Skull': 1981,
+    'skull': 1981,
+    'Warrior': 1982,
+    'warrior': 1982,
+    'Boy and Dog in a Johnnypump': 1982,
+    'Hollywood Africans': 1983,
+    '무제': 1981,
+    '전사': 1982,
+    '소년과 개': 1982,
+    '할리우드 아프리칸스': 1983
+  };
+
+  // 작품 연도 가져오기
+  const getWorkYear = (workName) => {
+    if (!workName) return null;
+    
+    // 직접 매칭
+    if (workYearMap[workName]) return workYearMap[workName];
+    
+    // 소문자 변환 후 매칭
+    const lower = workName.toLowerCase();
+    if (workYearMap[lower]) return workYearMap[lower];
+    
+    // 괄호 제거 후 매칭 시도
+    const withoutParens = workName.split('(')[0].trim();
+    if (workYearMap[withoutParens]) return workYearMap[withoutParens];
+    if (workYearMap[withoutParens.toLowerCase()]) return workYearMap[withoutParens.toLowerCase()];
+    
+    // 괄호 안 내용으로 매칭 시도
+    const match = workName.match(/\(([^)]+)\)/);
+    if (match) {
+      if (workYearMap[match[1]]) return workYearMap[match[1]];
+      if (workYearMap[match[1].toLowerCase()]) return workYearMap[match[1].toLowerCase()];
+    }
+    
+    return null;
   };
 
 
@@ -1744,7 +1859,9 @@ const ResultScreen = ({
                         const workName = displayWork ? formatWorkName(displayWork) : '';
                         const workShort = workName ? workName.split('(')[0].trim() : '';
                         if (workShort) {
-                          return `${movement}, <${workShort}>`;
+                          const year = getWorkYear(displayWork) || getWorkYear(workShort);
+                          const yearSuffix = year ? `, ${year}` : '';
+                          return `${movement}, 〈${workShort}${yearSuffix}〉`;
                         }
                         return movement;
                       } else if (category === 'oriental') {

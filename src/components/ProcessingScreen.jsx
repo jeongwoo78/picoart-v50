@@ -310,7 +310,6 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
       'Woman with a Hat': '모자를 쓴 여인(Woman with a Hat)',
       // 피카소
       'Guernica': '게르니카(Guernica)',
-      'Weeping Woman': '우는 여인(Weeping Woman)',
       "Les Demoiselles d'Avignon": "아비뇽의 처녀들(Les Demoiselles d'Avignon)",
       // 프리다 칼로
       'Me and My Parrots': '나와 앵무새(Me and My Parrots)',
@@ -318,7 +317,6 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
       'The Broken Column': '부러진 기둥(The Broken Column)',
       'Self-Portrait with Thorn Necklace': '가시 목걸이 자화상(Self-Portrait with Thorn Necklace)',
       'Self-Portrait with Monkeys': '원숭이와 자화상(Self-Portrait with Monkeys)',
-      'The Two Fridas': '두 명의 프리다(The Two Fridas)',
       // 바스키아
       'Untitled': '무제(Untitled)',
       'Untitled (Skull)': '무제(Untitled)',
@@ -330,6 +328,89 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
     };
     
     return workMap[workName] || workName;
+  };
+
+  // 작품 제작연도 매핑
+  const workYearMap = {
+    // 반 고흐
+    'The Starry Night': 1889,
+    'Starry Night': 1889,
+    'Sunflowers': 1888,
+    'Self-Portrait': 1889,
+    '별이 빛나는 밤': 1889,
+    '해바라기': 1888,
+    '자화상': 1889,
+    // 클림트
+    'The Kiss': 1908,
+    'Judith I': 1901,
+    'Judith': 1901,
+    'The Tree of Life': 1909,
+    'Tree of Life': 1909,
+    '키스': 1908,
+    '유디트': 1901,
+    '생명의 나무': 1909,
+    // 뭉크
+    'The Scream': 1893,
+    'Madonna': 1894,
+    'Jealousy': 1895,
+    '절규': 1893,
+    '마돈나': 1894,
+    '질투': 1895,
+    // 마티스
+    'The Dance': 1910,
+    'The Red Room': 1908,
+    'Harmony in Red': 1908,
+    'Woman with a Hat': 1905,
+    '춤': 1910,
+    '붉은 방': 1908,
+    '모자를 쓴 여인': 1905,
+    // 피카소
+    "Les Demoiselles d'Avignon": 1907,
+    'Guernica': 1937,
+    '아비뇽의 처녀들': 1907,
+    '게르니카': 1937,
+    // 프리다 칼로
+    'The Broken Column': 1944,
+    'Self-Portrait with Monkeys': 1943,
+    'Me and My Parrots': 1941,
+    'Self-Portrait with Parrots': 1941,
+    'Self-Portrait with Thorn Necklace': 1940,
+    'Self-Portrait with Thorn Necklace and Hummingbird': 1940,
+    '부러진 기둥': 1944,
+    '원숭이와 자화상': 1943,
+    '나와 앵무새': 1941,
+    '앵무새와 자화상': 1941,
+    '가시 목걸이 자화상': 1940,
+    '가시 목걸이와 벌새': 1940,
+    // 바스키아
+    'Untitled (Skull)': 1981,
+    'Untitled': 1982,
+    'Skull': 1981,
+    'Warrior': 1982,
+    'Boy and Dog in a Johnnypump': 1982,
+    'Hollywood Africans': 1983,
+    '무제': 1981,
+    '전사': 1982,
+    '소년과 개': 1982,
+    '할리우드 아프리칸스': 1983
+  };
+
+  // 작품 연도 가져오기
+  const getWorkYear = (workName) => {
+    if (!workName) return null;
+    
+    // 직접 매칭
+    if (workYearMap[workName]) return workYearMap[workName];
+    
+    // 괄호 제거 후 매칭 시도
+    const withoutParens = workName.split('(')[0].trim();
+    if (workYearMap[withoutParens]) return workYearMap[withoutParens];
+    
+    // 괄호 안 내용으로 매칭 시도
+    const match = workName.match(/\(([^)]+)\)/);
+    if (match && workYearMap[match[1]]) return workYearMap[match[1]];
+    
+    return null;
   };
 
   // 동양화 스타일 포맷: 한글명(영문명)
@@ -430,7 +511,11 @@ const ProcessingScreen = ({ photo, selectedStyle, onComplete }) => {
           }
         }
         
-        return `${movement}, 〈${workDisplay}〉`;
+        // 연도 추가
+        const year = getWorkYear(work) || getWorkYear(workDisplay);
+        const yearSuffix = year ? `, ${year}` : '';
+        
+        return `${movement}, 〈${workDisplay}${yearSuffix}〉`;
       }
       return movement;
     } else if (cat === 'oriental') {
