@@ -4590,7 +4590,10 @@ export default async function handler(req, res) {
     // ========================================
     
     // PhotoMaker 필수: gender prefix with img trigger
-    const genderPrefix = visionAnalysis.gender === 'female' ? 'asian woman img' : 'asian man img';
+    // visionAnalysis가 없으면 기본값 'female' 사용
+    const detectedGender = (visionAnalysis && visionAnalysis.gender) ? visionAnalysis.gender : 'female';
+    const genderPrefix = detectedGender === 'female' ? 'asian woman img' : 'asian man img';
+    console.log(`🎯 [v64] PhotoMaker gender: ${detectedGender}`);
     
     // PhotoMaker용 프롬프트 재구성
     // 형식: [gender img] + [style prompt] + [technique]
